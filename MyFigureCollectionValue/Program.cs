@@ -19,6 +19,8 @@ namespace MyFigureCollectionValue
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
 
+            builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())

@@ -1,8 +1,47 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger col-md-6">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success col-md-6">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    if (User?.Identity?.IsAuthenticated ?? false)
+    {
+        <div id="searchUrlBoxWrapper" class="d-flex justify-content-center align-items-center">
+            <div id="searchUrlBox">
+                <form asp-action="AddProfileUrl" id="profileForm" method="post">
+                    <input id="profileUrlInput" class="form-control mb-3" type="text" name="profileUrl" placeholder="Please provide a link to your myfigurecollection.net account" oninput="checkInput()" style="text-align: center;" />
+                    <button id="submitButton" class="btn btn-primary" type="submit" disabled>Add</button>
+                </form>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center">
+            <h2 class="welcome-header">Welcome!</h2>
+            <p></p>
+            <h4>If you want to check the current value of your anime figure collection, please create an account and provide a link to your <a href="https://myfigurecollection.net/" target="_blank">MyFigureCollection</a> acccount.</h4>
+        </div>
+    }
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<script>
+    function checkInput() {
+        const inputField = document.getElementById("profileUrlInput");
+        const submitButton = document.getElementById("submitButton");
+        submitButton.disabled = inputField.value.trim() === '';
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        checkInput();
+    });
+</script>
