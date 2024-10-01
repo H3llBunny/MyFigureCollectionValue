@@ -1,6 +1,8 @@
+using AngleSharp;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MyFigureCollectionValue.Data;
+using MyFigureCollectionValue.Services;
 
 namespace MyFigureCollectionValue
 {
@@ -20,6 +22,14 @@ namespace MyFigureCollectionValue
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+
+            builder.Services.AddScoped<IBrowsingContext>(serviceProvider =>
+            {
+                var config = Configuration.Default.WithDefaultLoader();
+                return BrowsingContext.New(config);
+            });
+
+            builder.Services.AddScoped<IScraperService, ScraperService>();
 
             var app = builder.Build();
 

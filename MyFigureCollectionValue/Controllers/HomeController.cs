@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using MyFigureCollectionValue.Models;
+using MyFigureCollectionValue.Services;
 using System.Diagnostics;
 using System.Security.Claims;
 
@@ -8,10 +9,13 @@ namespace MyFigureCollectionValue.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IScraperService _scraperService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger,
+            IScraperService scraperService)
         {
             _logger = logger;
+            this._scraperService = scraperService;
         }
 
         public IActionResult Index()
@@ -34,6 +38,8 @@ namespace MyFigureCollectionValue.Controllers
             }
 
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var links = this._scraperService.GetAllItemLinksAsync(profileUrl);
             
             return null;
         }
