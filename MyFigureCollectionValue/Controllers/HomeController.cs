@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using MyFigureCollectionValue.Models;
 using MyFigureCollectionValue.Services;
 using System.Diagnostics;
-using System.Security.Claims;
 
 namespace MyFigureCollectionValue.Controllers
 {
@@ -29,19 +28,24 @@ namespace MyFigureCollectionValue.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddProfileUrl(string profileUrl)
+        public async Task<IActionResult> AddProfileUrl(string profileUrl)
         {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return this.View();
+            }
+
             if (string.IsNullOrWhiteSpace(profileUrl))
             {
                 this.TempData["ErrorMessage"] = "Please ensure the URL is valid and try again";
                 return this.RedirectToAction(nameof(this.Index));
             }
 
-            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await this._scraperService.LoginAsync();
 
-            var links = this._scraperService.GetAllItemLinksAsync(profileUrl);
-            
-            return null;
+            var links = this._scraperService.GetAllFiguresLinkAsync(profileUrl);
+
+            return this.RedirectToAction(nameof(this.Index));
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

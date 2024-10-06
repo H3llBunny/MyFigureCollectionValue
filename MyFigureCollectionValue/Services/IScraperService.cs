@@ -2,6 +2,8 @@
 {
     public interface IScraperService
     {
-        Task<IEnumerable<string>> GetAllItemLinksAsync(string profileUrl);
+        Task LoginAsync();
+
+        Task<IEnumerable<string>> GetAllFiguresLinkAsync(string profileUrl);
     }
 }
