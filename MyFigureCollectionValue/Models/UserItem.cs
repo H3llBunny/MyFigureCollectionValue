@@ -8,8 +8,8 @@ namespace MyFigureCollectionValue.Models
 
         public IdentityUser User { get; set; }
 
-        public int ItemId { get; set; }
+        public int FigureId { get; set; }
 
-        public Item Item { get; set; }
+        public Figure Figure { get; set; }
     }
 }

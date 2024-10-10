@@ -1,8 +1,8 @@
 ﻿namespace MyFigureCollectionValue.Models
 {
-    public class Item
+    public class Figure
     {
-        public Item()
+        public Figure()
         {
             this.AftermarketPrices = new HashSet<AftermarketPrice>();
             this.UserItems = new HashSet<UserItem>();
@@ -21,6 +21,8 @@
         public string Currency { get; set; }
 
         public string Image { get; set; }
+
+        public string FigureUrl { get; set; }
 
         public ICollection<AftermarketPrice> AftermarketPrices { get; set; }
 

@@ -9,10 +9,10 @@ using MyFigureCollectionValue.Data;
 
 #nullable disable
 
-namespace MyFigureCollectionValue.Data.Migrations
+namespace MyFigureCollectionValue.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240929095334_InitialCreate")]
+    [Migration("20241010162517_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -239,7 +239,7 @@ namespace MyFigureCollectionValue.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ItemId")
+                    b.Property<int>("FigureId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("LoggedAt")
@@ -250,12 +250,12 @@ namespace MyFigureCollectionValue.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ItemId");
+                    b.HasIndex("FigureId");
 
                     b.ToTable("AftermarketPrices");
                 });
 
-            modelBuilder.Entity("MyFigureCollectionValue.Models.Item", b =>
+            modelBuilder.Entity("MyFigureCollectionValue.Models.Figure", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -268,6 +268,10 @@ namespace MyFigureCollectionValue.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FigureUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -288,7 +292,7 @@ namespace MyFigureCollectionValue.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Items");
+                    b.ToTable("Figures");
                 });
 
             modelBuilder.Entity("MyFigureCollectionValue.Models.UserItem", b =>
@@ -296,12 +300,12 @@ namespace MyFigureCollectionValue.Data.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("ItemId")
+                    b.Property<int>("FigureId")
                         .HasColumnType("int");
 
-                    b.HasKey("UserId", "ItemId");
+                    b.HasKey("UserId", "FigureId");
 
-                    b.HasIndex("ItemId");
+                    b.HasIndex("FigureId");
 
                     b.ToTable("UserItems");
                 });
@@ -359,20 +363,20 @@ namespace MyFigureCollectionValue.Data.Migrations
 
             modelBuilder.Entity("MyFigureCollectionValue.Models.AftermarketPrice", b =>
                 {
-                    b.HasOne("MyFigureCollectionValue.Models.Item", "Item")
+                    b.HasOne("MyFigureCollectionValue.Models.Figure", "Figure")
                         .WithMany("AftermarketPrices")
-                        .HasForeignKey("ItemId")
+                        .HasForeignKey("FigureId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Item");
+                    b.Navigation("Figure");
                 });
 
             modelBuilder.Entity("MyFigureCollectionValue.Models.UserItem", b =>
                 {
-                    b.HasOne("MyFigureCollectionValue.Models.Item", "Item")
+                    b.HasOne("MyFigureCollectionValue.Models.Figure", "Figure")
                         .WithMany("UserItems")
-                        .HasForeignKey("ItemId")
+                        .HasForeignKey("FigureId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -382,12 +386,12 @@ namespace MyFigureCollectionValue.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Item");
+                    b.Navigation("Figure");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("MyFigureCollectionValue.Models.Item", b =>
+            modelBuilder.Entity("MyFigureCollectionValue.Models.Figure", b =>
                 {
                     b.Navigation("AftermarketPrices");
 

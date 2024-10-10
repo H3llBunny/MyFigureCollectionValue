@@ -1,5 +1,6 @@
 ﻿using AngleSharp;
 using AngleSharp.Io;
+using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.Options;
 using MyFigureCollectionValue.Models;
 using System.Net;
@@ -73,7 +74,7 @@ namespace MyFigureCollectionValue.Services
                 {
                     throw new Exception("Failed to load the initial document. Please ensure the URL is valid and try again.");
                 }
-             
+
                 var ownedElement = initialDocument.QuerySelectorAll("nav.actions a").FirstOrDefault(a => a.TextContent.Contains("Owned"));
 
                 if (ownedElement == null)
@@ -101,7 +102,7 @@ namespace MyFigureCollectionValue.Services
                 }
 
                 await SetAuthenticatedCookies(figuresLink);
-                
+
                 var figuresDocument = await this._context.OpenAsync(figuresLink);
 
                 if (figuresDocument == null)
@@ -146,6 +147,28 @@ namespace MyFigureCollectionValue.Services
             {
                 throw new Exception($"An error occurred while scraping: {ex.Message}");
             }
+        }
+
+        public async Task<ICollection<Figure>> CreateFiguresListAsync(IEnumerable<string> figureUrls)
+        {
+            var figureList = new List<Figure>();
+            
+            try
+            {
+                foreach (var url in figureUrls)
+                {
+                    var document = await this._context.OpenAsync(url);
+                    string name = document.QuerySelector("h1.title").TextContent.Trim();
+                    var originElement = document.QuerySelectorAll("div.data-label").FirstOrDefault(a => a.TextContent.Contains("Origin"));
+                    string origin = originElement.NextElementSibling.QuerySelector("span").TextContent.Trim();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
+            return null;
         }
 
         private async Task SetAuthenticatedCookies(string url)

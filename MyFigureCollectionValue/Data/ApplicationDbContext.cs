@@ -11,7 +11,7 @@ namespace MyFigureCollectionValue.Data
         {
         }
 
-        public DbSet<Item> Items { get; set; }
+        public DbSet<Figure> Figures { get; set; }
 
         public DbSet<AftermarketPrice> AftermarketPrices { get; set; }
 
@@ -21,13 +21,13 @@ namespace MyFigureCollectionValue.Data
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<Item>()
+            builder.Entity<Figure>()
                 .HasMany(i => i.AftermarketPrices)
-                .WithOne(a => a.Item)
-                .HasForeignKey(a => a.ItemId);
+                .WithOne(a => a.Figure)
+                .HasForeignKey(a => a.FigureId);
 
             builder.Entity<UserItem>()
-                .HasKey(ui => new { ui.UserId, ui.ItemId });
+                .HasKey(ui => new { ui.UserId, ui.FigureId });
 
             builder.Entity<UserItem>()
                 .HasOne(ui => ui.User)
@@ -35,9 +35,9 @@ namespace MyFigureCollectionValue.Data
                 .HasForeignKey(ui => ui.UserId);
 
             builder.Entity<UserItem>()
-                .HasOne(ui => ui.Item)
+                .HasOne(ui => ui.Figure)
                 .WithMany(i => i.UserItems)
-                .HasForeignKey(ui => ui.ItemId);
+                .HasForeignKey(ui => ui.FigureId);
         }
     }
 }

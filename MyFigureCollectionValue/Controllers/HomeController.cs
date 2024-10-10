@@ -43,7 +43,9 @@ namespace MyFigureCollectionValue.Controllers
 
             await this._scraperService.LoginAsync();
 
-            var links = this._scraperService.GetAllFiguresLinkAsync(profileUrl);
+            var links = (await this._scraperService.GetAllFiguresLinkAsync(profileUrl)).ToList();
+
+            var figureList = await this._scraperService.CreateFiguresListAsync(links);
 
             return this.RedirectToAction(nameof(this.Index));
         }
