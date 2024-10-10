@@ -73,14 +73,12 @@ namespace MyFigureCollectionValue.Services
                 {
                     throw new Exception("Failed to load the initial document. Please ensure the URL is valid and try again.");
                 }
-                // Check if logged in
-                var userMenuInitial = initialDocument.QuerySelector("div.tbx-menu.user-menu");
-
+             
                 var ownedElement = initialDocument.QuerySelectorAll("nav.actions a").FirstOrDefault(a => a.TextContent.Contains("Owned"));
 
                 if (ownedElement == null)
                 {
-                    throw new Exception("Failed to find the action count element on the page.");
+                    throw new Exception("No figures found in your collection.");
                 }
 
                 var actionCountElement = ownedElement.QuerySelector("span.action-count");
@@ -103,10 +101,8 @@ namespace MyFigureCollectionValue.Services
                 }
 
                 await SetAuthenticatedCookies(figuresLink);
-                // Check if logged in
+                
                 var figuresDocument = await this._context.OpenAsync(figuresLink);
-
-                var userMenuFigDoc = figuresDocument.QuerySelector("div.tbx-menu.user-menu");
 
                 if (figuresDocument == null)
                 {
@@ -139,7 +135,7 @@ namespace MyFigureCollectionValue.Services
                 }
                 else
                 {
-                    var itemIds = figuresDocument.QuerySelectorAll("span.item-icon").Select(s => s.Attributes["href"].Value);
+                    var itemIds = figuresDocument.QuerySelectorAll("span.item-icon a").Select(s => s.Attributes["href"].Value);
 
                     figureUrls.AddRange(itemIds.Select(i => (new Uri(new Uri(profileUrl), i).ToString())));
                 }
