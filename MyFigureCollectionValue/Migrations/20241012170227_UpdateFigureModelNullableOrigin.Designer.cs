@@ -12,8 +12,8 @@ using MyFigureCollectionValue.Data;
 namespace MyFigureCollectionValue.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241010162517_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20241012170227_UpdateFigureModelNullableOrigin")]
+    partial class UpdateFigureModelNullableOrigin
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -258,16 +258,9 @@ namespace MyFigureCollectionValue.Migrations
             modelBuilder.Entity("MyFigureCollectionValue.Models.Figure", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
                     b.Property<string>("Company")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Currency")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -279,20 +272,47 @@ namespace MyFigureCollectionValue.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Origin")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("RetailPrice")
-                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Figures");
+                });
+
+            modelBuilder.Entity("MyFigureCollectionValue.Models.RetailPrice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FigureId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("ReleaseDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FigureId");
+
+                    b.ToTable("RetailPrice");
                 });
 
             modelBuilder.Entity("MyFigureCollectionValue.Models.UserItem", b =>
@@ -372,6 +392,17 @@ namespace MyFigureCollectionValue.Migrations
                     b.Navigation("Figure");
                 });
 
+            modelBuilder.Entity("MyFigureCollectionValue.Models.RetailPrice", b =>
+                {
+                    b.HasOne("MyFigureCollectionValue.Models.Figure", "Figure")
+                        .WithMany("RetailPrices")
+                        .HasForeignKey("FigureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Figure");
+                });
+
             modelBuilder.Entity("MyFigureCollectionValue.Models.UserItem", b =>
                 {
                     b.HasOne("MyFigureCollectionValue.Models.Figure", "Figure")
@@ -394,6 +425,8 @@ namespace MyFigureCollectionValue.Migrations
             modelBuilder.Entity("MyFigureCollectionValue.Models.Figure", b =>
                 {
                     b.Navigation("AftermarketPrices");
+
+                    b.Navigation("RetailPrices");
 
                     b.Navigation("UserItems");
                 });

@@ -1,8 +1,8 @@
 ﻿using AngleSharp;
 using AngleSharp.Io;
-using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.Options;
 using MyFigureCollectionValue.Models;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 
 namespace MyFigureCollectionValue.Services
@@ -10,13 +10,15 @@ namespace MyFigureCollectionValue.Services
     public class ScraperService : IScraperService
     {
         private IBrowsingContext _context;
+        private readonly IFigureService _figureService;
         private readonly HttpClient _client;
         private readonly CookieContainer _cookieContainer;
         private readonly ScraperSettings _settings;
 
-        public ScraperService(IBrowsingContext context, IOptions<ScraperSettings> settings)
+        public ScraperService(IBrowsingContext context, IOptions<ScraperSettings> settings, IFigureService figureService)
         {
             this._context = context;
+            this._figureService = figureService;
             this._settings = settings.Value;
 
             this._cookieContainer = new CookieContainer();
@@ -152,15 +154,92 @@ namespace MyFigureCollectionValue.Services
         public async Task<ICollection<Figure>> CreateFiguresListAsync(IEnumerable<string> figureUrls)
         {
             var figureList = new List<Figure>();
-            
+            var delayRequest = new Random();
+            const int maxRetries = 5;
+
             try
             {
                 foreach (var url in figureUrls)
                 {
-                    var document = await this._context.OpenAsync(url);
-                    string name = document.QuerySelector("h1.title").TextContent.Trim();
-                    var originElement = document.QuerySelectorAll("div.data-label").FirstOrDefault(a => a.TextContent.Contains("Origin"));
-                    string origin = originElement.NextElementSibling.QuerySelector("span").TextContent.Trim();
+                    int figureId = int.Parse(url.Split("/item/")[1]);
+
+                    if (await this._figureService.DoesFigureExistAsync(figureId))
+                    {
+                        continue;
+                    }
+
+                    int retries = 0;
+                    bool success = false;
+
+                    while (!success && retries < maxRetries)
+                    {
+                        try
+                        {
+                            var requestDelay = delayRequest.Next(500, 800);
+                            await Task.Delay(requestDelay);
+
+                            var document = await this._context.OpenAsync(url);
+
+                            string name = document.QuerySelector("h1.title")?.TextContent?.Trim()
+                                          ?? throw new NullReferenceException("Title not found");
+
+                            var originElement = document.QuerySelectorAll("div.data-label").FirstOrDefault(a => a.TextContent.Contains("Origin"));
+                            string origin = originElement?.NextElementSibling?.QuerySelector("span")?.TextContent?.Trim()
+                                            ?? "Unknown Origin";
+
+                            var companiesElement = document.QuerySelectorAll("div.data-label").FirstOrDefault(a => a.TextContent.Contains("Companies")
+                                                                                                                || a.TextContent.Contains("Company"));
+                            string companies = string.Join(", ",
+                                companiesElement.NextElementSibling.QuerySelectorAll("span")
+                                                .Zip(companiesElement.NextElementSibling.QuerySelectorAll("small"),
+                                                    (span, small) => $"{span.TextContent} {small.TextContent}"));
+
+                            string imageUrl = document.QuerySelector("a.main img").GetAttribute("src");
+                            string updatedUrl = imageUrl.Replace("/items/1/", "/items/2/");
+                            var response = await this._client.SendAsync(new HttpRequestMessage(System.Net.Http.HttpMethod.Head, updatedUrl));
+                            if (!response.IsSuccessStatusCode)
+                            {
+                                updatedUrl = imageUrl;
+                            }
+
+                            var newFigure = new Figure
+                            {
+                                Id = figureId,
+                                Name = name,
+                                Origin = origin,
+                                Company = companies,
+                                Image = updatedUrl,
+                                FigureUrl = url,
+                                LastUpdated = DateTime.UtcNow,
+                            };
+
+                            figureList.Add(newFigure);
+
+                            success = true;
+                        }
+                        catch (NullReferenceException ex)
+                        {
+                            retries++;
+                            Console.WriteLine($"Attempt {retries} failed for URL: {url}. Error: {ex.Message}");
+
+                            if (retries >= maxRetries)
+                            {
+                                Console.WriteLine("Max retries reached. Stopping execution.");
+                                break;
+                            }
+
+                            await Task.Delay(2000);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new Exception($"An error occurred: {ex.Message}");
+                        }
+                    }
+
+                    if (retries >= maxRetries)
+                    {
+                        break;
+                    }
                 }
             }
             catch (Exception ex)
@@ -168,7 +247,7 @@ namespace MyFigureCollectionValue.Services
                 throw new Exception(ex.Message);
             }
 
-            return null;
+            return figureList;
         }
 
         private async Task SetAuthenticatedCookies(string url)

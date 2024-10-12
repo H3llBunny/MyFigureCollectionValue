@@ -54,15 +54,13 @@ namespace MyFigureCollectionValue.Migrations
                 name: "Figures",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Origin = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Company = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    RetailPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Currency = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FigureUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    FigureUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -198,6 +196,28 @@ namespace MyFigureCollectionValue.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RetailPrice",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Currency = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ReleaseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    FigureId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RetailPrice", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RetailPrice_Figures_FigureId",
+                        column: x => x.FigureId,
+                        principalTable: "Figures",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserItems",
                 columns: table => new
                 {
@@ -266,6 +286,11 @@ namespace MyFigureCollectionValue.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_RetailPrice_FigureId",
+                table: "RetailPrice",
+                column: "FigureId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserItems_FigureId",
                 table: "UserItems",
                 column: "FigureId");
@@ -291,6 +316,9 @@ namespace MyFigureCollectionValue.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "RetailPrice");
 
             migrationBuilder.DropTable(
                 name: "UserItems");

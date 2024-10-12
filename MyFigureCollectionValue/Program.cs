@@ -34,6 +34,8 @@ namespace MyFigureCollectionValue
 
             builder.Services.AddScoped<IScraperService, ScraperService>();
 
+            builder.Services.AddScoped<IFigureService, FigureService>();
+
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())

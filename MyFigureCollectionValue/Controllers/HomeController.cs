@@ -9,12 +9,15 @@ namespace MyFigureCollectionValue.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IScraperService _scraperService;
+        private readonly IFigureService _figureService;
 
         public HomeController(ILogger<HomeController> logger,
-            IScraperService scraperService)
+            IScraperService scraperService,
+            IFigureService figureService)
         {
             _logger = logger;
             this._scraperService = scraperService;
+            this._figureService = figureService;
         }
 
         public IActionResult Index()
@@ -46,6 +49,8 @@ namespace MyFigureCollectionValue.Controllers
             var links = (await this._scraperService.GetAllFiguresLinkAsync(profileUrl)).ToList();
 
             var figureList = await this._scraperService.CreateFiguresListAsync(links);
+
+            await this._figureService.AddFiguresAsync(figureList);
 
             return this.RedirectToAction(nameof(this.Index));
         }
