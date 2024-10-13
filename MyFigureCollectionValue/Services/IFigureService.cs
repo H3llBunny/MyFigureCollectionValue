@@ -7,5 +7,7 @@ namespace MyFigureCollectionValue.Services
         Task<bool> DoesFigureExistAsync(int id);
 
         Task AddFiguresAsync(IEnumerable<Figure> figures);
+
+        Task AddRetailPrices(IEnumerable<RetailPrice> retailPrices);
     }
 }

@@ -1,4 +1,7 @@
-﻿namespace MyFigureCollectionValue.Models
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace MyFigureCollectionValue.Models
 {
     public class AftermarketPrice
     {

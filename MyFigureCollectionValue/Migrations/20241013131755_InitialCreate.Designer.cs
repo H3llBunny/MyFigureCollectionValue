@@ -12,8 +12,8 @@ using MyFigureCollectionValue.Data;
 namespace MyFigureCollectionValue.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241012170227_UpdateFigureModelNullableOrigin")]
-    partial class UpdateFigureModelNullableOrigin
+    [Migration("20241013131755_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -312,10 +312,10 @@ namespace MyFigureCollectionValue.Migrations
 
                     b.HasIndex("FigureId");
 
-                    b.ToTable("RetailPrice");
+                    b.ToTable("RetailPrices");
                 });
 
-            modelBuilder.Entity("MyFigureCollectionValue.Models.UserItem", b =>
+            modelBuilder.Entity("MyFigureCollectionValue.Models.UserFigure", b =>
                 {
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
@@ -327,7 +327,7 @@ namespace MyFigureCollectionValue.Migrations
 
                     b.HasIndex("FigureId");
 
-                    b.ToTable("UserItems");
+                    b.ToTable("UserFigure");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -403,7 +403,7 @@ namespace MyFigureCollectionValue.Migrations
                     b.Navigation("Figure");
                 });
 
-            modelBuilder.Entity("MyFigureCollectionValue.Models.UserItem", b =>
+            modelBuilder.Entity("MyFigureCollectionValue.Models.UserFigure", b =>
                 {
                     b.HasOne("MyFigureCollectionValue.Models.Figure", "Figure")
                         .WithMany("UserItems")

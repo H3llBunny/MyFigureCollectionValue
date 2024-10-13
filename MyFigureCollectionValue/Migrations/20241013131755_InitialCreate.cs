@@ -56,7 +56,7 @@ namespace MyFigureCollectionValue.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Origin = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Origin = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Company = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FigureUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -196,7 +196,7 @@ namespace MyFigureCollectionValue.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RetailPrice",
+                name: "RetailPrices",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -208,9 +208,9 @@ namespace MyFigureCollectionValue.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RetailPrice", x => x.Id);
+                    table.PrimaryKey("PK_RetailPrices", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_RetailPrice_Figures_FigureId",
+                        name: "FK_RetailPrices_Figures_FigureId",
                         column: x => x.FigureId,
                         principalTable: "Figures",
                         principalColumn: "Id",
@@ -218,7 +218,7 @@ namespace MyFigureCollectionValue.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserItems",
+                name: "UserFigure",
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -226,15 +226,15 @@ namespace MyFigureCollectionValue.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserItems", x => new { x.UserId, x.FigureId });
+                    table.PrimaryKey("PK_UserFigure", x => new { x.UserId, x.FigureId });
                     table.ForeignKey(
-                        name: "FK_UserItems_AspNetUsers_UserId",
+                        name: "FK_UserFigure_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserItems_Figures_FigureId",
+                        name: "FK_UserFigure_Figures_FigureId",
                         column: x => x.FigureId,
                         principalTable: "Figures",
                         principalColumn: "Id",
@@ -286,13 +286,13 @@ namespace MyFigureCollectionValue.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RetailPrice_FigureId",
-                table: "RetailPrice",
+                name: "IX_RetailPrices_FigureId",
+                table: "RetailPrices",
                 column: "FigureId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserItems_FigureId",
-                table: "UserItems",
+                name: "IX_UserFigure_FigureId",
+                table: "UserFigure",
                 column: "FigureId");
         }
 
@@ -318,10 +318,10 @@ namespace MyFigureCollectionValue.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "RetailPrice");
+                name: "RetailPrices");
 
             migrationBuilder.DropTable(
-                name: "UserItems");
+                name: "UserFigure");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

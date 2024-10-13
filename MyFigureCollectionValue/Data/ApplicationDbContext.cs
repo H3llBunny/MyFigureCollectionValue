@@ -13,31 +13,38 @@ namespace MyFigureCollectionValue.Data
 
         public DbSet<Figure> Figures { get; set; }
 
+        public DbSet<RetailPrice> RetailPrices { get; set; }
+
         public DbSet<AftermarketPrice> AftermarketPrices { get; set; }
 
-        public DbSet<UserItem> UserItems { get; set; }
+        public DbSet<UserFigure> UserFigure { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
             builder.Entity<Figure>()
-                .HasMany(i => i.AftermarketPrices)
-                .WithOne(a => a.Figure)
-                .HasForeignKey(a => a.FigureId);
+                .HasMany(f => f.RetailPrices)
+                .WithOne(rp => rp.Figure)
+                .HasForeignKey(rp => rp.FigureId);
 
-            builder.Entity<UserItem>()
-                .HasKey(ui => new { ui.UserId, ui.FigureId });
+            builder.Entity<Figure>()
+                .HasMany(f => f.AftermarketPrices)
+                .WithOne(ap => ap.Figure)
+                .HasForeignKey(ap => ap.FigureId);
 
-            builder.Entity<UserItem>()
-                .HasOne(ui => ui.User)
+            builder.Entity<UserFigure>()
+                .HasKey(uf => new { uf.UserId, uf.FigureId });
+
+            builder.Entity<UserFigure>()
+                .HasOne(uf => uf.User)
                 .WithMany()
-                .HasForeignKey(ui => ui.UserId);
+                .HasForeignKey(uf => uf.UserId);
 
-            builder.Entity<UserItem>()
-                .HasOne(ui => ui.Figure)
-                .WithMany(i => i.UserItems)
-                .HasForeignKey(ui => ui.FigureId);
+            builder.Entity<UserFigure>()
+                .HasOne(uf => uf.Figure)
+                .WithMany(f => f.UserItems)
+                .HasForeignKey(uf => uf.FigureId);
         }
     }
 }

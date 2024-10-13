@@ -2,7 +2,7 @@
 
 namespace MyFigureCollectionValue.Models
 {
-    public class UserItem
+    public class UserFigure
     {
         public string UserId { get; set; }
 

@@ -1,8 +1,8 @@
 ﻿using AngleSharp;
+using AngleSharp.Html.Dom;
 using AngleSharp.Io;
 using Microsoft.Extensions.Options;
 using MyFigureCollectionValue.Models;
-using System.ComponentModel.DataAnnotations;
 using System.Net;
 
 namespace MyFigureCollectionValue.Services
@@ -151,7 +151,7 @@ namespace MyFigureCollectionValue.Services
             }
         }
 
-        public async Task<ICollection<Figure>> CreateFiguresListAsync(IEnumerable<string> figureUrls)
+        public async Task<ICollection<Figure>> CreateFiguresAndRetailPricesAsync(IEnumerable<string> figureUrls)
         {
             var figureList = new List<Figure>();
             var delayRequest = new Random();
@@ -183,12 +183,12 @@ namespace MyFigureCollectionValue.Services
                             string name = document.QuerySelector("h1.title")?.TextContent?.Trim()
                                           ?? throw new NullReferenceException("Title not found");
 
-                            var originElement = document.QuerySelectorAll("div.data-label").FirstOrDefault(a => a.TextContent.Contains("Origin"));
+                            var originElement = document.QuerySelectorAll("div.data-label").FirstOrDefault(x => x.TextContent.Contains("Origin"));
                             string origin = originElement?.NextElementSibling?.QuerySelector("span")?.TextContent?.Trim()
                                             ?? "Unknown Origin";
 
-                            var companiesElement = document.QuerySelectorAll("div.data-label").FirstOrDefault(a => a.TextContent.Contains("Companies")
-                                                                                                                || a.TextContent.Contains("Company"));
+                            var companiesElement = document.QuerySelectorAll("div.data-label").FirstOrDefault(x => x.TextContent.Contains("Companies")
+                                                                                                                || x.TextContent.Contains("Company"));
                             string companies = string.Join(", ",
                                 companiesElement.NextElementSibling.QuerySelectorAll("span")
                                                 .Zip(companiesElement.NextElementSibling.QuerySelectorAll("small"),
@@ -197,6 +197,7 @@ namespace MyFigureCollectionValue.Services
                             string imageUrl = document.QuerySelector("a.main img").GetAttribute("src");
                             string updatedUrl = imageUrl.Replace("/items/1/", "/items/2/");
                             var response = await this._client.SendAsync(new HttpRequestMessage(System.Net.Http.HttpMethod.Head, updatedUrl));
+
                             if (!response.IsSuccessStatusCode)
                             {
                                 updatedUrl = imageUrl;
@@ -216,6 +217,14 @@ namespace MyFigureCollectionValue.Services
                             figureList.Add(newFigure);
 
                             success = true;
+
+                            var retailPriceList = await GetRetailPriceList(url, figureId);
+
+                            if (retailPriceList != null)
+                            {
+                                await this._figureService.AddRetailPrices(retailPriceList);
+                            }
+
                         }
                         catch (NullReferenceException ex)
                         {
@@ -248,6 +257,87 @@ namespace MyFigureCollectionValue.Services
             }
 
             return figureList;
+        }
+
+
+        public async Task<ICollection<RetailPrice>> GetRetailPriceList(string url, int figureId)
+        {
+            var retailPriceList = new List<RetailPrice>();
+
+            var document = await this._context.OpenAsync(url);
+
+            var dataField = document.QuerySelectorAll("div.data-field").FirstOrDefault(df => df.FirstChild.TextContent.Contains("Releases"));
+
+            if (dataField != null)
+            {
+                var label = dataField.QuerySelector("div.data-label");
+
+                if (label != null && label.TextContent.Contains("Releases"))
+                {
+                    retailPriceList.Add(await ExtractRetailPriceAsync(dataField, figureId));
+
+                    var nextSibling = dataField.NextElementSibling;
+
+                    while (nextSibling != null)
+                    {
+                        var labelElement = nextSibling.QuerySelector("div.data-label");
+
+                        if (labelElement == null)
+                        {
+                            retailPriceList.Add(await ExtractRetailPriceAsync(nextSibling, figureId));
+                        }
+
+                        nextSibling = nextSibling.NextElementSibling;
+                    }
+                }
+
+                return retailPriceList;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        private async Task<RetailPrice> ExtractRetailPriceAsync(AngleSharp.Dom.IElement dataField, int figureId)
+        {
+            var dataValue = dataField.QuerySelector("div.data-value");
+
+            var dateElement = dataValue.QuerySelector("a.time");
+            var smallElements = dataValue.QuerySelectorAll("small");
+
+            DateTime releaseDate;
+
+            string dateText = dateElement.TextContent.Trim();
+
+            if (dateText.Length == 10)
+            {
+                releaseDate = DateTime.ParseExact(dateText, "dd/MM/yyyy", null);
+            }
+            else if (dateText.Length == 7)
+            {
+                releaseDate = DateTime.ParseExact($"01/{dateText}", "dd/MM/yyyy", null);
+            }
+            else
+            {
+                throw new FormatException("Unexpected date format");
+            }
+
+            var priceText = dataValue.InnerHtml.Split("<small>")[0].Split("<br>").LastOrDefault()?.Trim();
+
+            priceText = priceText.Split(" ")[0].Replace(",", "");
+
+            decimal price = decimal.Parse(priceText);
+
+            string currency = smallElements[1].TextContent.Split(" ")[0];
+
+            return new RetailPrice
+            {
+                Price = price,
+                Currency = currency,
+                ReleaseDate = releaseDate,
+                FigureId = figureId,
+            };
         }
 
         private async Task SetAuthenticatedCookies(string url)
