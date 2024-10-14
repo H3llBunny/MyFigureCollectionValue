@@ -324,7 +324,7 @@ namespace MyFigureCollectionValue.Migrations
 
                     b.HasIndex("FigureId");
 
-                    b.ToTable("UserFigure");
+                    b.ToTable("UserFigures");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

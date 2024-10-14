@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using MyFigureCollectionValue.Models;
 using MyFigureCollectionValue.Services;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace MyFigureCollectionValue.Controllers
 {
@@ -48,11 +49,15 @@ namespace MyFigureCollectionValue.Controllers
 
             var links = (await this._scraperService.GetAllFiguresLinkAsync(profileUrl)).ToList();
 
-            var figureList = await this._scraperService.CreateFiguresAndRetailPricesAsync(links);
+            var (figureList, retailPriceList) = await this._scraperService.CreateFiguresAndRetailPricesAsync(links);
 
             await this._figureService.AddFiguresAsync(figureList);
 
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+            await this._figureService.AddUserFiguresAsync(userId, figureList);
+
+            await this._figureService.AddRetailPrices(retailPriceList);
 
             return this.RedirectToAction(nameof(this.Index));
         }

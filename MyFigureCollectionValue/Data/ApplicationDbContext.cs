@@ -17,7 +17,7 @@ namespace MyFigureCollectionValue.Data
 
         public DbSet<AftermarketPrice> AftermarketPrices { get; set; }
 
-        public DbSet<UserFigure> UserFigure { get; set; }
+        public DbSet<UserFigure> UserFigures { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

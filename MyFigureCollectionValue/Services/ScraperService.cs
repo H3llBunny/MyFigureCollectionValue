@@ -1,8 +1,8 @@
 ﻿using AngleSharp;
-using AngleSharp.Html.Dom;
 using AngleSharp.Io;
 using Microsoft.Extensions.Options;
 using MyFigureCollectionValue.Models;
+using System.Data;
 using System.Net;
 
 namespace MyFigureCollectionValue.Services
@@ -151,9 +151,10 @@ namespace MyFigureCollectionValue.Services
             }
         }
 
-        public async Task<ICollection<Figure>> CreateFiguresAndRetailPricesAsync(IEnumerable<string> figureUrls)
+        public async Task<(ICollection<Figure> Figures, ICollection<RetailPrice> RetailPrices)> CreateFiguresAndRetailPricesAsync(IEnumerable<string> figureUrls)
         {
             var figureList = new List<Figure>();
+            var retailPriceList = new List<RetailPrice>();
             var delayRequest = new Random();
             const int maxRetries = 5;
 
@@ -216,15 +217,14 @@ namespace MyFigureCollectionValue.Services
 
                             figureList.Add(newFigure);
 
-                            success = true;
+                            var figureRetailPrice = await GetRetailPriceList(url, figureId);
 
-                            var retailPriceList = await GetRetailPriceList(url, figureId);
-
-                            if (retailPriceList != null)
+                            if (figureRetailPrice != null)
                             {
-                                await this._figureService.AddRetailPrices(retailPriceList);
+                                retailPriceList.AddRange(figureRetailPrice);
                             }
 
+                            success = true;
                         }
                         catch (NullReferenceException ex)
                         {
@@ -256,7 +256,7 @@ namespace MyFigureCollectionValue.Services
                 throw new Exception(ex.Message);
             }
 
-            return figureList;
+            return (figureList, retailPriceList);
         }
 
 
@@ -274,7 +274,16 @@ namespace MyFigureCollectionValue.Services
 
                 if (label != null && label.TextContent.Contains("Releases"))
                 {
-                    retailPriceList.Add(await ExtractRetailPriceAsync(dataField, figureId));
+                    var retialPrice = await ExtractRetailPriceAsync(dataField, figureId);
+
+                    if (retialPrice != null)
+                    {
+                        retailPriceList.Add(retialPrice);
+                    }
+                    else
+                    {
+                        return null;
+                    }
 
                     var nextSibling = dataField.NextElementSibling;
 
@@ -284,10 +293,19 @@ namespace MyFigureCollectionValue.Services
 
                         if (labelElement == null)
                         {
-                            retailPriceList.Add(await ExtractRetailPriceAsync(nextSibling, figureId));
+                            var nextRetailPrice = await ExtractRetailPriceAsync(nextSibling, figureId);
+
+                            if (nextRetailPrice != null)
+                            {
+                                retailPriceList.Add(nextRetailPrice);
+                                nextSibling = nextSibling.NextElementSibling;
+                            }
+                        }
+                        else
+                        {
+                            break;
                         }
 
-                        nextSibling = nextSibling.NextElementSibling;
                     }
                 }
 
@@ -304,7 +322,6 @@ namespace MyFigureCollectionValue.Services
             var dataValue = dataField.QuerySelector("div.data-value");
 
             var dateElement = dataValue.QuerySelector("a.time");
-            var smallElements = dataValue.QuerySelectorAll("small");
 
             DateTime releaseDate;
 
@@ -312,7 +329,7 @@ namespace MyFigureCollectionValue.Services
 
             if (dateText.Length == 10)
             {
-                releaseDate = DateTime.ParseExact(dateText, "dd/MM/yyyy", null);
+                releaseDate = DateTime.ParseExact(dateText, "MM/dd/yyyy", null);
             }
             else if (dateText.Length == 7)
             {
@@ -323,11 +340,23 @@ namespace MyFigureCollectionValue.Services
                 throw new FormatException("Unexpected date format");
             }
 
-            var priceText = dataValue.InnerHtml.Split("<small>")[0].Split("<br>").LastOrDefault()?.Trim();
+            string dataText = dataValue.InnerHtml;
 
-            priceText = priceText.Split(" ")[0].Replace(",", "");
+            var priceTextSection = dataText.Split("<br>").Skip(1).FirstOrDefault()?.Trim();
 
-            decimal price = decimal.Parse(priceText);
+            if (priceTextSection == null)
+            {
+                return null;
+            }
+
+            var priceText = priceTextSection.Split(" ").FirstOrDefault()?.Trim().Replace(",", "");
+
+            if (!decimal.TryParse(priceText, out decimal price))
+            {
+                throw new Exception($"Failed to parse price from '{priceText}'");
+            }
+
+            var smallElements = dataValue.QuerySelectorAll("small");
 
             string currency = smallElements[1].TextContent.Split(" ")[0];
 

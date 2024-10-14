@@ -5,6 +5,7 @@ namespace MyFigureCollectionValue.Models
 {
     public class AftermarketPrice
     {
+        [Key]
         public int Id { get; set; }
 
         public decimal Price { get; set; }

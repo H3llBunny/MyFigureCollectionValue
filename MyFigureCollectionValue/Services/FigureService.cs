@@ -26,7 +26,22 @@ namespace MyFigureCollectionValue.Services
 
         public async Task AddRetailPrices(IEnumerable<RetailPrice> retailPrices)
         {
-            await this._dbContext.AddRangeAsync(retailPrices);
+            if (retailPrices != null)
+            {
+                await this._dbContext.AddRangeAsync(retailPrices);
+                await this._dbContext.SaveChangesAsync();
+            }
+        }
+
+        public async Task AddUserFiguresAsync(string userId, IEnumerable<Figure> figureList)
+        {
+            var userFigures = figureList.Select(figure => new UserFigure
+            {
+                UserId = userId,
+                FigureId = figure.Id,
+            }).ToList();
+
+            await this._dbContext.UserFigures.AddRangeAsync(userFigures);
             await this._dbContext.SaveChangesAsync();
         }
     }

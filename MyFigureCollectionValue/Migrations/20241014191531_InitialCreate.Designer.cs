@@ -12,7 +12,7 @@ using MyFigureCollectionValue.Data;
 namespace MyFigureCollectionValue.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241013131755_InitialCreate")]
+    [Migration("20241014191531_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -327,7 +327,7 @@ namespace MyFigureCollectionValue.Migrations
 
                     b.HasIndex("FigureId");
 
-                    b.ToTable("UserFigure");
+                    b.ToTable("UserFigures");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
