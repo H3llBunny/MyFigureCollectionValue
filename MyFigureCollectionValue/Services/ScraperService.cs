@@ -3,6 +3,7 @@ using AngleSharp.Io;
 using Microsoft.Extensions.Options;
 using MyFigureCollectionValue.Models;
 using System.Data;
+using System.Globalization;
 using System.Net;
 
 namespace MyFigureCollectionValue.Services
@@ -351,7 +352,7 @@ namespace MyFigureCollectionValue.Services
 
             var priceText = priceTextSection.Split(" ").FirstOrDefault()?.Trim().Replace(",", "");
 
-            if (!decimal.TryParse(priceText, out decimal price))
+            if (!decimal.TryParse(priceText, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal price))
             {
                 throw new Exception($"Failed to parse price from '{priceText}'");
             }
