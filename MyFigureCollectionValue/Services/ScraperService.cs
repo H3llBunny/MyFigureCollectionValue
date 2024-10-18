@@ -78,7 +78,8 @@ namespace MyFigureCollectionValue.Services
                     throw new Exception("Failed to load the initial document. Please ensure the URL is valid and try again.");
                 }
 
-                var ownedElement = initialDocument.QuerySelectorAll("nav.actions a").FirstOrDefault(a => a.TextContent.Contains("Owned"));
+                var ownedElement = initialDocument.QuerySelectorAll("nav.actions a")
+                                                  .FirstOrDefault(a => a.TextContent.Contains("Owned"));
 
                 if (ownedElement == null)
                 {
@@ -127,7 +128,9 @@ namespace MyFigureCollectionValue.Services
 
                         var userMenuPage = currentPageElement.QuerySelector("div.tbx-menu.user-menu");
 
-                        var itemIds = currentPageElement.QuerySelectorAll("div.item-icons span.item-icon a").Select(s => s.Attributes["href"].Value).ToList();
+                        var itemIds = currentPageElement.QuerySelectorAll("div.item-icons span.item-icon a")
+                                                        .Select(s => s.Attributes["href"].Value)
+                                                        .ToList();
 
                         if (itemIds == null)
                         {
@@ -152,21 +155,25 @@ namespace MyFigureCollectionValue.Services
             }
         }
 
-        public async Task<(ICollection<Figure> Figures, ICollection<RetailPrice> RetailPrices)> CreateFiguresAndRetailPricesAsync(IEnumerable<string> figureUrls)
+        public async Task<(ICollection<Figure> Figures,
+            ICollection<RetailPrice> RetailPrices)> CreateFiguresAndRetailPricesAsync(IEnumerable<string> figureUrls, string userId)
         {
-            var figureList = new List<Figure>();
+            var newFigureList = new List<Figure>();
             var retailPriceList = new List<RetailPrice>();
             var delayRequest = new Random();
             const int maxRetries = 5;
 
             try
             {
+                await this._figureService.RemoveUserFiguresAsync(userId);
+
                 foreach (var url in figureUrls)
                 {
                     int figureId = int.Parse(url.Split("/item/")[1]);
 
                     if (await this._figureService.DoesFigureExistAsync(figureId))
                     {
+                        await this._figureService.AddExistingFigureToUserAsync(figureId, userId);
                         continue;
                     }
 
@@ -185,12 +192,16 @@ namespace MyFigureCollectionValue.Services
                             string name = document.QuerySelector("h1.title")?.TextContent?.Trim()
                                           ?? throw new NullReferenceException("Title not found");
 
-                            var originElement = document.QuerySelectorAll("div.data-label").FirstOrDefault(x => x.TextContent.Contains("Origin"));
+                            var originElement = document.QuerySelectorAll("div.data-label")
+                                                        .FirstOrDefault(x => x.TextContent.Contains("Origin"));
+
                             string origin = originElement?.NextElementSibling?.QuerySelector("span")?.TextContent?.Trim()
                                             ?? "Unknown Origin";
 
-                            var companiesElement = document.QuerySelectorAll("div.data-label").FirstOrDefault(x => x.TextContent.Contains("Companies")
-                                                                                                                || x.TextContent.Contains("Company"));
+                            var companiesElement = document.QuerySelectorAll("div.data-label")
+                                                           .FirstOrDefault(x => x.TextContent.Contains("Companies")
+                                                           || x.TextContent.Contains("Company"));
+
                             string companies = string.Join(", ",
                                 companiesElement.NextElementSibling.QuerySelectorAll("span")
                                                 .Zip(companiesElement.NextElementSibling.QuerySelectorAll("small"),
@@ -216,9 +227,9 @@ namespace MyFigureCollectionValue.Services
                                 LastUpdated = DateTime.UtcNow,
                             };
 
-                            figureList.Add(newFigure);
+                            newFigureList.Add(newFigure);
 
-                            var figureRetailPrice = await GetRetailPriceList(url, figureId);
+                            var figureRetailPrice = await GetRetailPriceListAsync(url, figureId);
 
                             if (figureRetailPrice != null)
                             {
@@ -257,17 +268,18 @@ namespace MyFigureCollectionValue.Services
                 throw new Exception(ex.Message);
             }
 
-            return (figureList, retailPriceList);
+            return (newFigureList, retailPriceList);
         }
 
 
-        public async Task<ICollection<RetailPrice>> GetRetailPriceList(string url, int figureId)
+        public async Task<ICollection<RetailPrice>> GetRetailPriceListAsync(string url, int figureId)
         {
             var retailPriceList = new List<RetailPrice>();
 
             var document = await this._context.OpenAsync(url);
 
-            var dataField = document.QuerySelectorAll("div.data-field").FirstOrDefault(df => df.FirstChild.TextContent.Contains("Releases"));
+            var dataField = document.QuerySelectorAll("div.data-field")
+                                    .FirstOrDefault(df => df.FirstChild.TextContent.Contains("Releases"));
 
             if (dataField != null)
             {
@@ -336,9 +348,13 @@ namespace MyFigureCollectionValue.Services
             {
                 releaseDate = DateTime.ParseExact($"01/{dateText}", "dd/MM/yyyy", null);
             }
+            else if (dateText.Length == 4 && int.TryParse(dateText, out int year))
+            {
+                releaseDate = new DateTime(year, 1, 1);
+            }
             else
             {
-                throw new FormatException("Unexpected date format");
+                throw new FormatException($"Unexpected date format: {dateText}, figureId: {figureId}");
             }
 
             string dataText = dataValue.InnerHtml;
@@ -354,7 +370,9 @@ namespace MyFigureCollectionValue.Services
 
             if (!decimal.TryParse(priceText, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal price))
             {
-                throw new Exception($"Failed to parse price from '{priceText}'");
+                Console.WriteLine($"Failed to parse price from '{priceText}', figureId: {figureId}");
+                
+                return null;
             }
 
             var smallElements = dataValue.QuerySelectorAll("small");

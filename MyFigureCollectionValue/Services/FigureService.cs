@@ -24,7 +24,7 @@ namespace MyFigureCollectionValue.Services
             await this._dbContext.SaveChangesAsync();
         }
 
-        public async Task AddRetailPrices(IEnumerable<RetailPrice> retailPrices)
+        public async Task AddRetailPricesAsync(IEnumerable<RetailPrice> retailPrices)
         {
             if (retailPrices != null)
             {
@@ -42,6 +42,27 @@ namespace MyFigureCollectionValue.Services
             }).ToList();
 
             await this._dbContext.UserFigures.AddRangeAsync(userFigures);
+            await this._dbContext.SaveChangesAsync();
+        }
+
+        public async Task RemoveUserFiguresAsync(string userId)
+        {
+            var userFigures = this._dbContext.UserFigures.Where(uf => uf.UserId == userId);
+
+            this._dbContext.UserFigures.RemoveRange(userFigures);
+
+            await this._dbContext.SaveChangesAsync();
+        }
+
+        public async Task AddExistingFigureToUserAsync(int figureId, string userId)
+        {
+            var userFigure = new UserFigure
+            {
+                UserId = userId,
+                FigureId = figureId
+            };
+
+            await this._dbContext.UserFigures.AddAsync(userFigure);
             await this._dbContext.SaveChangesAsync();
         }
     }

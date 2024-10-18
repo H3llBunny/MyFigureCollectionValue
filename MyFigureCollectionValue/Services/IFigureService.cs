@@ -8,8 +8,12 @@ namespace MyFigureCollectionValue.Services
 
         Task AddFiguresAsync(IEnumerable<Figure> figures);
 
-        Task AddRetailPrices(IEnumerable<RetailPrice> retailPrices);
+        Task AddRetailPricesAsync(IEnumerable<RetailPrice> retailPrices);
 
         Task AddUserFiguresAsync(string userId, IEnumerable<Figure> figureList);
+
+        Task RemoveUserFiguresAsync(string userId);
+
+        Task AddExistingFigureToUserAsync(int figureId, string userId);
     }
 }

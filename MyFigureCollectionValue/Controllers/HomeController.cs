@@ -49,15 +49,19 @@ namespace MyFigureCollectionValue.Controllers
 
             var links = (await this._scraperService.GetAllFiguresLinkAsync(profileUrl)).ToList();
 
-            var (figureList, retailPriceList) = await this._scraperService.CreateFiguresAndRetailPricesAsync(links);
-
-            await this._figureService.AddFiguresAsync(figureList);
-
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var (newFigureList, retailPriceList) = await this._scraperService.CreateFiguresAndRetailPricesAsync(links, userId);
 
-            await this._figureService.AddUserFiguresAsync(userId, figureList);
+            if (newFigureList.Count > 0)
+            {
+                await this._figureService.AddFiguresAsync(newFigureList);
+                await this._figureService.AddUserFiguresAsync(userId, newFigureList);
+            }
 
-            await this._figureService.AddRetailPrices(retailPriceList);
+            if (retailPriceList.Count > 0)
+            {
+                await this._figureService.AddRetailPricesAsync(retailPriceList);
+            }
 
             return this.RedirectToAction(nameof(this.Index));
         }

@@ -8,8 +8,8 @@ namespace MyFigureCollectionValue.Services
 
         Task<IEnumerable<string>> GetAllFiguresLinkAsync(string profileUrl);
 
-        Task<(ICollection<Figure> Figures, ICollection<RetailPrice> RetailPrices)> CreateFiguresAndRetailPricesAsync(IEnumerable<string> figureUrls);
+        Task<(ICollection<Figure> Figures, ICollection<RetailPrice> RetailPrices)> CreateFiguresAndRetailPricesAsync(IEnumerable<string> figureUrls, string userId);
 
-        Task<ICollection<RetailPrice>> GetRetailPriceList(string url, int figureId);
+        Task<ICollection<RetailPrice>> GetRetailPriceListAsync(string url, int figureId);
     }
 }
