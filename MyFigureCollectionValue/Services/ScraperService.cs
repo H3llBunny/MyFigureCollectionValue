@@ -1,4 +1,6 @@
 ﻿using AngleSharp;
+using AngleSharp.Dom;
+using AngleSharp.Html.Dom;
 using AngleSharp.Io;
 using Microsoft.Extensions.Options;
 using MyFigureCollectionValue.Models;
@@ -155,11 +157,12 @@ namespace MyFigureCollectionValue.Services
             }
         }
 
-        public async Task<(ICollection<Figure> Figures,
-            ICollection<RetailPrice> RetailPrices)> CreateFiguresAndRetailPricesAsync(IEnumerable<string> figureUrls, string userId)
+        public async Task<(ICollection<Figure> Figures, ICollection<RetailPrice> RetailPrices, ICollection<AftermarketPrice> AftermarketPrices)>
+            CreateFiguresAndPricesAsync(IEnumerable<string> figureUrls, string userId)
         {
             var newFigureList = new List<Figure>();
             var retailPriceList = new List<RetailPrice>();
+            var aftermarketPriceList = new List<AftermarketPrice>();
             var delayRequest = new Random();
             const int maxRetries = 5;
 
@@ -236,6 +239,13 @@ namespace MyFigureCollectionValue.Services
                                 retailPriceList.AddRange(figureRetailPrice);
                             }
 
+                            var figureAftermarketPrice = await GetAftermarketPriceListAsync(url, figureId);
+
+                            if (figureAftermarketPrice != null)
+                            {
+                                aftermarketPriceList.AddRange(figureAftermarketPrice);
+                            }
+
                             success = true;
                         }
                         catch (NullReferenceException ex)
@@ -268,7 +278,7 @@ namespace MyFigureCollectionValue.Services
                 throw new Exception(ex.Message);
             }
 
-            return (newFigureList, retailPriceList);
+            return (newFigureList, retailPriceList, aftermarketPriceList);
         }
 
 
@@ -371,7 +381,7 @@ namespace MyFigureCollectionValue.Services
             if (!decimal.TryParse(priceText, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal price))
             {
                 Console.WriteLine($"Failed to parse price from '{priceText}', figureId: {figureId}");
-                
+
                 return null;
             }
 
@@ -388,15 +398,107 @@ namespace MyFigureCollectionValue.Services
             };
         }
 
-        private async Task SetAuthenticatedCookies(string url)
+        public async Task<ICollection<AftermarketPrice>> GetAftermarketPriceListAsync(string url, int figureId)
         {
-            var uri = new Uri(this._settings.LoginUrl);
-            var cookies = _cookieContainer.GetCookies(uri);
-            var cookieHeader = string.Join("; ", cookies.Cast<Cookie>().Select(c => $"{c.Name}={c.Value}"));
+            var aftermarketPriceList = new List<AftermarketPrice>();
 
-            await this._context.OpenAsync(res => res.Content("<div></div>")
-                .Address(url)
-                .Header(HeaderNames.SetCookie, cookieHeader));
+            var document = await this._context.OpenAsync(url);
+            var buyButton = document.QuerySelector("a.action.buy.tbx-window.main") as IHtmlAnchorElement;
+            
+            document = await buyButton.NavigateAsync();
+
+            var usersTab = document.QuerySelector("div.results-toggles a.result-link-toggle:nth-child(2)") as IHtmlAnchorElement;
+
+            document = await usersTab.NavigateAsync();
+
+            var resultsElement = document.QuerySelector("div.results.window-limited-content");
+
+            if (resultsElement == null)
+            {
+                return null;
+            }
+
+            var resultItems = resultsElement.QuerySelectorAll("div.result");
+
+            foreach (var item in resultItems)
+            {
+                var aftermarketPrice = await ExtractAftermarketPriceAsync(item, figureId);
+
+                if (aftermarketPrice != null)
+                {
+                    aftermarketPriceList.Add(aftermarketPrice);
+                }
+            }
+
+            var paginationElement = resultsElement.QuerySelector("div.results-count-pages");
+
+            if (paginationElement != null)
+            {
+                var adTabs = paginationElement.QuerySelectorAll("a.nav-page:not(.nav-current)");
+
+                foreach (var nextPageTab in adTabs)
+                {
+                    var pageTab = nextPageTab as IHtmlAnchorElement;
+                    document = await pageTab.NavigateAsync();
+
+                    var nextResultElement = document.QuerySelector("div.results.window-limited-contet");
+                    var nextResultItems = nextResultElement.QuerySelectorAll("div.result");
+
+                    foreach (var item in nextResultItems)
+                    {
+                        var nextAftermarketPrice = await ExtractAftermarketPriceAsync(item, figureId);
+
+                        if (nextAftermarketPrice != null)
+                        {
+                            aftermarketPriceList.Add(nextAftermarketPrice);
+                        }
+                    }
+                }
+            }
+
+            return aftermarketPriceList;
+        }
+
+            private async Task<AftermarketPrice> ExtractAftermarketPriceAsync(IElement item, int figureId)
+            {
+
+                string priceText = item.QuerySelector("span.classified-price-value").TextContent.Trim();
+
+                if (!decimal.TryParse(priceText.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out decimal price))
+                {
+                    Console.WriteLine($"Failed to parse price from '{priceText}', figureId: {figureId}");
+
+                    return null;
+                }
+
+                string currency = item.QuerySelector("span.classified-price-currency").TextContent.Trim();
+                var dateElement = item.QuerySelector("span.meta[title]");
+                string dateText = dateElement.GetAttribute("title");
+
+                if (!DateTime.TryParseExact(dateText, "dd/MM/yyyy, HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime loggedAt))
+                {
+                    Console.WriteLine($"Failed to parse date from '{dateText}', figureId: {figureId}");
+                    return null;
+                }
+
+                return new AftermarketPrice
+                {
+                    Price = price,
+                    Currency = currency,
+                    LoggedAt = loggedAt,
+                    FigureId = figureId,
+                };
+            }
+
+            private async Task SetAuthenticatedCookies(string url)
+            {
+                var uri = new Uri(this._settings.LoginUrl);
+                var cookies = _cookieContainer.GetCookies(uri);
+                var cookieHeader = string.Join("; ", cookies.Cast<Cookie>().Select(c => $"{c.Name}={c.Value}"));
+
+                await this._context.OpenAsync(res => res.Content("<div></div>")
+                    .Address(url)
+                    .Header(HeaderNames.SetCookie, cookieHeader));
+            }
         }
     }
-}

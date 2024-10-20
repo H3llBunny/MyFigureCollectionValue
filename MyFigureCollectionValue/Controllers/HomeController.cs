@@ -50,7 +50,7 @@ namespace MyFigureCollectionValue.Controllers
             var links = (await this._scraperService.GetAllFiguresLinkAsync(profileUrl)).ToList();
 
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var (newFigureList, retailPriceList) = await this._scraperService.CreateFiguresAndRetailPricesAsync(links, userId);
+            var (newFigureList, retailPriceList, aftermarketPriceList) = await this._scraperService.CreateFiguresAndPricesAsync(links, userId);
 
             if (newFigureList.Count > 0)
             {
@@ -61,6 +61,11 @@ namespace MyFigureCollectionValue.Controllers
             if (retailPriceList.Count > 0)
             {
                 await this._figureService.AddRetailPricesAsync(retailPriceList);
+            }
+
+            if (aftermarketPriceList.Count > 0)
+            {
+                await this._figureService.AddAftermarketPricesAsync(aftermarketPriceList);
             }
 
             return this.RedirectToAction(nameof(this.Index));
