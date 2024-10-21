@@ -1,12 +1,12 @@
 ﻿using AngleSharp;
 using AngleSharp.Dom;
-using AngleSharp.Html.Dom;
 using AngleSharp.Io;
 using Microsoft.Extensions.Options;
 using MyFigureCollectionValue.Models;
 using System.Data;
 using System.Globalization;
 using System.Net;
+using System.Text.Json;
 
 namespace MyFigureCollectionValue.Services
 {
@@ -400,105 +400,106 @@ namespace MyFigureCollectionValue.Services
 
         public async Task<ICollection<AftermarketPrice>> GetAftermarketPriceListAsync(string url, int figureId)
         {
-            var aftermarketPriceList = new List<AftermarketPrice>();
-
-            var document = await this._context.OpenAsync(url);
-            var buyButton = document.QuerySelector("a.action.buy.tbx-window.main") as IHtmlAnchorElement;
-            
-            document = await buyButton.NavigateAsync();
-
-            var usersTab = document.QuerySelector("div.results-toggles a.result-link-toggle:nth-child(2)") as IHtmlAnchorElement;
-
-            document = await usersTab.NavigateAsync();
-
-            var resultsElement = document.QuerySelector("div.results.window-limited-content");
-
-            if (resultsElement == null)
+            using (HttpClient client = new HttpClient())
             {
+                var formData = await GetFormData();
+                string cookieHeader = GetCookiesForRequest(url);
+                AddDefaultReuestHeaders(client, cookieHeader);
+
+                try
+                {
+                    HttpResponseMessage response = await client.PostAsync(url, formData);
+
+                    response.EnsureSuccessStatusCode();
+
+                    string htmlContent = await response.Content.ReadAsStringAsync();
+
+                    var jsonDocument = JsonDocument.Parse(htmlContent);
+                    string windowHtml = jsonDocument.RootElement.GetProperty("htmlValues").GetProperty("WINDOW").GetString();
+
+                    string decodedHtml = WebUtility.HtmlDecode(windowHtml);
+
+                    var document = await this._context.OpenAsync(req => req.Content(decodedHtml));
+
+                    string price = document.QuerySelector("span.classified-price-value").TextContent.Trim();
+
+                }
+                catch (HttpRequestException e)
+                {
+                    Console.WriteLine("Request error: " + e.Message);
+                }
+            }
+
+            return null;
+        }
+
+
+        private async Task<AftermarketPrice> ExtractAftermarketPriceAsync(IElement item, int figureId)
+        {
+
+            string priceText = item.QuerySelector("span.classified-price-value").TextContent.Trim();
+
+            if (!decimal.TryParse(priceText.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out decimal price))
+            {
+                Console.WriteLine($"Failed to parse price from '{priceText}', figureId: {figureId}");
+
                 return null;
             }
 
-            var resultItems = resultsElement.QuerySelectorAll("div.result");
+            string currency = item.QuerySelector("span.classified-price-currency").TextContent.Trim();
+            var dateElement = item.QuerySelector("span.meta[title]");
+            string dateText = dateElement.GetAttribute("title");
 
-            foreach (var item in resultItems)
+            if (!DateTime.TryParseExact(dateText, "dd/MM/yyyy, HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime loggedAt))
             {
-                var aftermarketPrice = await ExtractAftermarketPriceAsync(item, figureId);
-
-                if (aftermarketPrice != null)
-                {
-                    aftermarketPriceList.Add(aftermarketPrice);
-                }
+                Console.WriteLine($"Failed to parse date from '{dateText}', figureId: {figureId}");
+                return null;
             }
 
-            var paginationElement = resultsElement.QuerySelector("div.results-count-pages");
-
-            if (paginationElement != null)
+            return new AftermarketPrice
             {
-                var adTabs = paginationElement.QuerySelectorAll("a.nav-page:not(.nav-current)");
-
-                foreach (var nextPageTab in adTabs)
-                {
-                    var pageTab = nextPageTab as IHtmlAnchorElement;
-                    document = await pageTab.NavigateAsync();
-
-                    var nextResultElement = document.QuerySelector("div.results.window-limited-contet");
-                    var nextResultItems = nextResultElement.QuerySelectorAll("div.result");
-
-                    foreach (var item in nextResultItems)
-                    {
-                        var nextAftermarketPrice = await ExtractAftermarketPriceAsync(item, figureId);
-
-                        if (nextAftermarketPrice != null)
-                        {
-                            aftermarketPriceList.Add(nextAftermarketPrice);
-                        }
-                    }
-                }
-            }
-
-            return aftermarketPriceList;
+                Price = price,
+                Currency = currency,
+                LoggedAt = loggedAt,
+                FigureId = figureId,
+            };
         }
 
-            private async Task<AftermarketPrice> ExtractAftermarketPriceAsync(IElement item, int figureId)
+        private async Task<FormUrlEncodedContent> GetFormData()
+        {
+            return new FormUrlEncodedContent(new[]
             {
+                new KeyValuePair<string, string>("commit", "loadWindow"),
+                new KeyValuePair<string, string>("window", "buyItem"),
+                new KeyValuePair<string, string>("soldBy", "users"),
+                new KeyValuePair<string, string>("jan", "4560228202793"),
+            });
+        }
 
-                string priceText = item.QuerySelector("span.classified-price-value").TextContent.Trim();
+        private void AddDefaultReuestHeaders(HttpClient client, string cookieHeader)
+        {
+            client.DefaultRequestHeaders.Add("Cookie", cookieHeader);
+            client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
+            client.DefaultRequestHeaders.Add("Referer", "https://myfigurecollection.net/");
+        }
 
-                if (!decimal.TryParse(priceText.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out decimal price))
-                {
-                    Console.WriteLine($"Failed to parse price from '{priceText}', figureId: {figureId}");
+        private string GetCookiesForRequest(string url)
+        {
+            var uri = new Uri(url);
+            var cookies = _cookieContainer.GetCookies(uri).Cast<Cookie>();
 
-                    return null;
-                }
+            return string.Join("; ", cookies.Select(c => $"{c.Name}={c.Value}"));
+        }
 
-                string currency = item.QuerySelector("span.classified-price-currency").TextContent.Trim();
-                var dateElement = item.QuerySelector("span.meta[title]");
-                string dateText = dateElement.GetAttribute("title");
+        private async Task SetAuthenticatedCookies(string url)
+        {
+            var uri = new Uri(this._settings.LoginUrl);
+            var cookies = _cookieContainer.GetCookies(uri);
+            var cookieHeader = string.Join("; ", cookies.Cast<Cookie>().Select(c => $"{c.Name}={c.Value}"));
 
-                if (!DateTime.TryParseExact(dateText, "dd/MM/yyyy, HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime loggedAt))
-                {
-                    Console.WriteLine($"Failed to parse date from '{dateText}', figureId: {figureId}");
-                    return null;
-                }
-
-                return new AftermarketPrice
-                {
-                    Price = price,
-                    Currency = currency,
-                    LoggedAt = loggedAt,
-                    FigureId = figureId,
-                };
-            }
-
-            private async Task SetAuthenticatedCookies(string url)
-            {
-                var uri = new Uri(this._settings.LoginUrl);
-                var cookies = _cookieContainer.GetCookies(uri);
-                var cookieHeader = string.Join("; ", cookies.Cast<Cookie>().Select(c => $"{c.Name}={c.Value}"));
-
-                await this._context.OpenAsync(res => res.Content("<div></div>")
-                    .Address(url)
-                    .Header(HeaderNames.SetCookie, cookieHeader));
-            }
+            await this._context.OpenAsync(res => res.Content("<div></div>")
+                .Address(url)
+                .Header(HeaderNames.SetCookie, cookieHeader));
         }
     }
+}
