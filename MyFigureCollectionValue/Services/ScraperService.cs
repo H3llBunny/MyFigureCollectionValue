@@ -400,15 +400,17 @@ namespace MyFigureCollectionValue.Services
 
         public async Task<ICollection<AftermarketPrice>> GetAftermarketPriceListAsync(string url, int figureId)
         {
+            var aftermarketPriceList = new List<AftermarketPrice>();
+
             using (HttpClient client = new HttpClient())
             {
                 var formData = await GetFormData();
-                string cookieHeader = GetCookiesForRequest(url);
+                string cookieHeader = GetCookiesForPostRequest(url);
                 AddDefaultReuestHeaders(client, cookieHeader);
 
                 try
                 {
-                    HttpResponseMessage response = await client.PostAsync(url, formData);
+                    HttpResponseMessage response = await client.PostAsync("https://myfigurecollection.net/item/806092", formData);
 
                     response.EnsureSuccessStatusCode();
 
@@ -421,8 +423,24 @@ namespace MyFigureCollectionValue.Services
 
                     var document = await this._context.OpenAsync(req => req.Content(decodedHtml));
 
-                    string price = document.QuerySelector("span.classified-price-value").TextContent.Trim();
+                    var adsElement = document.QuerySelector("div.results.window-limited-content");
 
+                    if (adsElement == null)
+                    {
+                        return null;
+                    }
+
+                    var items = document.QuerySelectorAll("div.results.window-limited-content div.result");
+
+                    foreach (var item in items)
+                    {
+                        var aftermarketPrice = await ExtractAftermarketPriceAsync(item, figureId);
+
+                        if (aftermarketPrice != null)
+                        {
+                            aftermarketPriceList.Add(aftermarketPrice);
+                        }
+                    }
                 }
                 catch (HttpRequestException e)
                 {
@@ -447,10 +465,12 @@ namespace MyFigureCollectionValue.Services
             }
 
             string currency = item.QuerySelector("span.classified-price-currency").TextContent.Trim();
-            var dateElement = item.QuerySelector("span.meta[title]");
+            var dateElement = item.QuerySelector("span.meta > span[title]");
             string dateText = dateElement.GetAttribute("title");
 
-            if (!DateTime.TryParseExact(dateText, "dd/MM/yyyy, HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime loggedAt))
+            string expectedFormat = "MM/dd/yyyy, HH:mm:ss";
+
+            if (!DateTime.TryParseExact(dateText, expectedFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime loggedAt))
             {
                 Console.WriteLine($"Failed to parse date from '{dateText}', figureId: {figureId}");
                 return null;
@@ -472,7 +492,6 @@ namespace MyFigureCollectionValue.Services
                 new KeyValuePair<string, string>("commit", "loadWindow"),
                 new KeyValuePair<string, string>("window", "buyItem"),
                 new KeyValuePair<string, string>("soldBy", "users"),
-                new KeyValuePair<string, string>("jan", "4560228202793"),
             });
         }
 
@@ -483,7 +502,7 @@ namespace MyFigureCollectionValue.Services
             client.DefaultRequestHeaders.Add("Referer", "https://myfigurecollection.net/");
         }
 
-        private string GetCookiesForRequest(string url)
+        private string GetCookiesForPostRequest(string url)
         {
             var uri = new Uri(url);
             var cookies = _cookieContainer.GetCookies(uri).Cast<Cookie>();
