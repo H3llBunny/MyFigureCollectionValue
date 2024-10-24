@@ -157,8 +157,10 @@ namespace MyFigureCollectionValue.Services
             }
         }
 
-        public async Task<(ICollection<Figure> Figures, ICollection<RetailPrice> RetailPrices, ICollection<AftermarketPrice> AftermarketPrices)>
-            CreateFiguresAndPricesAsync(IEnumerable<string> figureUrls, string userId)
+        public async Task<(
+            ICollection<Figure> Figures, 
+            ICollection<RetailPrice> RetailPrices, 
+            ICollection<AftermarketPrice> AftermarketPrices)> CreateFiguresAndPricesAsync(IEnumerable<string> figureUrls, string userId)
         {
             var newFigureList = new List<Figure>();
             var retailPriceList = new List<RetailPrice>();
@@ -404,24 +406,14 @@ namespace MyFigureCollectionValue.Services
 
             using (HttpClient client = new HttpClient())
             {
-                var formData = await GetFormData();
+                int initialPageNum = 1;
+                var formData = await GetFormData(initialPageNum);
                 string cookieHeader = GetCookiesForPostRequest(url);
                 AddDefaultReuestHeaders(client, cookieHeader);
 
                 try
                 {
-                    HttpResponseMessage response = await client.PostAsync("https://myfigurecollection.net/item/806092", formData);
-
-                    response.EnsureSuccessStatusCode();
-
-                    string htmlContent = await response.Content.ReadAsStringAsync();
-
-                    var jsonDocument = JsonDocument.Parse(htmlContent);
-                    string windowHtml = jsonDocument.RootElement.GetProperty("htmlValues").GetProperty("WINDOW").GetString();
-
-                    string decodedHtml = WebUtility.HtmlDecode(windowHtml);
-
-                    var document = await this._context.OpenAsync(req => req.Content(decodedHtml));
+                    var document = await GetDocument(client, url, formData);
 
                     var adsElement = document.QuerySelector("div.results.window-limited-content");
 
@@ -441,6 +433,37 @@ namespace MyFigureCollectionValue.Services
                             aftermarketPriceList.Add(aftermarketPrice);
                         }
                     }
+
+                    var pageCountElement = document.QuerySelector("div.results-count-pages");
+
+                    if (pageCountElement != null)
+                    {
+                        var pageNumberElement = pageCountElement.LastChild.TextContent.Trim();
+
+                        if (int.TryParse(pageNumberElement, out int pageNumber))
+                        {
+                            for (int i = 2; i <= pageNumber; i++)
+                            {
+                                formData.Dispose();
+                                formData = await GetFormData(i);
+
+                                var newDocument = await GetDocument(client, url, formData);
+
+                                var newItems = newDocument.QuerySelectorAll("div.results.window-limited-content div.result");
+
+                                foreach (var item in newItems)
+                                {
+                                    var aftermarketPrice = await ExtractAftermarketPriceAsync(item, figureId);
+
+                                    if (aftermarketPrice != null)
+                                    {
+                                        aftermarketPriceList.Add(aftermarketPrice);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                 }
                 catch (HttpRequestException e)
                 {
@@ -448,9 +471,24 @@ namespace MyFigureCollectionValue.Services
                 }
             }
 
-            return null;
+            return aftermarketPriceList;
         }
 
+        private async Task<IDocument> GetDocument(HttpClient client, string url, FormUrlEncodedContent formData)
+        {
+            HttpResponseMessage response = await client.PostAsync(url, formData);
+
+            response.EnsureSuccessStatusCode();
+
+            string htmlContent = await response.Content.ReadAsStringAsync();
+
+            var jsonDocument = JsonDocument.Parse(htmlContent);
+            string windowHtml = jsonDocument.RootElement.GetProperty("htmlValues").GetProperty("WINDOW").GetString();
+
+            string decodedHtml = WebUtility.HtmlDecode(windowHtml);
+
+            return await this._context.OpenAsync(req => req.Content(decodedHtml));
+        } 
 
         private async Task<AftermarketPrice> ExtractAftermarketPriceAsync(IElement item, int figureId)
         {
@@ -485,14 +523,15 @@ namespace MyFigureCollectionValue.Services
             };
         }
 
-        private async Task<FormUrlEncodedContent> GetFormData()
+        private async Task<FormUrlEncodedContent> GetFormData(int pageNumber)
         {
             return new FormUrlEncodedContent(new[]
             {
                 new KeyValuePair<string, string>("commit", "loadWindow"),
                 new KeyValuePair<string, string>("window", "buyItem"),
                 new KeyValuePair<string, string>("soldBy", "users"),
-            });
+                new KeyValuePair<string, string>("page", $"{pageNumber}")
+            }); ;
         }
 
         private void AddDefaultReuestHeaders(HttpClient client, string cookieHeader)
