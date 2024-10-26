@@ -50,6 +50,9 @@ namespace MyFigureCollectionValue.Controllers
             var links = (await this._scraperService.GetAllFiguresLinkAsync(profileUrl)).ToList();
 
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            await this._figureService.RemoveUserFiguresAsync(userId);
+
             var (newFigureList, retailPriceList, aftermarketPriceList) = await this._scraperService.CreateFiguresAndPricesAsync(links, userId);
 
             if (newFigureList.Count > 0)

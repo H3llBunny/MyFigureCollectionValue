@@ -170,8 +170,6 @@ namespace MyFigureCollectionValue.Services
 
             try
             {
-                await this._figureService.RemoveUserFiguresAsync(userId);
-
                 foreach (var url in figureUrls)
                 {
                     int figureId = int.Parse(url.Split("/item/")[1]);
