@@ -158,8 +158,8 @@ namespace MyFigureCollectionValue.Services
         }
 
         public async Task<(
-            ICollection<Figure> Figures, 
-            ICollection<RetailPrice> RetailPrices, 
+            ICollection<Figure> Figures,
+            ICollection<RetailPrice> RetailPrices,
             ICollection<AftermarketPrice> AftermarketPrices)> CreateFiguresAndPricesAsync(IEnumerable<string> figureUrls, string userId)
         {
             var newFigureList = new List<Figure>();
@@ -401,71 +401,90 @@ namespace MyFigureCollectionValue.Services
         public async Task<ICollection<AftermarketPrice>> GetAftermarketPriceListAsync(string url, int figureId)
         {
             var aftermarketPriceList = new List<AftermarketPrice>();
+            int initialPageNum = 1;
+            const int maxRetries = 5;
+            var delayRequest = new Random();
+            int retries = 0;
+            bool success = false;
 
             using (HttpClient client = new HttpClient())
             {
-                int initialPageNum = 1;
                 var formData = await GetFormData(initialPageNum);
                 string cookieHeader = GetCookiesForPostRequest(url);
                 AddDefaultReuestHeaders(client, cookieHeader);
 
-                try
+                while (!success && retries < maxRetries)
                 {
-                    var document = await GetDocument(client, url, formData);
-
-                    var adsElement = document.QuerySelector("div.results.window-limited-content");
-
-                    if (adsElement == null)
+                    try
                     {
-                        return null;
-                    }
+                        await Task.Delay(delayRequest.Next(500, 800));
 
-                    var items = document.QuerySelectorAll("div.results.window-limited-content div.result");
+                        var document = await GetDocument(client, url, formData);
 
-                    foreach (var item in items)
-                    {
-                        var aftermarketPrice = await ExtractAftermarketPriceAsync(item, figureId);
+                        var adsElement = document.QuerySelector("div.results.window-limited-content");
 
-                        if (aftermarketPrice != null)
+                        if (adsElement == null)
                         {
-                            aftermarketPriceList.Add(aftermarketPrice);
+                            return null;
                         }
-                    }
 
-                    var pageCountElement = document.QuerySelector("div.results-count-pages");
+                        var items = document.QuerySelectorAll("div.results.window-limited-content div.result");
 
-                    if (pageCountElement != null)
-                    {
-                        var pageNumberElement = pageCountElement.LastChild.TextContent.Trim();
-
-                        if (int.TryParse(pageNumberElement, out int pageNumber))
+                        foreach (var item in items)
                         {
-                            for (int i = 2; i <= pageNumber; i++)
+                            var aftermarketPrice = await ExtractAftermarketPriceAsync(item, figureId);
+
+                            if (aftermarketPrice != null)
                             {
-                                formData.Dispose();
-                                formData = await GetFormData(i);
+                                aftermarketPriceList.Add(aftermarketPrice);
+                            }
+                        }
 
-                                var newDocument = await GetDocument(client, url, formData);
+                        var pageCountElement = document.QuerySelector("div.results-count-pages");
 
-                                var newItems = newDocument.QuerySelectorAll("div.results.window-limited-content div.result");
+                        if (pageCountElement != null)
+                        {
+                            var pageNumberElement = pageCountElement.LastChild.TextContent.Trim();
 
-                                foreach (var item in newItems)
+                            if (int.TryParse(pageNumberElement, out int pageNumber))
+                            {
+                                for (int i = 2; i <= pageNumber; i++)
                                 {
-                                    var aftermarketPrice = await ExtractAftermarketPriceAsync(item, figureId);
+                                    formData.Dispose();
+                                    formData = await GetFormData(i);
 
-                                    if (aftermarketPrice != null)
+                                    var newDocument = await GetDocument(client, url, formData);
+
+                                    var newItems = newDocument.QuerySelectorAll("div.results.window-limited-content div.result");
+
+                                    foreach (var item in newItems)
                                     {
-                                        aftermarketPriceList.Add(aftermarketPrice);
+                                        var aftermarketPrice = await ExtractAftermarketPriceAsync(item, figureId);
+
+                                        if (aftermarketPrice != null)
+                                        {
+                                            aftermarketPriceList.Add(aftermarketPrice);
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
 
-                }
-                catch (HttpRequestException e)
-                {
-                    Console.WriteLine("Request error: " + e.Message);
+                        success = true;
+                    }
+                    catch (HttpRequestException e)
+                    {
+                        retries++;
+                        Console.WriteLine($"Attempt {retries} failed for URL: {url}. Error: {e.Message}");
+
+                        if (retries >= maxRetries)
+                        {
+                            Console.WriteLine("Max retries reached. Stopping execution.");
+                            break;
+                        }
+
+                        await Task.Delay(2000);
+                    }
                 }
             }
 
@@ -486,12 +505,17 @@ namespace MyFigureCollectionValue.Services
             string decodedHtml = WebUtility.HtmlDecode(windowHtml);
 
             return await this._context.OpenAsync(req => req.Content(decodedHtml));
-        } 
+        }
 
         private async Task<AftermarketPrice> ExtractAftermarketPriceAsync(IElement item, int figureId)
         {
 
-            string priceText = item.QuerySelector("span.classified-price-value").TextContent.Trim();
+            string priceText = item.QuerySelector("span.classified-price-value")?.TextContent?.Trim();
+
+            if (priceText == null)
+            {
+                return null;
+            }
 
             if (!decimal.TryParse(priceText.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out decimal price))
             {
