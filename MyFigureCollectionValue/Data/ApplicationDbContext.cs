@@ -43,7 +43,7 @@ namespace MyFigureCollectionValue.Data
 
             builder.Entity<UserFigure>()
                 .HasOne(uf => uf.Figure)
-                .WithMany(f => f.UserItems)
+                .WithMany(f => f.UserFigures)
                 .HasForeignKey(uf => uf.FigureId);
         }
     }

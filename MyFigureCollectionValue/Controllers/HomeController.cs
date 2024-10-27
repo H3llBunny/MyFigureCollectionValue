@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyFigureCollectionValue.Models;
 using MyFigureCollectionValue.Services;
@@ -21,9 +22,23 @@ namespace MyFigureCollectionValue.Controllers
             this._figureService = figureService;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(int pageNumber = 1, string orderBy = "default")
         {
-            return View();
+            if (!User.Identity.IsAuthenticated)
+            {
+                return View();
+            }
+
+            if (pageNumber <= 0)
+            {
+                return this.NotFound();
+            }
+
+            const int FiguresPerPage = 8;
+
+            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return this.View();
         }
 
         public IActionResult Privacy()
@@ -50,7 +65,7 @@ namespace MyFigureCollectionValue.Controllers
             var links = (await this._scraperService.GetAllFiguresLinkAsync(profileUrl)).ToList();
 
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
+
             await this._figureService.RemoveUserFiguresAsync(userId);
 
             var (newFigureList, retailPriceList, aftermarketPriceList) = await this._scraperService.CreateFiguresAndPricesAsync(links, userId);

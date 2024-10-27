@@ -8,7 +8,7 @@ namespace MyFigureCollectionValue.Models
         {
             this.AftermarketPrices = new HashSet<AftermarketPrice>();
             this.RetailPrices = new HashSet<RetailPrice>();
-            this.UserItems = new HashSet<UserFigure>();
+            this.UserFigures = new HashSet<UserFigure>();
         }
 
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
@@ -30,6 +30,6 @@ namespace MyFigureCollectionValue.Models
 
         public ICollection<RetailPrice> RetailPrices { get; set; }
 
-        public ICollection<UserFigure> UserItems { get; set; }
+        public ICollection<UserFigure> UserFigures { get; set; }
     }
 }
