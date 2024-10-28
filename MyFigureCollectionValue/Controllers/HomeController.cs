@@ -22,7 +22,7 @@ namespace MyFigureCollectionValue.Controllers
             this._figureService = figureService;
         }
 
-        public IActionResult Index(int pageNumber = 1, string orderBy = "default")
+        public async Task<IActionResult> Index(int pageNumber = 1)
         {
             if (!User.Identity.IsAuthenticated)
             {
@@ -34,9 +34,26 @@ namespace MyFigureCollectionValue.Controllers
                 return this.NotFound();
             }
 
-            const int FiguresPerPage = 8;
+            const int FiguresPerPage = 200;
 
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var figures = await this._figureService.GetAllFigures(userId, pageNumber, FiguresPerPage);
+
+            if (figures.Any())
+            {
+
+                var figuresViewModel = new FiguresListViewModel
+                {
+                    FiguresPerPage = FiguresPerPage,
+                    PageNumber = pageNumber,
+                    UserId = userId,
+                    FiguresCount = await this._figureService.GetUserFiguresCount(userId),
+                    Figures = figures,
+                    AvgRetailPriceOfCollection = figures.Select(f => f.RetailPrice).Average(),
+                    AvgAftermarketPriceOfCollection = figures.Select(f => f.AvgAftermarketPrice).Average()
+                };
+                return this.View(figuresViewModel);
+            }
 
             return this.View();
         }

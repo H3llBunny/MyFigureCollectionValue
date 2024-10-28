@@ -68,5 +68,33 @@ namespace MyFigureCollectionValue.Services
             await this._dbContext.UserFigures.AddAsync(userFigure);
             await this._dbContext.SaveChangesAsync();
         }
+
+        public async Task<int> GetUserFiguresCount(string userId)
+        {
+            return await this._dbContext.UserFigures.Where(u => u.UserId == userId).CountAsync();
+        }
+
+        public async Task<IEnumerable<FigureInListViewModel>> GetAllFigures(string userId, int pageNumber, int figuresPerPage)
+        {
+            var figures = await this._dbContext.UserFigures
+                .Where(uf => uf.UserId == userId)
+                .Include(uf => uf.Figure.RetailPrices)
+                .Include(uf => uf.Figure.AftermarketPrices)
+                .Select(f => f.Figure)
+                .Skip((pageNumber - 1) * figuresPerPage)
+                .Take(figuresPerPage)
+                .ToListAsync();
+
+            return figures.Select(f => new FigureInListViewModel
+            {
+                Id = f.Id,
+                Name = f.Name,
+                ImageUrl = f.Image,
+                RetailPrice = f.RetailPrices
+                    .OrderByDescending(rp => rp.ReleaseDate)
+                    .FirstOrDefault()?.Price ?? 0,
+                AvgAftermarketPrice = 0
+            });
+        }
     }
 }

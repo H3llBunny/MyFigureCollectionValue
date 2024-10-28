@@ -17,5 +17,9 @@ namespace MyFigureCollectionValue.Services
         Task RemoveUserFiguresAsync(string userId);
 
         Task AddExistingFigureToUserAsync(int figureId, string userId);
+
+        Task<int> GetUserFiguresCount(string userId);
+
+        Task<IEnumerable<FigureInListViewModel>> GetAllFigures(string userId, int pageNumber, int figuresPerPage);
     }
 }
