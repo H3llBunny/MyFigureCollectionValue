@@ -32,7 +32,7 @@ namespace MyFigureCollectionValue.Controllers
             if (pageNumber <= 0)
             {
                 return this.NotFound();
-            }
+            } 
 
             const int FiguresPerPage = 200;
 

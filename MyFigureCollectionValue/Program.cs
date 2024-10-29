@@ -31,10 +31,13 @@ namespace MyFigureCollectionValue
             });
 
             builder.Services.Configure<ScraperSettings>(builder.Configuration.GetSection("ScraperSettings"));
+            builder.Services.Configure<CurrencyFreaksSettings>(builder.Configuration.GetSection("CurrencyFreaks"));
 
             builder.Services.AddScoped<IScraperService, ScraperService>();
 
             builder.Services.AddScoped<IFigureService, FigureService>();
+
+            builder.Services.AddHostedService<AutoUpdateDatabaseService>();
 
             var app = builder.Build();
 
