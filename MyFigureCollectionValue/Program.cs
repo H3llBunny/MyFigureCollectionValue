@@ -34,8 +34,8 @@ namespace MyFigureCollectionValue
             builder.Services.Configure<CurrencyFreaksSettings>(builder.Configuration.GetSection("CurrencyFreaks"));
 
             builder.Services.AddScoped<IScraperService, ScraperService>();
-
             builder.Services.AddScoped<IFigureService, FigureService>();
+            builder.Services.AddScoped<ICurrencyConverterService, CurrencyConverterService>();
 
             builder.Services.AddHostedService<AutoUpdateDatabaseService>();
 

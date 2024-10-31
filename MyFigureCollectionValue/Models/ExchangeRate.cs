@@ -2,7 +2,7 @@
 
 namespace MyFigureCollectionValue.Models
 {
-    public class ExchangeRatesResponse
+    public class ExchangeRate
     {
         [JsonPropertyName("date")]
         public string Date { get; set; }

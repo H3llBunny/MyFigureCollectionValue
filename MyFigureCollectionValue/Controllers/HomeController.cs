@@ -12,14 +12,17 @@ namespace MyFigureCollectionValue.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IScraperService _scraperService;
         private readonly IFigureService _figureService;
+        private readonly ICurrencyConverterService _currencyConverterService;
 
         public HomeController(ILogger<HomeController> logger,
             IScraperService scraperService,
-            IFigureService figureService)
+            IFigureService figureService,
+            ICurrencyConverterService currencyConverterService)
         {
             _logger = logger;
             this._scraperService = scraperService;
             this._figureService = figureService;
+            this._currencyConverterService = currencyConverterService;
         }
 
         public async Task<IActionResult> Index(int pageNumber = 1)
@@ -100,7 +103,9 @@ namespace MyFigureCollectionValue.Controllers
 
             if (aftermarketPriceList.Count > 0)
             {
-                await this._figureService.AddAftermarketPricesAsync(aftermarketPriceList);
+                var aftermarketPricesInUSD = this._currencyConverterService.ConvertAftermarketPricesToUSD(aftermarketPriceList);
+
+                await this._figureService.AddAftermarketPricesAsync(aftermarketPricesInUSD);
             }
 
             return this.RedirectToAction(nameof(this.Index));

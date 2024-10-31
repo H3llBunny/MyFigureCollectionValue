@@ -8,6 +8,7 @@ namespace MyFigureCollectionValue.Services
     {
         private readonly CurrencyFreaksSettings _fixerSettings;
         private readonly ILogger<AutoUpdateDatabaseService> _logger;
+        private readonly string currencies = "eur,gbp,jpy,aud,cad,hkd";
 
         public AutoUpdateDatabaseService(IOptions<CurrencyFreaksSettings> fixerSettings, ILogger<AutoUpdateDatabaseService> logger)
         {
@@ -41,14 +42,14 @@ namespace MyFigureCollectionValue.Services
                 string baseUrl = this._fixerSettings.BaseUrl;
                 string apiKey = this._fixerSettings.ApiKey;
 
-                string url = $"{baseUrl}?apikey={apiKey}&symbols=eur,gbp,cny,aud,cad";
+                string url = $"{baseUrl}?apikey={apiKey}&symbols={currencies}";
 
                 HttpResponseMessage response = await client.GetAsync(url);
 
                 response.EnsureSuccessStatusCode();
 
                 string jsonString = await response.Content.ReadAsStringAsync();
-                var jsonContent = JsonSerializer.Deserialize<ExchangeRatesResponse>(jsonString);
+                var jsonContent = JsonSerializer.Deserialize<ExchangeRate>(jsonString);
 
                 if (jsonContent != null)
                 {
