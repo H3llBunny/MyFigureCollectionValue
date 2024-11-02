@@ -90,10 +90,12 @@ namespace MyFigureCollectionValue.Services
                 Id = f.Id,
                 Name = f.Name,
                 ImageUrl = f.Image,
-                RetailPrice = f.RetailPrices
+                RetailPrice = f.RetailPrices?
                     .OrderByDescending(rp => rp.ReleaseDate)
                     .FirstOrDefault()?.Price ?? 0,
-                AvgAftermarketPrice = 0
+                AvgAftermarketPrice = f.AftermarketPrices != null && f.AftermarketPrices.Any()
+                    ? f.AftermarketPrices.Average(af => af.Price)
+                    : 0
             });
         }
     }

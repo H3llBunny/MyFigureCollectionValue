@@ -8,7 +8,7 @@ namespace MyFigureCollectionValue.Services
     {
         private readonly CurrencyFreaksSettings _fixerSettings;
         private readonly ILogger<AutoUpdateDatabaseService> _logger;
-        private readonly string currencies = "eur,gbp,jpy,aud,cad,hkd";
+        private readonly string currencies = "eur,gbp,jpy,aud,cad,hkd,cny,idr,krw,sgd,twd,aed";
 
         public AutoUpdateDatabaseService(IOptions<CurrencyFreaksSettings> fixerSettings, ILogger<AutoUpdateDatabaseService> logger)
         {

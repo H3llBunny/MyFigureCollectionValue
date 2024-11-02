@@ -52,9 +52,10 @@ namespace MyFigureCollectionValue.Controllers
                     UserId = userId,
                     FiguresCount = await this._figureService.GetUserFiguresCount(userId),
                     Figures = figures,
-                    AvgRetailPriceOfCollection = figures.Select(f => f.RetailPrice).Average(),
-                    AvgAftermarketPriceOfCollection = figures.Select(f => f.AvgAftermarketPrice).Average()
+                    SumRetailPriceCollection = figures.Select(f => f.RetailPrice).Sum(),
+                    SumAvgAftermarketPriceCollection = figures.Select(f => f.AvgAftermarketPrice).Sum()
                 };
+                
                 return this.View(figuresViewModel);
             }
 
@@ -98,6 +99,7 @@ namespace MyFigureCollectionValue.Controllers
 
             if (retailPriceList.Count > 0)
             {
+                var retailPricesInUSD = this._currencyConverterService.ConvertRetailPricesToUSD(retailPriceList);
                 await this._figureService.AddRetailPricesAsync(retailPriceList);
             }
 

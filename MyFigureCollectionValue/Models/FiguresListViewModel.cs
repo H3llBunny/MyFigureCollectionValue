@@ -12,9 +12,9 @@
 
         public string OrderBy { get; set; }
 
-        public decimal AvgRetailPriceOfCollection { get; set; }
+        public decimal SumRetailPriceCollection { get; set; }
 
-        public decimal AvgAftermarketPriceOfCollection { get; set; }
+        public decimal SumAvgAftermarketPriceCollection { get; set; }
 
         public IEnumerable<FigureInListViewModel> Figures { get; set; }
     }
