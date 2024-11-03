@@ -1,4 +1,5 @@
-﻿using MyFigureCollectionValue.Models;
+﻿using AngleSharp.Dom;
+using MyFigureCollectionValue.Models;
 
 namespace MyFigureCollectionValue.Services
 {
@@ -11,7 +12,7 @@ namespace MyFigureCollectionValue.Services
         Task<(ICollection<Figure> Figures, ICollection<RetailPrice> RetailPrices, ICollection<AftermarketPrice> AftermarketPrices)> 
             CreateFiguresAndPricesAsync(IEnumerable<string> figureUrls, string userId);
 
-        Task<ICollection<RetailPrice>> GetRetailPriceListAsync(string url, int figureId);
+        Task<ICollection<RetailPrice>> GetRetailPriceListAsync(IDocument document, int figureId);
 
         Task<ICollection<AftermarketPrice>> GetAftermarketPriceListAsync(string url, int figureId);
     }

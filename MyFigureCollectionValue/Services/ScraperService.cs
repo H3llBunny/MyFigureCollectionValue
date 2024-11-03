@@ -232,7 +232,7 @@ namespace MyFigureCollectionValue.Services
 
                             newFigureList.Add(newFigure);
 
-                            var figureRetailPrice = await GetRetailPriceListAsync(url, figureId);
+                            var figureRetailPrice = await GetRetailPriceListAsync(document, figureId);
 
                             if (figureRetailPrice != null)
                             {
@@ -282,11 +282,9 @@ namespace MyFigureCollectionValue.Services
         }
 
 
-        public async Task<ICollection<RetailPrice>> GetRetailPriceListAsync(string url, int figureId)
+        public async Task<ICollection<RetailPrice>> GetRetailPriceListAsync(IDocument document, int figureId)
         {
             var retailPriceList = new List<RetailPrice>();
-
-            var document = await this._context.OpenAsync(url);
 
             var dataField = document.QuerySelectorAll("div.data-field")
                                     .FirstOrDefault(df => df.FirstChild.TextContent.Contains("Releases"));

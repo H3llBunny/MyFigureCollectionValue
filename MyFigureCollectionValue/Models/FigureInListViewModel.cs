@@ -10,6 +10,10 @@
 
         public decimal RetailPrice { get; set; }
 
+        public string RetailPriceCurrency { get; set; }
+
         public decimal AvgAftermarketPrice { get; set; }
+
+        public string AvgAftermarketPriceCurrency { get; set; }
     }
 }

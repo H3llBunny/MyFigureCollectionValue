@@ -1,4 +1,5 @@
-﻿@{
+﻿@model FiguresListViewModel
+@{
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-danger col-md-6">
@@ -23,6 +24,30 @@
                 </form>
             </div>
         </div>
+
+        @if (Model != null)
+        {
+            <div class="collection-value d-flex justify-content-center">
+                <span class="total-value">Total Retail Value: <span class="figure-price">$@Model.SumRetailPriceCollection</span></span>
+                <span class="total-value">Total Aftermarket Value: <span class="figure-price">$@Model.SumAvgAftermarketPriceCollection</span></span>
+            </div>
+            <div class="figure-container justify-content-center">
+                @foreach (var figure in Model.Figures)
+                {
+                    <div class="figure-card m-2">
+                        <div class="figure-image" style="background-image: url('@figure.ImageUrl');">
+                            <div class="figure-overlay">
+                                <span class="title">@figure.Name</span>
+                            </div>
+                        </div>
+                        <ul class="figure-info">
+                            <li>Retail Price: <span class="figure-price">@figure.RetailPriceCurrency@figure.RetailPrice</span></li>
+                            <li>Average Aftermarket Price: <span class="figure-price">@figure.AvgAftermarketPriceCurrency@figure.AvgAftermarketPrice</span></li>
+                        </ul>
+                    </div>
+                }
+            </div>
+        }
     }
     else
     {

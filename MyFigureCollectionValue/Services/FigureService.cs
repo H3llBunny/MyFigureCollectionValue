@@ -93,9 +93,11 @@ namespace MyFigureCollectionValue.Services
                 RetailPrice = f.RetailPrices?
                     .OrderByDescending(rp => rp.ReleaseDate)
                     .FirstOrDefault()?.Price ?? 0,
+                RetailPriceCurrency = "$",
                 AvgAftermarketPrice = f.AftermarketPrices != null && f.AftermarketPrices.Any()
-                    ? f.AftermarketPrices.Average(af => af.Price)
-                    : 0
+                    ? Math.Round(f.AftermarketPrices.Average(af => af.Price), 2)
+                    : 0,
+                AvgAftermarketPriceCurrency = "$"
             });
         }
     }
