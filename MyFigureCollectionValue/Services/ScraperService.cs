@@ -153,7 +153,7 @@ namespace MyFigureCollectionValue.Services
             }
             catch (Exception ex)
             {
-                throw new Exception($"An error occurred while scraping: {ex.Message}");
+                throw new Exception(ex.Message);
             }
         }
 

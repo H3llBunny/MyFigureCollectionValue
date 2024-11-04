@@ -16,15 +16,20 @@
 
     if (User?.Identity?.IsAuthenticated ?? false)
     {
-        <div id="searchUrlBoxWrapper" class="d-flex justify-content-center align-items-center">
-            <div id="searchUrlBox">
-                <form asp-action="AddProfileUrl" id="profileForm" method="post">
-                    <input id="profileUrlInput" class="form-control mb-3" type="text" name="profileUrl" placeholder="Please provide a link to your myfigurecollection.net account" oninput="checkInput()" style="text-align: center;" />
-                    <button id="submitButton" class="btn btn-primary" type="submit" disabled>Add</button>
-                </form>
+        <div class="d-flex">
+            @if (Model != null)
+            {
+                <span class="d-flex" style="font-size: 20px; position: absolute">Figures count: <span class="figure-price" style="padding-left: 5px;">@Model.FiguresCount</span></span>
+            }
+            <div id="searchUrlBoxWrapper" class="d-flex justify-content-center align-items-center flex-grow-1">
+                <div id="searchUrlBox">
+                    <form asp-action="AddProfileUrl" id="profileForm" method="post">
+                        <input id="profileUrlInput" class="form-control mb-3" type="text" name="profileUrl" placeholder="Please provide a link to your myfigurecollection.net account" oninput="checkInput()" style="text-align: center;" />
+                        <button id="submitButton" class="btn btn-primary" type="submit" disabled>Add</button>
+                    </form>
+                </div>
             </div>
         </div>
-
         @if (Model != null)
         {
             <div class="collection-value d-flex justify-content-center">

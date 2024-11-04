@@ -35,7 +35,7 @@ namespace MyFigureCollectionValue.Controllers
             if (pageNumber <= 0)
             {
                 return this.NotFound();
-            } 
+            }
 
             const int FiguresPerPage = 200;
 
@@ -55,7 +55,7 @@ namespace MyFigureCollectionValue.Controllers
                     SumRetailPriceCollection = figures.Select(f => f.RetailPrice).Sum(),
                     SumAvgAftermarketPriceCollection = figures.Select(f => f.AvgAftermarketPrice).Sum()
                 };
-                
+
                 return this.View(figuresViewModel);
             }
 
@@ -83,7 +83,17 @@ namespace MyFigureCollectionValue.Controllers
 
             await this._scraperService.LoginAsync();
 
-            var links = (await this._scraperService.GetAllFiguresLinkAsync(profileUrl)).ToList();
+            List<string> links = new List<string>();
+
+            try
+            {
+                links = (await this._scraperService.GetAllFiguresLinkAsync(profileUrl)).ToList();
+            }
+            catch (Exception ex)
+            {
+                this.TempData["ErrorMessage"] = ex.Message;
+                return this.RedirectToAction(nameof(this.Index));
+            }
 
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
