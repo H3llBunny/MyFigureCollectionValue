@@ -18,8 +18,12 @@ namespace MyFigureCollectionValue.Services
 
         Task AddExistingFigureToUserAsync(int figureId, string userId);
 
-        Task<int> GetUserFiguresCount(string userId);
+        Task<int> GetUserFiguresCountAsync(string userId);
 
-        Task<IEnumerable<FigureInListViewModel>> GetAllFigures(string userId, int pageNumber, int figuresPerPage);
+        Task<IEnumerable<FigureInListViewModel>> GetAllFiguresAsync(string userId, int pageNumber, int figuresPerPage);
+
+        Task UpdateUserFigureCollectionUrlAsync(string userId, string url);
+
+        Task<string> GetUserFigureCollectionUrlAsync(string userId);
     }
 }

@@ -12,6 +12,10 @@
 
         public string OrderBy { get; set; }
 
+        public string UserFigureCollectionUrl { get; set; }
+
+        public string FigureCollectionUsername { get; set; }
+
         public decimal SumRetailPriceCollection { get; set; }
 
         public decimal SumAvgAftermarketPriceCollection { get; set; }

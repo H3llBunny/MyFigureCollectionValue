@@ -327,6 +327,23 @@ namespace MyFigureCollectionValue.Migrations
                     b.ToTable("UserFigures");
                 });
 
+            modelBuilder.Entity("MyFigureCollectionValue.Models.UserFigureCollectionUrl", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FigureCollectionUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("UserFigureCollectionUrls");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -403,7 +420,7 @@ namespace MyFigureCollectionValue.Migrations
             modelBuilder.Entity("MyFigureCollectionValue.Models.UserFigure", b =>
                 {
                     b.HasOne("MyFigureCollectionValue.Models.Figure", "Figure")
-                        .WithMany("UserItems")
+                        .WithMany("UserFigures")
                         .HasForeignKey("FigureId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -419,13 +436,24 @@ namespace MyFigureCollectionValue.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MyFigureCollectionValue.Models.UserFigureCollectionUrl", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithOne()
+                        .HasForeignKey("MyFigureCollectionValue.Models.UserFigureCollectionUrl", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MyFigureCollectionValue.Models.Figure", b =>
                 {
                     b.Navigation("AftermarketPrices");
 
                     b.Navigation("RetailPrices");
 
-                    b.Navigation("UserItems");
+                    b.Navigation("UserFigures");
                 });
 #pragma warning restore 612, 618
         }

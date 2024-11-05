@@ -19,6 +19,8 @@ namespace MyFigureCollectionValue.Data
 
         public DbSet<UserFigure> UserFigures { get; set; }
 
+        public DbSet<UserFigureCollectionUrl> UserFigureCollectionUrls { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -45,6 +47,15 @@ namespace MyFigureCollectionValue.Data
                 .HasOne(uf => uf.Figure)
                 .WithMany(f => f.UserFigures)
                 .HasForeignKey(uf => uf.FigureId);
+
+            builder.Entity<UserFigureCollectionUrl>()
+                .HasIndex(u => u.UserId)
+                .IsUnique();
+
+            builder.Entity<UserFigureCollectionUrl>()
+                .HasOne(u => u.User)
+                .WithOne()
+                .HasForeignKey<UserFigureCollectionUrl>(u => u.UserId);
         }
     }
 }

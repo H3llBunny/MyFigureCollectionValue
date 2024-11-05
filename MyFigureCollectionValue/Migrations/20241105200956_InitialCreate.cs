@@ -174,6 +174,24 @@ namespace MyFigureCollectionValue.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserFigureCollectionUrls",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    FigureCollectionUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserFigureCollectionUrls", x => x.UserId);
+                    table.ForeignKey(
+                        name: "FK_UserFigureCollectionUrls_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AftermarketPrices",
                 columns: table => new
                 {
@@ -291,6 +309,12 @@ namespace MyFigureCollectionValue.Migrations
                 column: "FigureId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserFigureCollectionUrls_UserId",
+                table: "UserFigureCollectionUrls",
+                column: "UserId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserFigures_FigureId",
                 table: "UserFigures",
                 column: "FigureId");
@@ -319,6 +343,9 @@ namespace MyFigureCollectionValue.Migrations
 
             migrationBuilder.DropTable(
                 name: "RetailPrices");
+
+            migrationBuilder.DropTable(
+                name: "UserFigureCollectionUrls");
 
             migrationBuilder.DropTable(
                 name: "UserFigures");

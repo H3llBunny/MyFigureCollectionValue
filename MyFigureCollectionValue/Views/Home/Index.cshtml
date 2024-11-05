@@ -19,7 +19,20 @@
         <div class="d-flex">
             @if (Model != null)
             {
-                <span class="d-flex" style="font-size: 20px; position: absolute">Figures count: <span class="figure-price" style="padding-left: 5px;">@Model.FiguresCount</span></span>
+                <div class="d-flex flex-column" style="font-size: 20px;">
+                    <div>
+                        Figures count:
+                        <span class="figure-price" style="padding-left: 5px;">@Model.FiguresCount</span>
+                    </div>
+                    <div>
+                        Collection:
+                        <span class="figure-price" style="padding-left: 5px;">
+                            <a href="@Model.UserFigureCollectionUrl" target="_blank" style="color: inherit;">
+                                @Model.FigureCollectionUsername
+                            </a>
+                        </span>
+                    </div>
+                </div>
             }
             <div id="searchUrlBoxWrapper" class="d-flex justify-content-center align-items-center flex-grow-1">
                 <div id="searchUrlBox">

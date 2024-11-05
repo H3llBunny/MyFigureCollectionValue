@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyFigureCollectionValue.Models;
 using MyFigureCollectionValue.Services;
@@ -40,18 +39,22 @@ namespace MyFigureCollectionValue.Controllers
             const int FiguresPerPage = 200;
 
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var figures = await this._figureService.GetAllFigures(userId, pageNumber, FiguresPerPage);
+            var figures = await this._figureService.GetAllFiguresAsync(userId, pageNumber, FiguresPerPage);
 
             if (figures.Any())
             {
+                string userFigureCollectionUrl = await this._figureService.GetUserFigureCollectionUrlAsync(userId);
+                string figureCollectionUsername = userFigureCollectionUrl.Substring(userFigureCollectionUrl.IndexOf("/profile/") + 9);
 
                 var figuresViewModel = new FiguresListViewModel
                 {
                     FiguresPerPage = FiguresPerPage,
                     PageNumber = pageNumber,
                     UserId = userId,
-                    FiguresCount = await this._figureService.GetUserFiguresCount(userId),
+                    FiguresCount = await this._figureService.GetUserFiguresCountAsync(userId),
                     Figures = figures,
+                    UserFigureCollectionUrl = userFigureCollectionUrl,
+                    FigureCollectionUsername = figureCollectionUsername,
                     SumRetailPriceCollection = figures.Select(f => f.RetailPrice).Sum(),
                     SumAvgAftermarketPriceCollection = figures.Select(f => f.AvgAftermarketPrice).Sum()
                 };
@@ -98,6 +101,8 @@ namespace MyFigureCollectionValue.Controllers
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             await this._figureService.RemoveUserFiguresAsync(userId);
+
+            await this._figureService.UpdateUserFigureCollectionUrlAsync(userId, profileUrl);
 
             var (newFigureList, retailPriceList, aftermarketPriceList) = await this._scraperService.CreateFiguresAndPricesAsync(links, userId);
 
