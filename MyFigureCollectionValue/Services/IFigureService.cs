@@ -25,5 +25,9 @@ namespace MyFigureCollectionValue.Services
         Task UpdateUserFigureCollectionUrlAsync(string userId, string url);
 
         Task<string> GetUserFigureCollectionUrlAsync(string userId);
+
+        Task<decimal> SumRetailPriceCollectionAsync(string userId);
+
+        Task<decimal> SumAvgAftermarketPriceCollectionAsync(string userId);
     }
 }

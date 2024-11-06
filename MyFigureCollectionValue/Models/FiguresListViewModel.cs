@@ -1,16 +1,8 @@
 ﻿namespace MyFigureCollectionValue.Models
 {
-    public class FiguresListViewModel
+    public class FiguresListViewModel : PaginationViewModel
     {
-        public int FiguresPerPage { get; set; }
-
-        public int PageNumber { get; set; }
-
         public string UserId { get; set; }
-
-        public int FiguresCount { get; set; }
-
-        public string OrderBy { get; set; }
 
         public string UserFigureCollectionUrl { get; set; }
 

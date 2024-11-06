@@ -36,7 +36,7 @@ namespace MyFigureCollectionValue.Controllers
                 return this.NotFound();
             }
 
-            const int FiguresPerPage = 200;
+            const int FiguresPerPage = 90;
 
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var figures = await this._figureService.GetAllFiguresAsync(userId, pageNumber, FiguresPerPage);
@@ -55,8 +55,8 @@ namespace MyFigureCollectionValue.Controllers
                     Figures = figures,
                     UserFigureCollectionUrl = userFigureCollectionUrl,
                     FigureCollectionUsername = figureCollectionUsername,
-                    SumRetailPriceCollection = figures.Select(f => f.RetailPrice).Sum(),
-                    SumAvgAftermarketPriceCollection = figures.Select(f => f.AvgAftermarketPrice).Sum()
+                    SumRetailPriceCollection = await this._figureService.SumAvgAftermarketPriceCollectionAsync(userId),
+                    SumAvgAftermarketPriceCollection = await this._figureService.SumAvgAftermarketPriceCollectionAsync(userId)
                 };
 
                 return this.View(figuresViewModel);

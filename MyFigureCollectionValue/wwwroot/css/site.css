@@ -18,6 +18,56 @@ body {
     font-family: "Roboto Condensed", sans-serif;
 }
 
+a {
+    color: #f48939;
+}
+
+.btn-primary {
+    background-color: #f48939;
+    border-color: #fefae0;
+    border-radius: 15px;
+}
+
+    .btn-primary:hover {
+        background-color: #9f5c00;
+        border-color: #fefae0;
+    }
+
+    .btn-primary:active {
+        background-color: gray !important;
+        border-color: #fefae0 !important;
+        box-shadow: none !important;
+    }
+
+    .btn-primary:focus {
+        box-shadow: none;
+    }
+
+    .btn-primary:disabled {
+        background-color: #f48939;
+        border-color: #fefae0;
+        border-radius: 15px;
+        box-shadow: none;
+    }
+
+.page-link {
+    color: white;
+}
+
+.active > .page-link {
+    background-color: #f48939;
+    border-color: white;
+}
+
+a.page-link:hover {
+    color: gray;
+}
+
+a.page-link:focus {
+    color: white;
+    box-shadow: none;
+}
+
 .container-wrapper {
     flex: 1;
 }
@@ -37,25 +87,29 @@ footer {
     align-items: center;
 }
 
+    #searchUrlBox .form-control {
+        border-radius: 40px;
+    }
+
 #profileForm {
     width: 100%;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
 }
 
-.collection-value{
+.collection-value {
     padding-top: 10px;
     font-size: 20px;
 }
 
-.collection-value .total-value {
-    margin-right: 10px;
-}
-
-    .collection-value .total-value:last-child {
-        margin-right: 0;
+    .collection-value .total-value {
+        margin-right: 10px;
     }
+
+        .collection-value .total-value:last-child {
+            margin-right: 0;
+        }
 
 .figure-container {
     display: flex;

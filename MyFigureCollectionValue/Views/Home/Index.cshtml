@@ -2,14 +2,14 @@
 @{
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger col-md-6">
+        <div class="alert alert-danger d-flex justify-content-center align-items-center">
             @TempData["ErrorMessage"]
         </div>
     }
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success col-md-6">
+        <div class="alert alert-success d-flex justify-content-center align-items-center">
             @TempData["SuccessMessage"]
         </div>
     }
@@ -37,8 +37,10 @@
             <div id="searchUrlBoxWrapper" class="d-flex justify-content-center align-items-center flex-grow-1">
                 <div id="searchUrlBox">
                     <form asp-action="AddProfileUrl" id="profileForm" method="post">
-                        <input id="profileUrlInput" class="form-control mb-3" type="text" name="profileUrl" placeholder="Please provide a link to your myfigurecollection.net account" oninput="checkInput()" style="text-align: center;" />
-                        <button id="submitButton" class="btn btn-primary" type="submit" disabled>Add</button>
+                        <input id="profileUrlInput" class="form-control" type="text" name="profileUrl" placeholder="Please provide a link to your myfigurecollection.net account" oninput="checkInput()" style="text-align: center;" />
+                        <div style="padding-left: 10px;">
+                            <button id="submitButton" class="btn btn-primary" type="submit" disabled>Add</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -66,13 +68,16 @@
                 }
             </div>
         }
+        <partial name="_PagingPartial" model="@Model" />
     }
     else
     {
         <div class="text-center">
             <h2 class="welcome-header">Welcome!</h2>
             <p></p>
-            <h4>If you want to check the current value of your anime figure collection, please create an account and provide a link to your <a href="https://myfigurecollection.net/" target="_blank">MyFigureCollection</a> acccount.</h4>
+            <h4>
+                If you want to check the current value of an anime figure collection, please <a href="/Identity/Account/Register">register</a> and provide a link to your <a href="https://myfigurecollection.net/" target="_blank">MyFigureCollection</a> acccount.
+            </h4>
         </div>
     }
 }

@@ -128,5 +128,31 @@ namespace MyFigureCollectionValue.Services
             var userFigureCollectionUrl = await this._dbContext.UserFigureCollectionUrls.FirstOrDefaultAsync(u => u.UserId == userId);
             return userFigureCollectionUrl?.FigureCollectionUrl;
         }
+
+        public async Task<decimal> SumRetailPriceCollectionAsync(string userId)
+        {
+            var figures = await this._dbContext.UserFigures
+                .Where(uf => uf.UserId == userId)
+                .Include(uf => uf.Figure.RetailPrices)
+                .Select(f => f.Figure)
+                .ToListAsync();
+
+            return figures.Select(f => f.RetailPrices
+                          .OrderByDescending(rp => rp.ReleaseDate)
+                          .FirstOrDefault()?.Price ?? 0).Sum();
+
+        }
+
+        public async Task<decimal> SumAvgAftermarketPriceCollectionAsync(string userId)
+        {
+            var figures = await this._dbContext.UserFigures
+                .Where(uf => uf.UserId == userId)
+                .Include(uf => uf.Figure.AftermarketPrices)
+                .Select(f => f.Figure)
+                .ToListAsync();
+
+            return figures.Select((f => f.AftermarketPrices != null && f.AftermarketPrices.Any()
+                          ? Math.Round(f.AftermarketPrices.Average(af => af.Price), 2) : 0)).Sum();
+        }
     }
 }
