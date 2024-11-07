@@ -17,6 +17,7 @@ namespace MyFigureCollectionValue.Services
         private readonly HttpClient _client;
         private readonly CookieContainer _cookieContainer;
         private readonly ScraperSettings _settings;
+        private readonly Random _delayRequest = new Random();
 
         public ScraperService(IBrowsingContext context, IOptions<ScraperSettings> settings, IFigureService figureService)
         {
@@ -165,7 +166,6 @@ namespace MyFigureCollectionValue.Services
             var newFigureList = new List<Figure>();
             var retailPriceList = new List<RetailPrice>();
             var aftermarketPriceList = new List<AftermarketPrice>();
-            var delayRequest = new Random();
             const int maxRetries = 5;
 
             try
@@ -187,7 +187,7 @@ namespace MyFigureCollectionValue.Services
                     {
                         try
                         {
-                            var requestDelay = delayRequest.Next(500, 800);
+                            var requestDelay = this._delayRequest.Next(500, 800);
                             await Task.Delay(requestDelay);
 
                             var document = await this._context.OpenAsync(url);
@@ -258,8 +258,6 @@ namespace MyFigureCollectionValue.Services
                                 Console.WriteLine("Max retries reached. Stopping execution.");
                                 break;
                             }
-
-                            await Task.Delay(2000);
                         }
                         catch (Exception ex)
                         {
@@ -338,7 +336,7 @@ namespace MyFigureCollectionValue.Services
             }
         }
 
-        private async Task<RetailPrice> ExtractRetailPriceAsync(AngleSharp.Dom.IElement dataField, int figureId)
+        private async Task<RetailPrice> ExtractRetailPriceAsync(IElement dataField, int figureId)
         {
             var dataValue = dataField.QuerySelector("div.data-value");
 
@@ -401,7 +399,6 @@ namespace MyFigureCollectionValue.Services
             var aftermarketPriceList = new List<AftermarketPrice>();
             int initialPageNum = 1;
             const int maxRetries = 5;
-            var delayRequest = new Random();
             int retries = 0;
             bool success = false;
 
@@ -415,7 +412,7 @@ namespace MyFigureCollectionValue.Services
                 {
                     try
                     {
-                        await Task.Delay(delayRequest.Next(500, 800));
+                        await Task.Delay(this._delayRequest.Next(500, 800));
 
                         var document = await GetDocument(client, url, formData);
 
@@ -480,8 +477,6 @@ namespace MyFigureCollectionValue.Services
                             Console.WriteLine("Max retries reached. Stopping execution.");
                             break;
                         }
-
-                        await Task.Delay(2000);
                     }
                 }
             }

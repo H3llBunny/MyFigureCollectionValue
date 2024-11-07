@@ -96,7 +96,7 @@ namespace MyFigureCollectionValue.Services
                 RetailPriceCurrency = "$",
                 AvgAftermarketPrice = f.AftermarketPrices != null && f.AftermarketPrices.Any()
                     ? Math.Round(f.AftermarketPrices.Average(af => af.Price), 2)
-                    : 0,
+                    : (f.RetailPrices.OrderByDescending(rp => rp.ReleaseDate).FirstOrDefault()?.Price ?? 0),
                 AvgAftermarketPriceCurrency = "$"
             });
         }
@@ -147,12 +147,16 @@ namespace MyFigureCollectionValue.Services
         {
             var figures = await this._dbContext.UserFigures
                 .Where(uf => uf.UserId == userId)
+                .Include(uf => uf.Figure.RetailPrices)
                 .Include(uf => uf.Figure.AftermarketPrices)
                 .Select(f => f.Figure)
                 .ToListAsync();
 
-            return figures.Select((f => f.AftermarketPrices != null && f.AftermarketPrices.Any()
-                          ? Math.Round(f.AftermarketPrices.Average(af => af.Price), 2) : 0)).Sum();
+            return figures.Select((f =>
+                f.AftermarketPrices != null && f.AftermarketPrices.Any()
+                    ? Math.Round(f.AftermarketPrices.Average(af => af.Price), 2)
+                    : f.RetailPrices.OrderByDescending(rp => rp.ReleaseDate).FirstOrDefault()?.Price ?? 0)
+            ).Sum();
         }
     }
 }
