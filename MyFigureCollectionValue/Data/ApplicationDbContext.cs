@@ -17,6 +17,8 @@ namespace MyFigureCollectionValue.Data
 
         public DbSet<AftermarketPrice> AftermarketPrices { get; set; }
 
+        public DbSet<CurrentAftermarketPrice> CurrentAftermarketPrices { get; set; }
+
         public DbSet<UserFigure> UserFigures { get; set; }
 
         public DbSet<UserFigureCollectionUrl> UserFigureCollectionUrls { get; set; }
@@ -34,6 +36,11 @@ namespace MyFigureCollectionValue.Data
                 .HasMany(f => f.AftermarketPrices)
                 .WithOne(ap => ap.Figure)
                 .HasForeignKey(ap => ap.FigureId);
+
+            builder.Entity<Figure>()
+                .HasMany(f => f.CurrentAftermarketPrices)
+                .WithOne(cap => cap.Figure)
+                .HasForeignKey(cap => cap.FigureId);
 
             builder.Entity<UserFigure>()
                 .HasKey(uf => new { uf.UserId, uf.FigureId });

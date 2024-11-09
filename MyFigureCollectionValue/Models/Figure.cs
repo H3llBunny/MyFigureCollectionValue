@@ -7,6 +7,7 @@ namespace MyFigureCollectionValue.Models
         public Figure()
         {
             this.AftermarketPrices = new HashSet<AftermarketPrice>();
+            this.CurrentAftermarketPrices = new HashSet<CurrentAftermarketPrice>();
             this.RetailPrices = new HashSet<RetailPrice>();
             this.UserFigures = new HashSet<UserFigure>();
         }
@@ -27,6 +28,8 @@ namespace MyFigureCollectionValue.Models
         public DateTime LastUpdated { get; set; }
 
         public ICollection<AftermarketPrice> AftermarketPrices { get; set; }
+
+        public ICollection<CurrentAftermarketPrice> CurrentAftermarketPrices { get; set; }
 
         public ICollection<RetailPrice> RetailPrices { get; set; }
 

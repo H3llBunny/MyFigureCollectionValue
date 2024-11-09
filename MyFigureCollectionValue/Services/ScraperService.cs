@@ -187,8 +187,7 @@ namespace MyFigureCollectionValue.Services
                     {
                         try
                         {
-                            var requestDelay = this._delayRequest.Next(500, 800);
-                            await Task.Delay(requestDelay);
+                            await Task.Delay(this._delayRequest.Next(500, 800));
 
                             var document = await this._context.OpenAsync(url);
 
@@ -529,8 +528,11 @@ namespace MyFigureCollectionValue.Services
                 return null;
             }
 
+            int id = int.Parse(item.QuerySelector("div.dgst-wrapper a").GetAttribute("href").Split("/")[2]);
+
             return new AftermarketPrice
             {
+                Id = id,
                 Price = price,
                 Currency = currency,
                 LoggedAt = loggedAt,

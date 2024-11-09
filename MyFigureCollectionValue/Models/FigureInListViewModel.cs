@@ -12,8 +12,10 @@
 
         public string RetailPriceCurrency { get; set; }
 
-        public decimal AvgAftermarketPrice { get; set; }
+        public decimal AvgCurrentAftermarketPrice { get; set; }
 
         public string AvgAftermarketPriceCurrency { get; set; }
+
+        public ICollection<AftermarketPrice> AftermarketPrices { get; set; }
     }
 }

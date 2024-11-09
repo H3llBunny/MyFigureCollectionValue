@@ -62,13 +62,13 @@
                         </div>
                         <ul class="figure-info">
                             <li>Retail Price: <span class="figure-price">@figure.RetailPriceCurrency@figure.RetailPrice</span></li>
-                            <li>Average Aftermarket Price: <span class="figure-price">@figure.AvgAftermarketPriceCurrency@figure.AvgAftermarketPrice</span></li>
+                            <li>Average Aftermarket Price: <span class="figure-price">@figure.AvgAftermarketPriceCurrency@figure.AvgCurrentAftermarketPrice</span></li>
                         </ul>
                     </div>
                 }
             </div>
+            <partial name="_PagingPartial" model="@Model" />
         }
-        <partial name="_PagingPartial" model="@Model" />
     }
     else
     {

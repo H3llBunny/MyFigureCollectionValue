@@ -195,8 +195,7 @@ namespace MyFigureCollectionValue.Migrations
                 name: "AftermarketPrices",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Currency = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LoggedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -207,6 +206,27 @@ namespace MyFigureCollectionValue.Migrations
                     table.PrimaryKey("PK_AftermarketPrices", x => x.Id);
                     table.ForeignKey(
                         name: "FK_AftermarketPrices_Figures_FigureId",
+                        column: x => x.FigureId,
+                        principalTable: "Figures",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CurrentAftermarketPrices",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Currency = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LoggedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    FigureId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CurrentAftermarketPrices", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CurrentAftermarketPrices_Figures_FigureId",
                         column: x => x.FigureId,
                         principalTable: "Figures",
                         principalColumn: "Id",
@@ -304,6 +324,11 @@ namespace MyFigureCollectionValue.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CurrentAftermarketPrices_FigureId",
+                table: "CurrentAftermarketPrices",
+                column: "FigureId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RetailPrices_FigureId",
                 table: "RetailPrices",
                 column: "FigureId");
@@ -340,6 +365,9 @@ namespace MyFigureCollectionValue.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "CurrentAftermarketPrices");
 
             migrationBuilder.DropTable(
                 name: "RetailPrices");

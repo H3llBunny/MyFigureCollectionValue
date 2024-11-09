@@ -30,10 +30,30 @@ namespace MyFigureCollectionValue.Services
             await this._dbContext.SaveChangesAsync();
         }
 
+        public async Task AddCurrentAftermarketPricesAsync(IEnumerable<CurrentAftermarketPrice> currentAftermarketPrices)
+        {
+            await _dbContext.Database.ExecuteSqlRawAsync("DELETE FROM CurrentAftermarketPrices");
+
+            await this._dbContext.AddRangeAsync(currentAftermarketPrices);
+            await this._dbContext.SaveChangesAsync();
+        }
+
         public async Task AddAftermarketPricesAsync(IEnumerable<AftermarketPrice> aftermarketPrices)
         {
-            await this._dbContext.AddRangeAsync(aftermarketPrices);
-            await this._dbContext.SaveChangesAsync();
+            var priceIds = aftermarketPrices.Select(ap => ap.Id).ToList();
+
+            var existingPriceIds = await this._dbContext.AftermarketPrices
+                .Where(ap => priceIds.Contains(ap.Id))
+                .Select(ap => ap.Id)
+                .ToListAsync();
+
+            var filteredPrices = aftermarketPrices.Where(ap => !existingPriceIds.Contains(ap.Id)).ToList();
+
+            if (filteredPrices.Any())
+            {
+                await this._dbContext.AftermarketPrices.AddRangeAsync(filteredPrices);
+                await this._dbContext.SaveChangesAsync();
+            }
         }
 
         public async Task AddUserFiguresAsync(string userId, IEnumerable<Figure> figureList)
@@ -79,6 +99,7 @@ namespace MyFigureCollectionValue.Services
             var figures = await this._dbContext.UserFigures
                 .Where(uf => uf.UserId == userId)
                 .Include(uf => uf.Figure.RetailPrices)
+                .Include(uf => uf.Figure.CurrentAftermarketPrices)
                 .Include(uf => uf.Figure.AftermarketPrices)
                 .Select(f => f.Figure)
                 .Skip((pageNumber - 1) * figuresPerPage)
@@ -94,10 +115,11 @@ namespace MyFigureCollectionValue.Services
                     .OrderByDescending(rp => rp.ReleaseDate)
                     .FirstOrDefault()?.Price ?? 0,
                 RetailPriceCurrency = "$",
-                AvgAftermarketPrice = f.AftermarketPrices != null && f.AftermarketPrices.Any()
-                    ? Math.Round(f.AftermarketPrices.Average(af => af.Price), 2)
+                AvgCurrentAftermarketPrice = f.CurrentAftermarketPrices != null && f.CurrentAftermarketPrices.Any()
+                    ? Math.Round(f.CurrentAftermarketPrices.Average(af => af.Price), 2)
                     : (f.RetailPrices.OrderByDescending(rp => rp.ReleaseDate).FirstOrDefault()?.Price ?? 0),
-                AvgAftermarketPriceCurrency = "$"
+                AvgAftermarketPriceCurrency = "$",
+                AftermarketPrices = f.AftermarketPrices
             });
         }
 

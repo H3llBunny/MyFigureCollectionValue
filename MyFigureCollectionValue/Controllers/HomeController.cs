@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using MyFigureCollectionValue.Models;
 using MyFigureCollectionValue.Services;
 using System.Diagnostics;
+using System.IO.Pipelines;
 using System.Security.Claims;
 
 namespace MyFigureCollectionValue.Controllers
@@ -123,6 +124,16 @@ namespace MyFigureCollectionValue.Controllers
                 var aftermarketPricesInUSD = this._currencyConverterService.ConvertAftermarketPricesToUSD(aftermarketPriceList);
 
                 await this._figureService.AddAftermarketPricesAsync(aftermarketPricesInUSD);
+
+                var currentAftermarketPrices = aftermarketPricesInUSD.Select(ap => new CurrentAftermarketPrice
+                {
+                    Id = ap.Id,
+                    Price = ap.Price,
+                    Currency = ap.Currency,
+                    LoggedAt = ap.LoggedAt,
+                    FigureId = ap.FigureId,
+                });
+                await this._figureService.AddCurrentAftermarketPricesAsync(currentAftermarketPrices);
             }
 
             return this.RedirectToAction(nameof(this.Index));

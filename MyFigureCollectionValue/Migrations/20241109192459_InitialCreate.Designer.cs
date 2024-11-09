@@ -12,7 +12,7 @@ using MyFigureCollectionValue.Data;
 namespace MyFigureCollectionValue.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241105200956_InitialCreate")]
+    [Migration("20241109192459_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -230,10 +230,7 @@ namespace MyFigureCollectionValue.Migrations
             modelBuilder.Entity("MyFigureCollectionValue.Models.AftermarketPrice", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Currency")
                         .IsRequired()
@@ -253,6 +250,31 @@ namespace MyFigureCollectionValue.Migrations
                     b.HasIndex("FigureId");
 
                     b.ToTable("AftermarketPrices");
+                });
+
+            modelBuilder.Entity("MyFigureCollectionValue.Models.CurrentAftermarketPrice", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FigureId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LoggedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FigureId");
+
+                    b.ToTable("CurrentAftermarketPrices");
                 });
 
             modelBuilder.Entity("MyFigureCollectionValue.Models.Figure", b =>
@@ -409,6 +431,17 @@ namespace MyFigureCollectionValue.Migrations
                     b.Navigation("Figure");
                 });
 
+            modelBuilder.Entity("MyFigureCollectionValue.Models.CurrentAftermarketPrice", b =>
+                {
+                    b.HasOne("MyFigureCollectionValue.Models.Figure", "Figure")
+                        .WithMany("CurrentAftermarketPrices")
+                        .HasForeignKey("FigureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Figure");
+                });
+
             modelBuilder.Entity("MyFigureCollectionValue.Models.RetailPrice", b =>
                 {
                     b.HasOne("MyFigureCollectionValue.Models.Figure", "Figure")
@@ -453,6 +486,8 @@ namespace MyFigureCollectionValue.Migrations
             modelBuilder.Entity("MyFigureCollectionValue.Models.Figure", b =>
                 {
                     b.Navigation("AftermarketPrices");
+
+                    b.Navigation("CurrentAftermarketPrices");
 
                     b.Navigation("RetailPrices");
 
