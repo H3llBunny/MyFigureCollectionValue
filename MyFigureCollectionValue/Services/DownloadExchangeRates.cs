@@ -4,13 +4,13 @@ using System.Text.Json;
 
 namespace MyFigureCollectionValue.Services
 {
-    public class AutoUpdateDatabaseService : BackgroundService
+    public class DownloadExchangeRates : BackgroundService
     {
         private readonly CurrencyFreaksSettings _fixerSettings;
-        private readonly ILogger<AutoUpdateDatabaseService> _logger;
+        private readonly ILogger<DownloadExchangeRates> _logger;
         private readonly string currencies = "eur,gbp,jpy,aud,cad,hkd,cny,idr,krw,sgd,twd,aed";
 
-        public AutoUpdateDatabaseService(IOptions<CurrencyFreaksSettings> fixerSettings, ILogger<AutoUpdateDatabaseService> logger)
+        public DownloadExchangeRates(IOptions<CurrencyFreaksSettings> fixerSettings, ILogger<DownloadExchangeRates> logger)
         {
             this._fixerSettings = fixerSettings.Value;
             this._logger = logger;

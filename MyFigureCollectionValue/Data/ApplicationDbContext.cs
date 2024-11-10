@@ -23,6 +23,8 @@ namespace MyFigureCollectionValue.Data
 
         public DbSet<UserFigureCollectionUrl> UserFigureCollectionUrls { get; set; }
 
+        public DbSet<LastUpdate> LastUpdate { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
