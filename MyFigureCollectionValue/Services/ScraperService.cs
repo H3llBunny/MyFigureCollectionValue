@@ -19,10 +19,15 @@ namespace MyFigureCollectionValue.Services
         private readonly ScraperSettings _settings;
         private readonly Random _delayRequest = new Random();
 
-        public ScraperService(IBrowsingContext context, IOptions<ScraperSettings> settings, IFigureService figureService)
+        public ScraperService(
+            IBrowsingContext context,
+            IOptions<ScraperSettings> settings,
+            IFigureService figureService,
+            HttpClient httpClient)
         {
             this._context = context;
             this._figureService = figureService;
+            this._client = httpClient;
             this._settings = settings.Value;
 
             this._cookieContainer = new CookieContainer();
@@ -35,6 +40,8 @@ namespace MyFigureCollectionValue.Services
             };
 
             this._client = new HttpClient(handler);
+            this._client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
+            this._client.DefaultRequestHeaders.Add("Referer", "https://myfigurecollection.net/");
         }
 
         public async Task LoginAsync()
@@ -72,8 +79,6 @@ namespace MyFigureCollectionValue.Services
         {
             try
             {
-                await SetAuthenticatedCookies(profileUrl);
-
                 var initialDocument = await this._context.OpenAsync(profileUrl);
 
                 if (initialDocument == null)
@@ -401,81 +406,78 @@ namespace MyFigureCollectionValue.Services
             int retries = 0;
             bool success = false;
 
-            using (HttpClient client = new HttpClient())
+            var formData = await GetFormData(initialPageNum);
+            string cookieHeader = GetCookiesForPostRequest(url);
+            UpdateCookieHeader(this._client, cookieHeader);
+
+            while (!success && retries < maxRetries)
             {
-                var formData = await GetFormData(initialPageNum);
-                string cookieHeader = GetCookiesForPostRequest(url);
-                AddDefaultReuestHeaders(client, cookieHeader);
-
-                while (!success && retries < maxRetries)
+                try
                 {
-                    try
+                    await Task.Delay(this._delayRequest.Next(500, 800));
+
+                    var document = await GetDocument(this._client, url, formData);
+
+                    var adsElement = document.QuerySelector("div.results.window-limited-content");
+
+                    if (adsElement == null)
                     {
-                        await Task.Delay(this._delayRequest.Next(500, 800));
+                        return null;
+                    }
 
-                        var document = await GetDocument(client, url, formData);
+                    var items = document.QuerySelectorAll("div.results.window-limited-content div.result");
 
-                        var adsElement = document.QuerySelector("div.results.window-limited-content");
+                    foreach (var item in items)
+                    {
+                        var aftermarketPrice = await ExtractAftermarketPriceAsync(item, figureId);
 
-                        if (adsElement == null)
+                        if (aftermarketPrice != null)
                         {
-                            return null;
+                            aftermarketPriceList.Add(aftermarketPrice);
                         }
+                    }
 
-                        var items = document.QuerySelectorAll("div.results.window-limited-content div.result");
+                    var pageCountElement = document.QuerySelector("div.results-count-pages");
 
-                        foreach (var item in items)
+                    if (pageCountElement != null)
+                    {
+                        var pageNumberElement = pageCountElement.LastChild.TextContent.Trim();
+
+                        if (int.TryParse(pageNumberElement, out int pageNumber))
                         {
-                            var aftermarketPrice = await ExtractAftermarketPriceAsync(item, figureId);
-
-                            if (aftermarketPrice != null)
+                            for (int i = 2; i <= pageNumber; i++)
                             {
-                                aftermarketPriceList.Add(aftermarketPrice);
-                            }
-                        }
+                                formData.Dispose();
+                                formData = await GetFormData(i);
 
-                        var pageCountElement = document.QuerySelector("div.results-count-pages");
+                                var newDocument = await GetDocument(this._client, url, formData);
 
-                        if (pageCountElement != null)
-                        {
-                            var pageNumberElement = pageCountElement.LastChild.TextContent.Trim();
+                                var newItems = newDocument.QuerySelectorAll("div.results.window-limited-content div.result");
 
-                            if (int.TryParse(pageNumberElement, out int pageNumber))
-                            {
-                                for (int i = 2; i <= pageNumber; i++)
+                                foreach (var item in newItems)
                                 {
-                                    formData.Dispose();
-                                    formData = await GetFormData(i);
+                                    var aftermarketPrice = await ExtractAftermarketPriceAsync(item, figureId);
 
-                                    var newDocument = await GetDocument(client, url, formData);
-
-                                    var newItems = newDocument.QuerySelectorAll("div.results.window-limited-content div.result");
-
-                                    foreach (var item in newItems)
+                                    if (aftermarketPrice != null)
                                     {
-                                        var aftermarketPrice = await ExtractAftermarketPriceAsync(item, figureId);
-
-                                        if (aftermarketPrice != null)
-                                        {
-                                            aftermarketPriceList.Add(aftermarketPrice);
-                                        }
+                                        aftermarketPriceList.Add(aftermarketPrice);
                                     }
                                 }
                             }
                         }
-
-                        success = true;
                     }
-                    catch (HttpRequestException e)
-                    {
-                        retries++;
-                        Console.WriteLine($"Attempt {retries} failed for URL: {url}. Error: {e.Message}");
 
-                        if (retries >= maxRetries)
-                        {
-                            Console.WriteLine("Max retries reached. Stopping execution.");
-                            break;
-                        }
+                    success = true;
+                }
+                catch (HttpRequestException e)
+                {
+                    retries++;
+                    Console.WriteLine($"Attempt {retries} failed for URL: {url}. Error: {e.Message}");
+
+                    if (retries >= maxRetries)
+                    {
+                        Console.WriteLine("Max retries reached. Stopping execution.");
+                        break;
                     }
                 }
             }
@@ -551,11 +553,14 @@ namespace MyFigureCollectionValue.Services
             }); ;
         }
 
-        private void AddDefaultReuestHeaders(HttpClient client, string cookieHeader)
+        private void UpdateCookieHeader(HttpClient client, string cookieHeader)
         {
+            if (client.DefaultRequestHeaders.Contains("Cookie"))
+            {
+                client.DefaultRequestHeaders.Remove("Cookie");
+            }
+
             client.DefaultRequestHeaders.Add("Cookie", cookieHeader);
-            client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
-            client.DefaultRequestHeaders.Add("Referer", "https://myfigurecollection.net/");
         }
 
         private string GetCookiesForPostRequest(string url)

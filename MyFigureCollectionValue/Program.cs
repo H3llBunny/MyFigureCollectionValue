@@ -33,11 +33,14 @@ namespace MyFigureCollectionValue
             builder.Services.Configure<ScraperSettings>(builder.Configuration.GetSection("ScraperSettings"));
             builder.Services.Configure<CurrencyFreaksSettings>(builder.Configuration.GetSection("CurrencyFreaks"));
 
-            builder.Services.AddScoped<IScraperService, ScraperService>();
+            builder.Services.AddHttpClient<IScraperService, ScraperService>();
             builder.Services.AddScoped<IFigureService, FigureService>();
             builder.Services.AddScoped<ICurrencyConverterService, CurrencyConverterService>();
+            builder.Services.AddScoped<ILastUpdateService, LastUpdateService>();
 
-            //builder.Services.AddHostedService<DownloadExchangeRates>();
+            builder.Services.AddHttpClient<DownloadExchangeRates>();
+            builder.Services.AddHostedService<DownloadExchangeRates>();
+            //builder.Services.AddHostedService<UpdateAftermarketPrices>();
 
             var app = builder.Build();
 
