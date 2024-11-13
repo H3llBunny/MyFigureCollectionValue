@@ -236,6 +236,9 @@ namespace MyFigureCollectionValue.Migrations
                     b.Property<int>("FigureId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("LoggedAt")
                         .HasColumnType("datetime2");
 
@@ -306,26 +309,6 @@ namespace MyFigureCollectionValue.Migrations
                     b.ToTable("Figures");
                 });
 
-            modelBuilder.Entity("MyFigureCollectionValue.Models.LastUpdate", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdateName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("LastUpdate");
-                });
-
             modelBuilder.Entity("MyFigureCollectionValue.Models.RetailPrice", b =>
                 {
                     b.Property<int>("Id")
@@ -340,6 +323,9 @@ namespace MyFigureCollectionValue.Migrations
 
                     b.Property<int>("FigureId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");

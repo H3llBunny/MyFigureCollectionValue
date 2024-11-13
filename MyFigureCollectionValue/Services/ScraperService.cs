@@ -394,6 +394,7 @@ namespace MyFigureCollectionValue.Services
                 Currency = currency,
                 ReleaseDate = releaseDate,
                 FigureId = figureId,
+                LastUpdated = DateTime.UtcNow
             };
         }
 
@@ -536,6 +537,7 @@ namespace MyFigureCollectionValue.Services
                 Currency = currency,
                 LoggedAt = loggedAt,
                 FigureId = figureId,
+                LastUpdated = DateTime.UtcNow
             };
         }
 
