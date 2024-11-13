@@ -5,5 +5,7 @@
         Task<DateTime> GetLastDateForExchangeRateUpdateAsync();
 
         Task UpdateLastExchangeRateDateAsync();
+
+        Task<DateTime> GetLastDateForAfterrmarketPricesUpdateAsync();
     }
 }

@@ -36,7 +36,6 @@ namespace MyFigureCollectionValue
             builder.Services.AddHttpClient<IScraperService, ScraperService>();
             builder.Services.AddScoped<IFigureService, FigureService>();
             builder.Services.AddScoped<ICurrencyConverterService, CurrencyConverterService>();
-            builder.Services.AddScoped<ILastUpdateService, LastUpdateService>();
 
             builder.Services.AddHttpClient<DownloadExchangeRates>();
             builder.Services.AddHostedService<DownloadExchangeRates>();

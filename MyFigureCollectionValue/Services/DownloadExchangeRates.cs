@@ -9,19 +9,16 @@ namespace MyFigureCollectionValue.Services
         private readonly CurrencyFreaksSettings _fixerSettings;
         private readonly ILogger<DownloadExchangeRates> _logger;
         private readonly HttpClient _httpClient;
-        private readonly IServiceScopeFactory _scopeFactory;
         private readonly string currencies = "eur,gbp,jpy,aud,cad,hkd,cny,idr,krw,sgd,twd,aed";
 
         public DownloadExchangeRates(
             IOptions<CurrencyFreaksSettings> fixerSettings,
             ILogger<DownloadExchangeRates> logger,
-            HttpClient httpClient,
-            IServiceScopeFactory scopeFactory)
+            HttpClient httpClient)
         {
             this._fixerSettings = fixerSettings.Value;
             this._logger = logger;
             this._httpClient = httpClient;
-            this._scopeFactory = scopeFactory;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -30,32 +27,42 @@ namespace MyFigureCollectionValue.Services
             {
                 try
                 {
-                    using (var scope = this._scopeFactory.CreateScope())
-                    {
-                        var lastUpdateService = scope.ServiceProvider.GetRequiredService<ILastUpdateService>();
-                        var lastUpdated = await lastUpdateService.GetLastDateForExchangeRateUpdateAsync();
+                    string filePath = Path.Combine(AppContext.BaseDirectory, "exchange_rates.json");
 
-                        if ((DateTime.UtcNow - lastUpdated).TotalDays >= 1)
+                    if (File.Exists(filePath))
+                    {
+                        string jsonString = await File.ReadAllTextAsync(filePath);
+                        var existingDate = JsonSerializer.Deserialize<ExchangeRate>(jsonString);
+
+                        DateTime.TryParse(existingDate.Date, out DateTime lastUdated);
+
+                        if ((DateTime.UtcNow - lastUdated).TotalDays >= 1)
                         {
-                            await DoWorkAsync(scope);
+                            await DoWorkAsync();
+                            await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
+                        }
+                        else
+                        {
+                            await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
                         }
                     }
-
-                    await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
+                    else
+                    {
+                        await DoWorkAsync();
+                        await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    this._logger.LogError(ex, "An error occured while executing the background task.");
+                    this._logger.LogError(ex, "An error occured while executing the DownloadExchangeRates background task.");
 
                     await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
                 }
             }
         }
 
-        private async Task DoWorkAsync(IServiceScope scope)
+        private async Task DoWorkAsync()
         {
-            var lastUpdateService = scope.ServiceProvider.GetRequiredService<ILastUpdateService>();
-
             string baseUrl = this._fixerSettings.BaseUrl;
             string apiKey = this._fixerSettings.ApiKey;
 
@@ -74,8 +81,6 @@ namespace MyFigureCollectionValue.Services
 
                 string filePath = Path.Combine(AppContext.BaseDirectory, "exchange_rates.json");
                 await File.WriteAllTextAsync(filePath, jsonOutput);
-
-                await lastUpdateService.UpdateLastExchangeRateDateAsync();
             }
             else
             {
