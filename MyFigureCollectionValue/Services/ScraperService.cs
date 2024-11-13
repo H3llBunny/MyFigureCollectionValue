@@ -65,7 +65,6 @@ namespace MyFigureCollectionValue.Services
 
             request.Headers.Add("Accept", "application/json, text/javascript, */*; q=0.01");
             request.Headers.Add("Referer", "https://myfigurecollection.net/session/signin/");
-            request.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36");
 
             var response = await this._client.SendAsync(request);
 
@@ -407,8 +406,6 @@ namespace MyFigureCollectionValue.Services
             bool success = false;
 
             var formData = await GetFormData(initialPageNum);
-            string cookieHeader = GetCookiesForPostRequest(url);
-            UpdateCookieHeader(this._client, cookieHeader);
 
             while (!success && retries < maxRetries)
             {
@@ -551,24 +548,6 @@ namespace MyFigureCollectionValue.Services
                 new KeyValuePair<string, string>("soldBy", "users"),
                 new KeyValuePair<string, string>("page", $"{pageNumber}")
             }); ;
-        }
-
-        private void UpdateCookieHeader(HttpClient client, string cookieHeader)
-        {
-            if (client.DefaultRequestHeaders.Contains("Cookie"))
-            {
-                client.DefaultRequestHeaders.Remove("Cookie");
-            }
-
-            client.DefaultRequestHeaders.Add("Cookie", cookieHeader);
-        }
-
-        private string GetCookiesForPostRequest(string url)
-        {
-            var uri = new Uri(url);
-            var cookies = _cookieContainer.GetCookies(uri).Cast<Cookie>();
-
-            return string.Join("; ", cookies.Select(c => $"{c.Name}={c.Value}"));
         }
 
         private async Task SetAuthenticatedCookies(string url)

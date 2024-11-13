@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using MyFigureCollectionValue.Models;
 using System.Text.Json;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace MyFigureCollectionValue.Services
 {
