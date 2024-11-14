@@ -1,4 +1,7 @@
 ﻿
+using MyFigureCollectionValue.Models;
+using static System.Formats.Asn1.AsnWriter;
+
 namespace MyFigureCollectionValue.Services
 {
     public class UpdateAftermarketPrices : BackgroundService
@@ -21,13 +24,21 @@ namespace MyFigureCollectionValue.Services
                 {
                     using (var scope = this._scopeFactory.CreateScope())
                     {
-                        var lastUpdateService = scope.ServiceProvider.GetRequiredService<ILastUpdateService>();
-                        var lastUpdated = await lastUpdateService.GetLastDateForAfterrmarketPricesUpdateAsync();
+                        var figureService = scope.ServiceProvider.GetRequiredService<IFigureService>();
 
-                        if ((DateTime.UtcNow - lastUpdated).TotalDays >= 1)
+                        var figureUrlAndIds = await figureService.GetFigureUrlsWithOutdatedAftermarketPricesAsync();
+
+                        if (figureUrlAndIds.Any())
                         {
+                            var scraperService = scope.ServiceProvider.GetRequiredService<IScraperService>();
+                            var currencyConverterService = scope.ServiceProvider.GetRequiredService<ICurrencyConverterService>();
 
+                            await DoWorkAsyn(scraperService, figureService, currencyConverterService, figureUrlAndIds);
+
+                            await Task.Delay(TimeSpan.FromHours(3), stoppingToken);
                         }
+
+                        await Task.Delay(TimeSpan.FromHours(3), stoppingToken);
                     }
                 }
                 catch (Exception ex)
@@ -35,6 +46,47 @@ namespace MyFigureCollectionValue.Services
                     this._logger.LogError(ex, "An error occured while executing the UpdateAftermarketPrices background task.");
                     await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
                 }
+            }
+        }
+
+        private async Task DoWorkAsyn(
+            IScraperService scraperService, 
+            IFigureService figureService,
+            ICurrencyConverterService currencyConverterService,
+            Dictionary<string, int> figureUrlAndIds)
+        {
+            scraperService.LoginAsync();
+
+            var aftermarketPrices = new List<AftermarketPrice>();
+
+            foreach (var figure in figureUrlAndIds)
+            {
+                var newAftermarketPrices = await scraperService.GetAftermarketPriceListAsync(figure.Key, figure.Value);
+
+                if (newAftermarketPrices != null)
+                {
+                    aftermarketPrices.AddRange(newAftermarketPrices);
+                }
+            }
+
+            if (aftermarketPrices.Any())
+            {
+                var aftermarketPricesInUSD = currencyConverterService.ConvertAftermarketPricesToUSD(aftermarketPrices);
+
+                await figureService.AddAftermarketPricesAsync(aftermarketPricesInUSD);
+
+                var currentAftermarketPrices = aftermarketPricesInUSD.Select(ap => new CurrentAftermarketPrice
+                {
+                    Id = ap.Id,
+                    Price = ap.Price,
+                    Currency = ap.Currency,
+                    LoggedAt = ap.LoggedAt,
+                    FigureId = ap.FigureId,
+                });
+
+                await figureService.AddCurrentAftermarketPricesAsync(currentAftermarketPrices);
+
+                // TODO: add a service to update the AM price date for the relevant figures
             }
         }
     }

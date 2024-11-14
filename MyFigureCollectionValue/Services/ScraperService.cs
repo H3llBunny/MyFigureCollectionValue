@@ -231,6 +231,7 @@ namespace MyFigureCollectionValue.Services
                                 Image = updatedUrl,
                                 FigureUrl = url,
                                 LastUpdated = DateTime.UtcNow,
+                                LastUpdatedRetailPrices = DateTime.UtcNow
                             };
 
                             newFigureList.Add(newFigure);
@@ -394,11 +395,10 @@ namespace MyFigureCollectionValue.Services
                 Currency = currency,
                 ReleaseDate = releaseDate,
                 FigureId = figureId,
-                LastUpdated = DateTime.UtcNow
             };
         }
 
-        public async Task<ICollection<AftermarketPrice>> GetAftermarketPriceListAsync(string url, int figureId)
+        public async Task<ICollection<AftermarketPrice>> GetAftermarketPriceListAsync(string url, int figureId = 0)
         {
             var aftermarketPriceList = new List<AftermarketPrice>();
             int initialPageNum = 1;
@@ -537,7 +537,6 @@ namespace MyFigureCollectionValue.Services
                 Currency = currency,
                 LoggedAt = loggedAt,
                 FigureId = figureId,
-                LastUpdated = DateTime.UtcNow
             };
         }
 

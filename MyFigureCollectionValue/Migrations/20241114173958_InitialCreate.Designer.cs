@@ -12,7 +12,7 @@ using MyFigureCollectionValue.Data;
 namespace MyFigureCollectionValue.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241113191233_InitialCreate")]
+    [Migration("20241114173958_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -239,9 +239,6 @@ namespace MyFigureCollectionValue.Migrations
                     b.Property<int>("FigureId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("datetime2");
-
                     b.Property<DateTime>("LoggedAt")
                         .HasColumnType("datetime2");
 
@@ -300,6 +297,9 @@ namespace MyFigureCollectionValue.Migrations
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("LastUpdatedRetailPrices")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -326,9 +326,6 @@ namespace MyFigureCollectionValue.Migrations
 
                     b.Property<int>("FigureId")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("datetime2");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");

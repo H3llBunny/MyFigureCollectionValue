@@ -236,9 +236,6 @@ namespace MyFigureCollectionValue.Migrations
                     b.Property<int>("FigureId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("datetime2");
-
                     b.Property<DateTime>("LoggedAt")
                         .HasColumnType("datetime2");
 
@@ -297,6 +294,9 @@ namespace MyFigureCollectionValue.Migrations
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("LastUpdatedRetailPrices")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -323,9 +323,6 @@ namespace MyFigureCollectionValue.Migrations
 
                     b.Property<int>("FigureId")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("datetime2");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");

@@ -13,8 +13,6 @@ namespace MyFigureCollectionValue.Models
 
         public DateTime ReleaseDate { get; set; }
 
-        public DateTime LastUpdated { get; set; }
-
         public int FigureId { get; set; }
 
         public Figure Figure { get; set; }

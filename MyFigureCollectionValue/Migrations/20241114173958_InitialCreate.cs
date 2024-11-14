@@ -60,7 +60,8 @@ namespace MyFigureCollectionValue.Migrations
                     Company = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FigureUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastUpdatedRetailPrices = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -199,7 +200,6 @@ namespace MyFigureCollectionValue.Migrations
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Currency = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LoggedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     FigureId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -243,7 +243,6 @@ namespace MyFigureCollectionValue.Migrations
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Currency = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ReleaseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     FigureId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>

@@ -2,10 +2,6 @@
 {
     public interface ILastUpdateService
     {
-        Task<DateTime> GetLastDateForExchangeRateUpdateAsync();
-
-        Task UpdateLastExchangeRateDateAsync();
-
-        Task<DateTime> GetLastDateForAfterrmarketPricesUpdateAsync();
+        Task<DateTime> AftermarketPriceLastUpdateAsync();
     }
 }

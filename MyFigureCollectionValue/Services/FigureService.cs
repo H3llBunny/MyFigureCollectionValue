@@ -47,11 +47,31 @@ namespace MyFigureCollectionValue.Services
                 .Select(ap => ap.Id)
                 .ToListAsync();
 
-            var filteredPrices = aftermarketPrices.Where(ap => !existingPriceIds.Contains(ap.Id)).ToList();
+            var newPrices = aftermarketPrices.Where(ap => !existingPriceIds.Contains(ap.Id)).ToList();
 
-            if (filteredPrices.Any())
+            if (newPrices.Any())
             {
-                await this._dbContext.AftermarketPrices.AddRangeAsync(filteredPrices);
+                await this._dbContext.AftermarketPrices.AddRangeAsync(newPrices);
+                await this._dbContext.SaveChangesAsync();
+            }
+
+            var existingAds = await this._dbContext.AftermarketPrices.Where(ap => existingPriceIds.Contains(ap.Id)).ToListAsync();
+
+            bool priceUpdated = false;
+
+            foreach (var existingAd in existingAds)
+            {
+                var newPriceAd = aftermarketPrices.FirstOrDefault(ap => ap.Id == existingAd.Id);
+
+                if (newPriceAd != null && existingAd.Price != newPriceAd.Price)
+                {
+                    existingAd.Price = newPriceAd.Price;
+                    priceUpdated = true;
+                }
+            }
+
+            if (priceUpdated)
+            {
                 await this._dbContext.SaveChangesAsync();
             }
         }
@@ -179,6 +199,15 @@ namespace MyFigureCollectionValue.Services
                     ? Math.Round(f.AftermarketPrices.Average(af => af.Price), 2)
                     : f.RetailPrices.OrderByDescending(rp => rp.ReleaseDate).FirstOrDefault()?.Price ?? 0)
             ).Sum();
+        }
+
+        public async Task<Dictionary<string, int>> GetFigureUrlsWithOutdatedAftermarketPricesAsync()
+        {
+            var thresholdDate = DateTime.UtcNow.AddDays(-1);
+
+            return await this._dbContext.Figures
+                .Where(f => (f.LastUpdatedRetailPrices <= thresholdDate))
+                .ToDictionaryAsync(f => f.FigureUrl, f => f.Id);
         }
     }
 }

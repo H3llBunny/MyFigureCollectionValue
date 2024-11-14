@@ -39,7 +39,7 @@ namespace MyFigureCollectionValue
 
             builder.Services.AddHttpClient<DownloadExchangeRates>();
             builder.Services.AddHostedService<DownloadExchangeRates>();
-            //builder.Services.AddHostedService<UpdateAftermarketPrices>();
+            builder.Services.AddHostedService<UpdateAftermarketPrices>();
 
             var app = builder.Build();
 
