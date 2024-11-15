@@ -48,8 +48,10 @@
         @if (Model != null)
         {
             <div class="collection-value d-flex justify-content-center">
-                <span class="total-value">Total Retail Value: <span class="figure-price">$@Model.SumRetailPriceCollection</span></span>
-                <span class="total-value">Total Aftermarket Value: <span class="figure-price">$@Model.SumAvgAftermarketPriceCollection</span></span>
+                <div class="value-box">
+                    <span class="total-value">Total Retail Value: <span class="figure-price">$@Model.SumRetailPriceCollection</span></span>
+                    <span class="total-value">Total Aftermarket Value: <span class="figure-price">$@Model.SumAvgAftermarketPriceCollection</span></span>
+                </div>
             </div>
             <div class="figure-container justify-content-center">
                 @foreach (var figure in Model.Figures)

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using MyFigureCollectionValue.Data;
 using MyFigureCollectionValue.Models;
 
@@ -208,6 +209,18 @@ namespace MyFigureCollectionValue.Services
             return await this._dbContext.Figures
                 .Where(f => (f.LastUpdatedRetailPrices <= thresholdDate))
                 .ToDictionaryAsync(f => f.FigureUrl, f => f.Id);
+        }
+
+        public async Task UpdateFiguresLastUpdatedRetailPricesAsync(List<int> figureIds)
+        {
+            var parameters = figureIds.Select((figureId, index) => new SqlParameter($"@id{index}", figureId)).ToList();
+            var sqlParameterNames = string.Join(", ", parameters.Select(p => p.ParameterName));
+
+            await this._dbContext.Database.ExecuteSqlRawAsync($@"
+                UPDATE Figures
+                SET LastUpdatedRetailPrices = @currentDate
+                WHERE Id IN ({sqlParameterNames});
+            ", parameters.Append(new SqlParameter("@currentDate", DateTime.UtcNow)).ToArray());
         }
     }
 }

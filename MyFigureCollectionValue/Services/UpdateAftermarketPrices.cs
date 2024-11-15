@@ -86,7 +86,9 @@ namespace MyFigureCollectionValue.Services
 
                 await figureService.AddCurrentAftermarketPricesAsync(currentAftermarketPrices);
 
-                // TODO: add a service to update the AM price date for the relevant figures
+                var figureIds = figureUrlAndIds.Select(f => f.Value).ToList();
+
+                await figureService.UpdateFiguresLastUpdatedRetailPricesAsync(figureIds);
             }
         }
     }
