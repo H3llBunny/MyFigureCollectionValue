@@ -1,6 +1,4 @@
-﻿
-using MyFigureCollectionValue.Models;
-using static System.Formats.Asn1.AsnWriter;
+﻿using MyFigureCollectionValue.Models;
 
 namespace MyFigureCollectionValue.Services
 {
@@ -10,10 +8,10 @@ namespace MyFigureCollectionValue.Services
         private readonly ILogger<UpdateAftermarketPrices> _logger;
 
         public UpdateAftermarketPrices(
-            IServiceScopeFactory serviceScopeFactory,
+            IServiceScopeFactory scopeFactory,
             ILogger<UpdateAftermarketPrices> logger)
         {
-            this._scopeFactory = serviceScopeFactory;
+            this._scopeFactory = scopeFactory;
             this._logger = logger;
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)

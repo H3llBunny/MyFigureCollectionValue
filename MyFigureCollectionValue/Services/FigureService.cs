@@ -222,5 +222,15 @@ namespace MyFigureCollectionValue.Services
                 WHERE Id IN ({sqlParameterNames});
             ", parameters.Append(new SqlParameter("@currentDate", DateTime.UtcNow)).ToArray());
         }
+
+        public async Task<List<string>> GetOutdatedFigureUrlsAsync()
+        {
+            var thresholdDate = DateTime.UtcNow.AddDays(-7);
+
+            return await this._dbContext.Figures
+                .Where(f => (f.LastUpdated <= thresholdDate))
+                .Select(f => f.FigureUrl)
+                .ToListAsync();
+        }
     }
 }
