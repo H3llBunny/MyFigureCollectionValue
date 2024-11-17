@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using MyFigureCollectionValue.Models;
 using MyFigureCollectionValue.Services;
 using System.Diagnostics;
-using System.IO.Pipelines;
 using System.Security.Claims;
 
 namespace MyFigureCollectionValue.Controllers
@@ -20,9 +19,9 @@ namespace MyFigureCollectionValue.Controllers
             ICurrencyConverterService currencyConverterService)
         {
             _logger = logger;
-            this._scraperService = scraperService;
-            this._figureService = figureService;
-            this._currencyConverterService = currencyConverterService;
+            _scraperService = scraperService;
+            _figureService = figureService;
+            _currencyConverterService = currencyConverterService;
         }
 
         public async Task<IActionResult> Index(int pageNumber = 1)
@@ -34,17 +33,17 @@ namespace MyFigureCollectionValue.Controllers
 
             if (pageNumber <= 0)
             {
-                return this.NotFound();
+                return NotFound();
             }
 
             const int FiguresPerPage = 90;
 
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var figures = await this._figureService.GetAllFiguresAsync(userId, pageNumber, FiguresPerPage);
+            var figures = await _figureService.GetAllFiguresAsync(userId, pageNumber, FiguresPerPage);
 
             if (figures.Any())
             {
-                string userFigureCollectionUrl = await this._figureService.GetUserFigureCollectionUrlAsync(userId);
+                string userFigureCollectionUrl = await _figureService.GetUserFigureCollectionUrlAsync(userId);
                 string figureCollectionUsername = userFigureCollectionUrl.Substring(userFigureCollectionUrl.IndexOf("/profile/") + 9);
 
                 var figuresViewModel = new FiguresListViewModel
@@ -52,18 +51,18 @@ namespace MyFigureCollectionValue.Controllers
                     FiguresPerPage = FiguresPerPage,
                     PageNumber = pageNumber,
                     UserId = userId,
-                    FiguresCount = await this._figureService.GetUserFiguresCountAsync(userId),
+                    FiguresCount = await _figureService.GetUserFiguresCountAsync(userId),
                     Figures = figures,
                     UserFigureCollectionUrl = userFigureCollectionUrl,
                     FigureCollectionUsername = figureCollectionUsername,
-                    SumRetailPriceCollection = await this._figureService.SumRetailPriceCollectionAsync(userId),
-                    SumAvgAftermarketPriceCollection = await this._figureService.SumAvgAftermarketPriceCollectionAsync(userId)
+                    SumRetailPriceCollection = await _figureService.SumRetailPriceCollectionAsync(userId),
+                    SumAvgAftermarketPriceCollection = await _figureService.SumAvgAftermarketPriceCollectionAsync(userId)
                 };
 
-                return this.View(figuresViewModel);
+                return View(figuresViewModel);
             }
 
-            return this.View();
+            return View();
         }
 
         public IActionResult Privacy()
@@ -76,56 +75,53 @@ namespace MyFigureCollectionValue.Controllers
         {
             if (!User.Identity.IsAuthenticated)
             {
-                return this.View();
+                return View();
             }
 
             if (string.IsNullOrWhiteSpace(profileUrl))
             {
-                this.TempData["ErrorMessage"] = "Please ensure the URL is valid and try again";
-                return this.RedirectToAction(nameof(this.Index));
+                TempData["ErrorMessage"] = "Please ensure the URL is valid and try again";
+                return RedirectToAction(nameof(Index));
             }
 
-            await this._scraperService.LoginAsync();
+            await _scraperService.LoginAsync();
 
             List<string> links = new List<string>();
 
             try
             {
-                links = (await this._scraperService.GetAllFiguresLinkAsync(profileUrl)).ToList();
+                links = (await _scraperService.GetAllFiguresLinkAsync(profileUrl)).ToList();
             }
             catch (Exception ex)
             {
-                this.TempData["ErrorMessage"] = ex.Message;
-                return this.RedirectToAction(nameof(this.Index));
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction(nameof(Index));
             }
 
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            await this._figureService.RemoveUserFiguresAsync(userId);
+            await _figureService.RemoveUserFiguresAsync(userId);
 
-            await this._figureService.UpdateUserFigureCollectionUrlAsync(userId, profileUrl);
+            await _figureService.UpdateUserFigureCollectionUrlAsync(userId, profileUrl);
 
-            var (newFigureList, retailPriceList, aftermarketPriceList) = await this._scraperService.CreateFiguresAndPricesAsync(links, userId);
+            var (newFigureList, retailPriceList, aftermarketPriceList) = await _scraperService.CreateFiguresAndPricesAsync(links, userId);
 
             if (newFigureList.Any())
             {
-                await this._figureService.AddFiguresAsync(newFigureList);
-                await this._figureService.AddUserFiguresAsync(userId, newFigureList);
+                await _figureService.AddFiguresAsync(newFigureList);
+                await _figureService.AddUserFiguresAsync(userId, newFigureList);
             }
 
             if (retailPriceList.Any())
             {
-                var retailPricesInUSD = this._currencyConverterService.ConvertRetailPricesToUSD(retailPriceList);
-                await this._figureService.AddRetailPricesAsync(retailPriceList);
+                await _figureService.AddRetailPricesAsync(retailPriceList);
             }
 
             if (aftermarketPriceList.Count > 0)
             {
-                var aftermarketPricesInUSD = this._currencyConverterService.ConvertAftermarketPricesToUSD(aftermarketPriceList);
+                await _figureService.AddAftermarketPricesAsync(aftermarketPriceList);
 
-                await this._figureService.AddAftermarketPricesAsync(aftermarketPricesInUSD);
-
-                var currentAftermarketPrices = aftermarketPricesInUSD.Select(ap => new CurrentAftermarketPrice
+                var currentAftermarketPrices = aftermarketPriceList.Select(ap => new CurrentAftermarketPrice
                 {
                     Id = ap.Id,
                     Price = ap.Price,
@@ -133,10 +129,10 @@ namespace MyFigureCollectionValue.Controllers
                     LoggedAt = ap.LoggedAt,
                     FigureId = ap.FigureId,
                 });
-                await this._figureService.AddCurrentAftermarketPricesAsync(currentAftermarketPrices);
+                await _figureService.AddCurrentAftermarketPricesAsync(currentAftermarketPrices);
             }
 
-            return this.RedirectToAction(nameof(this.Index));
+            return RedirectToAction(nameof(Index));
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

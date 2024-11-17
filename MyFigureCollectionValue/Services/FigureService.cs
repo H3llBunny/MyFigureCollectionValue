@@ -8,10 +8,13 @@ namespace MyFigureCollectionValue.Services
     public class FigureService : IFigureService
     {
         private readonly ApplicationDbContext _dbContext;
+        private readonly ICurrencyConverterService _currencyConverter;
+        private const string DefaultCurrencySymbol = "$";
 
-        public FigureService(ApplicationDbContext dbContext)
+        public FigureService(ApplicationDbContext dbContext, ICurrencyConverterService currencyConverter)
         {
             _dbContext = dbContext;
+            this._currencyConverter = currencyConverter;
         }
 
         public async Task<bool> DoesFigureExistAsync(int id)
@@ -119,13 +122,21 @@ namespace MyFigureCollectionValue.Services
         {
             var figures = await _dbContext.UserFigures
                 .Where(uf => uf.UserId == userId)
+                .Skip((pageNumber - 1) * figuresPerPage)
+                .Take(figuresPerPage)
                 .Include(uf => uf.Figure.RetailPrices)
                 .Include(uf => uf.Figure.CurrentAftermarketPrices)
                 .Include(uf => uf.Figure.AftermarketPrices)
                 .Select(f => f.Figure)
-                .Skip((pageNumber - 1) * figuresPerPage)
-                .Take(figuresPerPage)
+                .AsNoTracking()
                 .ToListAsync();
+
+            if (figures.Any())
+            {
+                var retailPriceTask = _currencyConverter.ConvertRetailPricesToUSDAsync(figures.SelectMany(f => f.RetailPrices).ToList());
+                var aftermarketPriceTask = _currencyConverter.ConvertAftermarketPricesToUSDAsync(figures.SelectMany(f => f.AftermarketPrices).ToList());
+                await Task.WhenAll(retailPriceTask, aftermarketPriceTask);
+            }
 
             return figures.Select(f => new FigureInListViewModel
             {
@@ -135,11 +146,11 @@ namespace MyFigureCollectionValue.Services
                 RetailPrice = f.RetailPrices?
                     .OrderByDescending(rp => rp.ReleaseDate)
                     .FirstOrDefault()?.Price ?? 0,
-                RetailPriceCurrency = "$",
+                RetailPriceCurrency = DefaultCurrencySymbol,
                 AvgCurrentAftermarketPrice = f.CurrentAftermarketPrices != null && f.CurrentAftermarketPrices.Any()
                     ? Math.Round(f.CurrentAftermarketPrices.Average(af => af.Price), 2)
                     : (f.RetailPrices.OrderByDescending(rp => rp.ReleaseDate).FirstOrDefault()?.Price ?? 0),
-                AvgAftermarketPriceCurrency = "$",
+                AvgAftermarketPriceCurrency = DefaultCurrencySymbol,
                 AftermarketPrices = f.AftermarketPrices
             });
         }
@@ -180,6 +191,13 @@ namespace MyFigureCollectionValue.Services
                 .Select(f => f.Figure)
                 .ToListAsync();
 
+            if (!figures.Any())
+            {
+                return 0;
+            }
+
+            await _currencyConverter.ConvertRetailPricesToUSDAsync(figures.SelectMany(f => f.RetailPrices).ToList());
+
             return figures.Select(f => f.RetailPrices
                           .OrderByDescending(rp => rp.ReleaseDate)
                           .FirstOrDefault()?.Price ?? 0).Sum();
@@ -194,6 +212,13 @@ namespace MyFigureCollectionValue.Services
                 .Include(uf => uf.Figure.AftermarketPrices)
                 .Select(f => f.Figure)
                 .ToListAsync();
+
+            if (!figures.Any())
+            {
+                return 0;
+            }
+
+            await _currencyConverter.ConvertAftermarketPricesToUSDAsync(figures.SelectMany(f => f.AftermarketPrices).ToList());
 
             return figures.Select((f =>
                 f.AftermarketPrices != null && f.AftermarketPrices.Any()

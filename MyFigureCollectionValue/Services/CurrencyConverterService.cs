@@ -8,9 +8,9 @@ namespace MyFigureCollectionValue.Services
     {
         private readonly string filePath = Path.Combine(AppContext.BaseDirectory, "exchange_rates.json");
 
-        public ICollection<RetailPrice> ConvertRetailPricesToUSD(ICollection<RetailPrice> retailPrices)
+        public async Task<ICollection<RetailPrice>> ConvertRetailPricesToUSDAsync(ICollection<RetailPrice> retailPrices)
         {
-            var jsonContent = File.ReadAllText(filePath);
+            var jsonContent = await File.ReadAllTextAsync(filePath);
             var exchangeRatesUSD = JsonSerializer.Deserialize<ExchangeRate>(jsonContent);
 
             foreach (var price in retailPrices)
@@ -37,7 +37,7 @@ namespace MyFigureCollectionValue.Services
             return retailPrices;
         }
 
-        public ICollection<AftermarketPrice> ConvertAftermarketPricesToUSD(ICollection<AftermarketPrice> aftermarketPrices)
+        public async Task<ICollection<AftermarketPrice>> ConvertAftermarketPricesToUSDAsync(ICollection<AftermarketPrice> aftermarketPrices)
         {
             var jsonContent = File.ReadAllText(filePath);
             var exchangeRatesUSD = JsonSerializer.Deserialize<ExchangeRate>(jsonContent);

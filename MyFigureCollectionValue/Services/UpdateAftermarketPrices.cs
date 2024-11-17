@@ -69,11 +69,9 @@ namespace MyFigureCollectionValue.Services
 
             if (aftermarketPrices.Any())
             {
-                var aftermarketPricesInUSD = currencyConverterService.ConvertAftermarketPricesToUSD(aftermarketPrices);
+                await figureService.AddAftermarketPricesAsync(aftermarketPrices);
 
-                await figureService.AddAftermarketPricesAsync(aftermarketPricesInUSD);
-
-                var currentAftermarketPrices = aftermarketPricesInUSD.Select(ap => new CurrentAftermarketPrice
+                var currentAftermarketPrices = aftermarketPrices.Select(ap => new CurrentAftermarketPrice
                 {
                     Id = ap.Id,
                     Price = ap.Price,

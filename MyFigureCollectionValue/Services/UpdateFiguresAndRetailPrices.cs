@@ -67,8 +67,7 @@ namespace MyFigureCollectionValue.Services
 
             if (retailPriceList.Any())
             {
-                var retailPricesInUSD = currencyConverterService.ConvertRetailPricesToUSD(retailPriceList);
-                await figureService.UpdateRetailPricesAsync(retailPricesInUSD);
+                await figureService.UpdateRetailPricesAsync(retailPriceList);
             }
         }
     }

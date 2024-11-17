@@ -4,8 +4,8 @@ namespace MyFigureCollectionValue.Services
 {
     public interface ICurrencyConverterService
     {
-        ICollection<RetailPrice> ConvertRetailPricesToUSD(ICollection<RetailPrice> retailPrices);
+        Task<ICollection<RetailPrice>> ConvertRetailPricesToUSDAsync(ICollection<RetailPrice> retailPrices);
 
-        ICollection<AftermarketPrice> ConvertAftermarketPricesToUSD(ICollection<AftermarketPrice> aftermarketPrices);
+        Task<ICollection<AftermarketPrice>> ConvertAftermarketPricesToUSDAsync(ICollection<AftermarketPrice> aftermarketPrices);
     }
 }
