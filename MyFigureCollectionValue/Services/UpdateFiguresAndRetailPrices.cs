@@ -1,4 +1,5 @@
-﻿namespace MyFigureCollectionValue.Services
+﻿
+namespace MyFigureCollectionValue.Services
 {
     public class UpdateFiguresAndRetailPrices : BackgroundService
     {
@@ -25,7 +26,10 @@
 
                         if (figureUrls.Any())
                         {
-                            // TODO: get relevant services and pass them to the DoWorkAsync method
+                            var scraperService = scope.ServiceProvider.GetRequiredService<IScraperService>();
+                            var currencyConverterService = scope.ServiceProvider.GetRequiredService<ICurrencyConverterService>();
+
+                            await DoWorkAsync(scraperService, currencyConverterService, figureUrls);
                         }
                     }
                 }
@@ -35,6 +39,10 @@
                     await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
                 }
             }
+        }
+
+        private async Task DoWorkAsync(IScraperService scraperService, ICurrencyConverterService currencyConverterService, List<string> figureUrls)
+        {
         }
     }
 }

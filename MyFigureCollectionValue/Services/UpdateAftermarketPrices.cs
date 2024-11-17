@@ -53,7 +53,7 @@ namespace MyFigureCollectionValue.Services
             ICurrencyConverterService currencyConverterService,
             Dictionary<string, int> figureUrlAndIds)
         {
-            scraperService.LoginAsync();
+            await scraperService.LoginAsync();
 
             var aftermarketPrices = new List<AftermarketPrice>();
 
