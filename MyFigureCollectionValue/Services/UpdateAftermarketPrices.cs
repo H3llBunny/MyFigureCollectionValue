@@ -11,8 +11,8 @@ namespace MyFigureCollectionValue.Services
             IServiceScopeFactory scopeFactory,
             ILogger<UpdateAftermarketPrices> logger)
         {
-            this._scopeFactory = scopeFactory;
-            this._logger = logger;
+            _scopeFactory = scopeFactory;
+            _logger = logger;
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -20,7 +20,7 @@ namespace MyFigureCollectionValue.Services
             {
                 try
                 {
-                    using (var scope = this._scopeFactory.CreateScope())
+                    using (var scope = _scopeFactory.CreateScope())
                     {
                         var figureService = scope.ServiceProvider.GetRequiredService<IFigureService>();
 
@@ -41,7 +41,7 @@ namespace MyFigureCollectionValue.Services
                 }
                 catch (Exception ex)
                 {
-                    this._logger.LogError(ex, "An error occured while executing the UpdateAftermarketPrices background task.");
+                    _logger.LogError(ex, "An error occured while executing the UpdateAftermarketPrices background task.");
                     await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
                 }
             }

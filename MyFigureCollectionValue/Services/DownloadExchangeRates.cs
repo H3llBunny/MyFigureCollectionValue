@@ -16,9 +16,9 @@ namespace MyFigureCollectionValue.Services
             ILogger<DownloadExchangeRates> logger,
             HttpClient httpClient)
         {
-            this._fixerSettings = fixerSettings.Value;
-            this._logger = logger;
-            this._httpClient = httpClient;
+            _fixerSettings = fixerSettings.Value;
+            _logger = logger;
+            _httpClient = httpClient;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -54,7 +54,7 @@ namespace MyFigureCollectionValue.Services
                 }
                 catch (Exception ex)
                 {
-                    this._logger.LogError(ex, "An error occured while executing the DownloadExchangeRates background task.");
+                    _logger.LogError(ex, "An error occured while executing the DownloadExchangeRates background task.");
 
                     await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
                 }
@@ -63,12 +63,12 @@ namespace MyFigureCollectionValue.Services
 
         private async Task DoWorkAsync()
         {
-            string baseUrl = this._fixerSettings.BaseUrl;
-            string apiKey = this._fixerSettings.ApiKey;
+            string baseUrl = _fixerSettings.BaseUrl;
+            string apiKey = _fixerSettings.ApiKey;
 
-            string url = $"{baseUrl}?apikey={apiKey}&symbols={currencies}";
+            string url = $"{baseUrl}?apikey={apiKey}&symbols={this.currencies}";
 
-            HttpResponseMessage response = await this._httpClient.GetAsync(url);
+            HttpResponseMessage response = await _httpClient.GetAsync(url);
 
             response.EnsureSuccessStatusCode();
 
@@ -84,7 +84,7 @@ namespace MyFigureCollectionValue.Services
             }
             else
             {
-                this._logger.LogWarning("Failed to retrieve exchange rates or received an unsuccessful response.");
+                _logger.LogWarning("Failed to retrieve exchange rates or received an unsuccessful response.");
             }
         }
     }

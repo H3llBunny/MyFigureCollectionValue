@@ -25,23 +25,23 @@ namespace MyFigureCollectionValue.Services
             IFigureService figureService,
             HttpClient httpClient)
         {
-            this._context = context;
-            this._figureService = figureService;
-            this._client = httpClient;
-            this._settings = settings.Value;
+            _context = context;
+            _figureService = figureService;
+            _client = httpClient;
+            _settings = settings.Value;
 
-            this._cookieContainer = new CookieContainer();
+            _cookieContainer = new CookieContainer();
             var handler = new HttpClientHandler
             {
-                CookieContainer = this._cookieContainer,
+                CookieContainer = _cookieContainer,
                 UseCookies = true,
                 AllowAutoRedirect = true,
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
             };
 
-            this._client = new HttpClient(handler);
-            this._client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
-            this._client.DefaultRequestHeaders.Add("Referer", "https://myfigurecollection.net/");
+            _client = new HttpClient(handler);
+            _client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
+            _client.DefaultRequestHeaders.Add("Referer", "https://myfigurecollection.net/");
         }
 
         public async Task LoginAsync()
@@ -50,15 +50,15 @@ namespace MyFigureCollectionValue.Services
             {
                 { "commit", "signIn" },
                 { "from", "https://myfigurecollection.net/" },
-                { "username", this._settings.Username },
-                { "password", this._settings.Password },
+                { "username", _settings.Username },
+                { "password", _settings.Password },
                 { "remember", "1" },
                 { "hide", "0" }
             };
 
             var content = new FormUrlEncodedContent(loginData);
 
-            var request = new HttpRequestMessage(System.Net.Http.HttpMethod.Post, this._settings.LoginUrl)
+            var request = new HttpRequestMessage(System.Net.Http.HttpMethod.Post, _settings.LoginUrl)
             {
                 Content = content
             };
@@ -66,7 +66,7 @@ namespace MyFigureCollectionValue.Services
             request.Headers.Add("Accept", "application/json, text/javascript, */*; q=0.01");
             request.Headers.Add("Referer", "https://myfigurecollection.net/session/signin/");
 
-            var response = await this._client.SendAsync(request);
+            var response = await _client.SendAsync(request);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -78,7 +78,7 @@ namespace MyFigureCollectionValue.Services
         {
             try
             {
-                var initialDocument = await this._context.OpenAsync(profileUrl);
+                var initialDocument = await _context.OpenAsync(profileUrl);
 
                 if (initialDocument == null)
                 {
@@ -114,7 +114,7 @@ namespace MyFigureCollectionValue.Services
 
                 await SetAuthenticatedCookies(figuresLink);
 
-                var figuresDocument = await this._context.OpenAsync(figuresLink);
+                var figuresDocument = await _context.OpenAsync(figuresLink);
 
                 if (figuresDocument == null)
                 {
@@ -131,7 +131,7 @@ namespace MyFigureCollectionValue.Services
 
                     foreach (var page in pageLinks)
                     {
-                        var currentPageElement = await this._context.OpenAsync(page);
+                        var currentPageElement = await _context.OpenAsync(page);
 
                         var userMenuPage = currentPageElement.QuerySelector("div.tbx-menu.user-menu");
 
@@ -178,9 +178,9 @@ namespace MyFigureCollectionValue.Services
                 {
                     int figureId = int.Parse(url.Split("/item/")[1]);
 
-                    if (await this._figureService.DoesFigureExistAsync(figureId))
+                    if (await _figureService.DoesFigureExistAsync(figureId))
                     {
-                        await this._figureService.AddExistingFigureToUserAsync(figureId, userId);
+                        await _figureService.AddExistingFigureToUserAsync(figureId, userId);
                         continue;
                     }
 
@@ -191,48 +191,11 @@ namespace MyFigureCollectionValue.Services
                     {
                         try
                         {
-                            await Task.Delay(this._delayRequest.Next(500, 800));
+                            await Task.Delay(_delayRequest.Next(500, 800));
 
-                            var document = await this._context.OpenAsync(url);
+                            var document = await _context.OpenAsync(url);
 
-                            string name = document.QuerySelector("h1.title")?.TextContent?.Trim()
-                                          ?? throw new NullReferenceException("Title not found");
-
-                            var originElement = document.QuerySelectorAll("div.data-label")
-                                                        .FirstOrDefault(x => x.TextContent.Contains("Origin"));
-
-                            string origin = originElement?.NextElementSibling?.QuerySelector("span")?.TextContent?.Trim()
-                                            ?? "Unknown Origin";
-
-                            var companiesElement = document.QuerySelectorAll("div.data-label")
-                                                           .FirstOrDefault(x => x.TextContent.Contains("Companies")
-                                                           || x.TextContent.Contains("Company"));
-
-                            string companies = string.Join(", ",
-                                companiesElement.NextElementSibling.QuerySelectorAll("span")
-                                                .Zip(companiesElement.NextElementSibling.QuerySelectorAll("small"),
-                                                    (span, small) => $"{span.TextContent} {small.TextContent}"));
-
-                            string imageUrl = document.QuerySelector("a.main img").GetAttribute("src");
-                            string updatedUrl = imageUrl.Replace("/items/1/", "/items/2/");
-                            var response = await this._client.SendAsync(new HttpRequestMessage(System.Net.Http.HttpMethod.Head, updatedUrl));
-
-                            if (!response.IsSuccessStatusCode)
-                            {
-                                updatedUrl = imageUrl;
-                            }
-
-                            var newFigure = new Figure
-                            {
-                                Id = figureId,
-                                Name = name,
-                                Origin = origin,
-                                Company = companies,
-                                Image = updatedUrl,
-                                FigureUrl = url,
-                                LastUpdated = DateTime.UtcNow,
-                                LastUpdatedRetailPrices = DateTime.UtcNow
-                            };
+                            var newFigure = await ScrapeFigure(document, url, figureId);
 
                             newFigureList.Add(newFigure);
 
@@ -283,6 +246,47 @@ namespace MyFigureCollectionValue.Services
             return (newFigureList, retailPriceList, aftermarketPriceList);
         }
 
+        private async Task<Figure> ScrapeFigure(IDocument document, string url, int figureId)
+        {
+            string name = document.QuerySelector("h1.title")?.TextContent?.Trim()
+                                          ?? throw new NullReferenceException("Title not found");
+
+            var originElement = document.QuerySelectorAll("div.data-label")
+                                        .FirstOrDefault(x => x.TextContent.Contains("Origin"));
+
+            string origin = originElement?.NextElementSibling?.QuerySelector("span")?.TextContent?.Trim()
+                            ?? "Unknown Origin";
+
+            var companiesElement = document.QuerySelectorAll("div.data-label")
+                                           .FirstOrDefault(x => x.TextContent.Contains("Companies")
+                                           || x.TextContent.Contains("Company"));
+
+            string companies = string.Join(", ",
+                companiesElement.NextElementSibling.QuerySelectorAll("span")
+                                .Zip(companiesElement.NextElementSibling.QuerySelectorAll("small"),
+                                    (span, small) => $"{span.TextContent} {small.TextContent}"));
+
+            string imageUrl = document.QuerySelector("a.main img").GetAttribute("src");
+            string updatedUrl = imageUrl.Replace("/items/1/", "/items/2/");
+            var response = await _client.SendAsync(new HttpRequestMessage(System.Net.Http.HttpMethod.Head, updatedUrl));
+
+            if (!response.IsSuccessStatusCode)
+            {
+                updatedUrl = imageUrl;
+            }
+
+            return new Figure
+            {
+                Id = figureId,
+                Name = name,
+                Origin = origin,
+                Company = companies,
+                Image = updatedUrl,
+                FigureUrl = url,
+                LastUpdated = DateTime.UtcNow,
+                LastUpdatedRetailPrices = DateTime.UtcNow
+            };
+        }
 
         public async Task<ICollection<RetailPrice>> GetRetailPriceListAsync(IDocument document, int figureId)
         {
@@ -412,9 +416,9 @@ namespace MyFigureCollectionValue.Services
             {
                 try
                 {
-                    await Task.Delay(this._delayRequest.Next(500, 800));
+                    await Task.Delay(_delayRequest.Next(500, 800));
 
-                    var document = await GetDocument(this._client, url, formData);
+                    var document = await GetDocument(_client, url, formData);
 
                     var adsElement = document.QuerySelector("div.results.window-limited-content");
 
@@ -448,7 +452,7 @@ namespace MyFigureCollectionValue.Services
                                 formData.Dispose();
                                 formData = await GetFormData(i);
 
-                                var newDocument = await GetDocument(this._client, url, formData);
+                                var newDocument = await GetDocument(_client, url, formData);
 
                                 var newItems = newDocument.QuerySelectorAll("div.results.window-limited-content div.result");
 
@@ -496,7 +500,7 @@ namespace MyFigureCollectionValue.Services
 
             string decodedHtml = WebUtility.HtmlDecode(windowHtml);
 
-            return await this._context.OpenAsync(req => req.Content(decodedHtml));
+            return await _context.OpenAsync(req => req.Content(decodedHtml));
         }
 
         private async Task<AftermarketPrice> ExtractAftermarketPriceAsync(IElement item, int figureId)
@@ -553,13 +557,81 @@ namespace MyFigureCollectionValue.Services
 
         private async Task SetAuthenticatedCookies(string url)
         {
-            var uri = new Uri(this._settings.LoginUrl);
+            var uri = new Uri(_settings.LoginUrl);
             var cookies = _cookieContainer.GetCookies(uri);
             var cookieHeader = string.Join("; ", cookies.Cast<Cookie>().Select(c => $"{c.Name}={c.Value}"));
 
-            await this._context.OpenAsync(res => res.Content("<div></div>")
+            await _context.OpenAsync(res => res.Content("<div></div>")
                 .Address(url)
                 .Header(HeaderNames.SetCookie, cookieHeader));
+        }
+
+        public async Task<(
+            ICollection<Figure> Figures, 
+            ICollection<RetailPrice> RetailPrices)> GetFiguresAndRetailPricesAsync(IEnumerable<string> figureUrls)
+        {
+            var figureList = new List<Figure>();
+            var retailPriceList = new List<RetailPrice>();
+            const int maxRetries = 5;
+
+            try
+            {
+                foreach (var url in figureUrls)
+                {
+                    int figureId = int.Parse(url.Split("/item/")[1]);
+                    int retries = 0;
+                    bool success = false;
+
+                    while (!success && retries < maxRetries)
+                    {
+                        try
+                        {
+                            await Task.Delay(_delayRequest.Next(500, 800));
+
+                            var document = await _context.OpenAsync(url);
+
+                            var newFigure = await ScrapeFigure(document, url, figureId);
+
+                            figureList.Add(newFigure);
+
+                            var figureRetailPrice = await GetRetailPriceListAsync(document, figureId);
+
+                            if (figureRetailPrice != null)
+                            {
+                                retailPriceList.AddRange(figureRetailPrice);
+                            }
+
+                            success = true;
+                        }
+                        catch (NullReferenceException ex)
+                        {
+                            retries++;
+                            Console.WriteLine($"Attempt {retries} failed for URL: {url}. Error: {ex.Message}");
+
+                            if (retries >= maxRetries)
+                            {
+                                Console.WriteLine("Max retries reached. Stopping execution.");
+                                break;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new Exception($"An error occurred: {ex.Message}");
+                        }
+                    }
+
+                    if (retries >= maxRetries)
+                    {
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
+            return (figureList, retailPriceList);
         }
     }
 }

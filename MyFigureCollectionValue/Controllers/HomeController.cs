@@ -107,13 +107,13 @@ namespace MyFigureCollectionValue.Controllers
 
             var (newFigureList, retailPriceList, aftermarketPriceList) = await this._scraperService.CreateFiguresAndPricesAsync(links, userId);
 
-            if (newFigureList.Count > 0)
+            if (newFigureList.Any())
             {
                 await this._figureService.AddFiguresAsync(newFigureList);
                 await this._figureService.AddUserFiguresAsync(userId, newFigureList);
             }
 
-            if (retailPriceList.Count > 0)
+            if (retailPriceList.Any())
             {
                 var retailPricesInUSD = this._currencyConverterService.ConvertRetailPricesToUSD(retailPriceList);
                 await this._figureService.AddRetailPricesAsync(retailPriceList);

@@ -11,39 +11,39 @@ namespace MyFigureCollectionValue.Services
 
         public FigureService(ApplicationDbContext dbContext)
         {
-            this._dbContext = dbContext;
+            _dbContext = dbContext;
         }
 
         public async Task<bool> DoesFigureExistAsync(int id)
         {
-            return await this._dbContext.Figures.AnyAsync(f => f.Id == id);
+            return await _dbContext.Figures.AnyAsync(f => f.Id == id);
         }
 
         public async Task AddFiguresAsync(IEnumerable<Figure> figures)
         {
-            await this._dbContext.AddRangeAsync(figures);
-            await this._dbContext.SaveChangesAsync();
+            await _dbContext.AddRangeAsync(figures);
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task AddRetailPricesAsync(IEnumerable<RetailPrice> retailPrices)
         {
-            await this._dbContext.AddRangeAsync(retailPrices);
-            await this._dbContext.SaveChangesAsync();
+            await _dbContext.AddRangeAsync(retailPrices);
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task AddCurrentAftermarketPricesAsync(IEnumerable<CurrentAftermarketPrice> currentAftermarketPrices)
         {
             await _dbContext.Database.ExecuteSqlRawAsync("DELETE FROM CurrentAftermarketPrices");
 
-            await this._dbContext.AddRangeAsync(currentAftermarketPrices);
-            await this._dbContext.SaveChangesAsync();
+            await _dbContext.AddRangeAsync(currentAftermarketPrices);
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task AddAftermarketPricesAsync(IEnumerable<AftermarketPrice> aftermarketPrices)
         {
             var priceIds = aftermarketPrices.Select(ap => ap.Id).ToList();
 
-            var existingPriceIds = await this._dbContext.AftermarketPrices
+            var existingPriceIds = await _dbContext.AftermarketPrices
                 .Where(ap => priceIds.Contains(ap.Id))
                 .Select(ap => ap.Id)
                 .ToListAsync();
@@ -52,11 +52,11 @@ namespace MyFigureCollectionValue.Services
 
             if (newPrices.Any())
             {
-                await this._dbContext.AftermarketPrices.AddRangeAsync(newPrices);
-                await this._dbContext.SaveChangesAsync();
+                await _dbContext.AftermarketPrices.AddRangeAsync(newPrices);
+                await _dbContext.SaveChangesAsync();
             }
 
-            var existingAds = await this._dbContext.AftermarketPrices.Where(ap => existingPriceIds.Contains(ap.Id)).ToListAsync();
+            var existingAds = await _dbContext.AftermarketPrices.Where(ap => existingPriceIds.Contains(ap.Id)).ToListAsync();
 
             bool priceUpdated = false;
 
@@ -73,7 +73,7 @@ namespace MyFigureCollectionValue.Services
 
             if (priceUpdated)
             {
-                await this._dbContext.SaveChangesAsync();
+                await _dbContext.SaveChangesAsync();
             }
         }
 
@@ -85,17 +85,17 @@ namespace MyFigureCollectionValue.Services
                 FigureId = figure.Id,
             }).ToList();
 
-            await this._dbContext.UserFigures.AddRangeAsync(userFigures);
-            await this._dbContext.SaveChangesAsync();
+            await _dbContext.UserFigures.AddRangeAsync(userFigures);
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task RemoveUserFiguresAsync(string userId)
         {
-            var userFigures = this._dbContext.UserFigures.Where(uf => uf.UserId == userId);
+            var userFigures = _dbContext.UserFigures.Where(uf => uf.UserId == userId);
 
-            this._dbContext.UserFigures.RemoveRange(userFigures);
+            _dbContext.UserFigures.RemoveRange(userFigures);
 
-            await this._dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task AddExistingFigureToUserAsync(int figureId, string userId)
@@ -106,18 +106,18 @@ namespace MyFigureCollectionValue.Services
                 FigureId = figureId
             };
 
-            await this._dbContext.UserFigures.AddAsync(userFigure);
-            await this._dbContext.SaveChangesAsync();
+            await _dbContext.UserFigures.AddAsync(userFigure);
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task<int> GetUserFiguresCountAsync(string userId)
         {
-            return await this._dbContext.UserFigures.Where(u => u.UserId == userId).CountAsync();
+            return await _dbContext.UserFigures.Where(u => u.UserId == userId).CountAsync();
         }
 
         public async Task<IEnumerable<FigureInListViewModel>> GetAllFiguresAsync(string userId, int pageNumber, int figuresPerPage)
         {
-            var figures = await this._dbContext.UserFigures
+            var figures = await _dbContext.UserFigures
                 .Where(uf => uf.UserId == userId)
                 .Include(uf => uf.Figure.RetailPrices)
                 .Include(uf => uf.Figure.CurrentAftermarketPrices)
@@ -146,12 +146,12 @@ namespace MyFigureCollectionValue.Services
 
         public async Task UpdateUserFigureCollectionUrlAsync(string userId, string url)
         {
-            var user = await this._dbContext.UserFigureCollectionUrls.FirstOrDefaultAsync(u => u.UserId == userId);
+            var user = await _dbContext.UserFigureCollectionUrls.FirstOrDefaultAsync(u => u.UserId == userId);
 
             if (user != null)
             {
                 user.FigureCollectionUrl = url;
-                await this._dbContext.SaveChangesAsync();
+                await _dbContext.SaveChangesAsync();
             }
             else
             {
@@ -161,20 +161,20 @@ namespace MyFigureCollectionValue.Services
                     FigureCollectionUrl = url
                 };
 
-                await this._dbContext.UserFigureCollectionUrls.AddAsync(userFigureCollectionUrl);
-                await this._dbContext.SaveChangesAsync();
+                await _dbContext.UserFigureCollectionUrls.AddAsync(userFigureCollectionUrl);
+                await _dbContext.SaveChangesAsync();
             }
         }
 
         public async Task<string> GetUserFigureCollectionUrlAsync(string userId)
         {
-            var userFigureCollectionUrl = await this._dbContext.UserFigureCollectionUrls.FirstOrDefaultAsync(u => u.UserId == userId);
+            var userFigureCollectionUrl = await _dbContext.UserFigureCollectionUrls.FirstOrDefaultAsync(u => u.UserId == userId);
             return userFigureCollectionUrl?.FigureCollectionUrl;
         }
 
         public async Task<decimal> SumRetailPriceCollectionAsync(string userId)
         {
-            var figures = await this._dbContext.UserFigures
+            var figures = await _dbContext.UserFigures
                 .Where(uf => uf.UserId == userId)
                 .Include(uf => uf.Figure.RetailPrices)
                 .Select(f => f.Figure)
@@ -188,7 +188,7 @@ namespace MyFigureCollectionValue.Services
 
         public async Task<decimal> SumAvgAftermarketPriceCollectionAsync(string userId)
         {
-            var figures = await this._dbContext.UserFigures
+            var figures = await _dbContext.UserFigures
                 .Where(uf => uf.UserId == userId)
                 .Include(uf => uf.Figure.RetailPrices)
                 .Include(uf => uf.Figure.AftermarketPrices)
@@ -206,7 +206,7 @@ namespace MyFigureCollectionValue.Services
         {
             var thresholdDate = DateTime.UtcNow.AddDays(-1);
 
-            return await this._dbContext.Figures
+            return await _dbContext.Figures
                 .Where(f => (f.LastUpdatedRetailPrices <= thresholdDate))
                 .ToDictionaryAsync(f => f.FigureUrl, f => f.Id);
         }
@@ -216,21 +216,65 @@ namespace MyFigureCollectionValue.Services
             var parameters = figureIds.Select((figureId, index) => new SqlParameter($"@id{index}", figureId)).ToList();
             var sqlParameterNames = string.Join(", ", parameters.Select(p => p.ParameterName));
 
-            await this._dbContext.Database.ExecuteSqlRawAsync($@"
+            await _dbContext.Database.ExecuteSqlRawAsync($@"
                 UPDATE Figures
                 SET LastUpdatedRetailPrices = @currentDate
                 WHERE Id IN ({sqlParameterNames});
             ", parameters.Append(new SqlParameter("@currentDate", DateTime.UtcNow)).ToArray());
         }
 
-        public async Task<List<string>> GetOutdatedFigureUrlsAsync()
+        public async Task<ICollection<string>> GetOutdatedFigureUrlsAsync()
         {
             var thresholdDate = DateTime.UtcNow.AddDays(-7);
 
-            return await this._dbContext.Figures
+            return await _dbContext.Figures
                 .Where(f => (f.LastUpdated <= thresholdDate))
                 .Select(f => f.FigureUrl)
                 .ToListAsync();
+        }
+
+        public async Task UpdateFiguresAsync(ICollection<Figure> figures)
+        {
+            var figureIds = figures.Select(f => f.Id).ToList();
+
+            var existingFigures = await _dbContext.Figures
+                .Where(f => figureIds.Contains(f.Id))
+                .ToListAsync();
+
+            foreach (var existingFigure in existingFigures)
+            {
+                var updatedFigure = figures.First(f => f.Id == existingFigure.Id);
+
+                existingFigure.Name = updatedFigure.Name;
+                existingFigure.Origin = updatedFigure.Origin;
+                existingFigure.Company = updatedFigure.Company;
+                existingFigure.Image = updatedFigure.Image;
+                existingFigure.LastUpdated = updatedFigure.LastUpdated;
+            }
+
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateRetailPricesAsync(ICollection<RetailPrice> retailPrices)
+        {
+            var figureIds = retailPrices.Select(rp => rp.FigureId).Distinct().ToList();
+
+            var existingRetailPrices = await _dbContext.RetailPrices
+                .Where(rp => figureIds.Contains(rp.FigureId))
+                .ToListAsync();
+
+            var newRetailPrices = retailPrices
+                .Where(newPrice =>
+                    !existingRetailPrices.Any(existingPrice =>
+                        existingPrice.FigureId == newPrice.FigureId &&
+                        existingPrice.ReleaseDate == newPrice.ReleaseDate))
+                .ToList();
+
+            if (newRetailPrices.Any())
+            {
+                await _dbContext.RetailPrices.AddRangeAsync(newRetailPrices);
+                await _dbContext.SaveChangesAsync();
+            }
         }
     }
 }

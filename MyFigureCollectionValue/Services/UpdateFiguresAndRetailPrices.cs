@@ -1,4 +1,6 @@
 ﻿
+using MyFigureCollectionValue.Models;
+
 namespace MyFigureCollectionValue.Services
 {
     public class UpdateFiguresAndRetailPrices : BackgroundService
@@ -10,8 +12,8 @@ namespace MyFigureCollectionValue.Services
             IServiceScopeFactory scopeFactory,
             ILogger<UpdateFiguresAndRetailPrices> logger)
         {
-            this._scopeFactory = scopeFactory;
-            this._logger = logger;
+            _scopeFactory = scopeFactory;
+            _logger = logger;
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -19,7 +21,7 @@ namespace MyFigureCollectionValue.Services
             {
                 try
                 {
-                    using (var scope = this._scopeFactory.CreateScope())
+                    using (var scope = _scopeFactory.CreateScope())
                     {
                         var figureService = scope.ServiceProvider.GetRequiredService<IFigureService>();
                         var figureUrls = await figureService.GetOutdatedFigureUrlsAsync();
@@ -29,20 +31,45 @@ namespace MyFigureCollectionValue.Services
                             var scraperService = scope.ServiceProvider.GetRequiredService<IScraperService>();
                             var currencyConverterService = scope.ServiceProvider.GetRequiredService<ICurrencyConverterService>();
 
-                            await DoWorkAsync(scraperService, currencyConverterService, figureUrls);
+                            await DoWorkAsync(scraperService, currencyConverterService, figureService, figureUrls);
+
+                            await Task.Delay(TimeSpan.FromDays(7), stoppingToken);
                         }
+
+                        await Task.Delay(TimeSpan.FromDays(7), stoppingToken);
                     }
                 }
                 catch (Exception ex)
                 {
-                    this._logger.LogError(ex, "An error occured while executing the UpdateFiguresAndRetailPrices background task.");
+                    _logger.LogError(ex, "An error occured while executing the UpdateFiguresAndRetailPrices background task.");
                     await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
                 }
             }
         }
 
-        private async Task DoWorkAsync(IScraperService scraperService, ICurrencyConverterService currencyConverterService, List<string> figureUrls)
+        private async Task DoWorkAsync(
+            IScraperService scraperService,
+            ICurrencyConverterService currencyConverterService,
+            IFigureService figureService,
+            ICollection<string> figureUrls)
         {
+            await scraperService.LoginAsync();
+
+            var figures = new List<Figure>();
+            var retailPrices = new List<RetailPrice>();
+
+            var (figureList, retailPriceList) = await scraperService.GetFiguresAndRetailPricesAsync(figureUrls);
+
+            if (figureList.Any())
+            {
+                await figureService.UpdateFiguresAsync(figureList);
+            }
+
+            if (retailPriceList.Any())
+            {
+                var retailPricesInUSD = currencyConverterService.ConvertRetailPricesToUSD(retailPriceList);
+                await figureService.UpdateRetailPricesAsync(retailPricesInUSD);
+            }
         }
     }
 }
