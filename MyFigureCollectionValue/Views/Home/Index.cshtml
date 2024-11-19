@@ -57,11 +57,13 @@
                 @foreach (var figure in Model.Figures)
                 {
                     <div class="figure-card m-2">
-                        <div class="figure-image" style="background-image: url('@figure.ImageUrl');">
-                            <div class="figure-overlay">
-                                <span class="title">@figure.Name</span>
+                        <a class="no_underline" asp-controller="Figure" asp-action="GetFigure" asp-route-figureId="@figure.Id" style="width: inherit;">
+                            <div class="figure-image" style="background-image: url('@figure.ImageUrl');">
+                                <div class="figure-overlay">
+                                    <span class="title">@figure.Name</span>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                         <ul class="figure-info">
                             <li>Retail Price: <span class="figure-price">@figure.RetailPriceCurrency@figure.RetailPrice</span></li>
                             <li>Avg. Aftermarket Price: <span class="figure-price">@figure.AvgAftermarketPriceCurrency@figure.AvgCurrentAftermarketPrice</span></li>

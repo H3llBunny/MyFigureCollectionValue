@@ -37,10 +37,10 @@ namespace MyFigureCollectionValue
             builder.Services.AddScoped<IFigureService, FigureService>();
             builder.Services.AddScoped<ICurrencyConverterService, CurrencyConverterService>();
 
-            builder.Services.AddHttpClient<DownloadExchangeRates>();
-            builder.Services.AddHostedService<DownloadExchangeRates>();
-            builder.Services.AddHostedService<UpdateAftermarketPrices>();
-            builder.Services.AddHostedService<UpdateFiguresAndRetailPrices>();
+            //builder.Services.AddHttpClient<DownloadExchangeRates>();
+            //builder.Services.AddHostedService<DownloadExchangeRates>();
+            //builder.Services.AddHostedService<UpdateAftermarketPrices>();
+            //builder.Services.AddHostedService<UpdateFiguresAndRetailPrices>();
 
             var app = builder.Build();
 
