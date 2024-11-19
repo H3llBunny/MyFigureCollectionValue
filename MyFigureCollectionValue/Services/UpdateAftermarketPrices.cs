@@ -29,9 +29,8 @@ namespace MyFigureCollectionValue.Services
                         if (figureUrlAndIds.Any())
                         {
                             var scraperService = scope.ServiceProvider.GetRequiredService<IScraperService>();
-                            var currencyConverterService = scope.ServiceProvider.GetRequiredService<ICurrencyConverterService>();
 
-                            await DoWorkAsyn(scraperService, figureService, currencyConverterService, figureUrlAndIds);
+                            await DoWorkAsyn(scraperService, figureService, figureUrlAndIds);
 
                             await Task.Delay(TimeSpan.FromHours(3), stoppingToken);
                         }
@@ -50,7 +49,6 @@ namespace MyFigureCollectionValue.Services
         private async Task DoWorkAsyn(
             IScraperService scraperService, 
             IFigureService figureService,
-            ICurrencyConverterService currencyConverterService,
             Dictionary<string, int> figureUrlAndIds)
         {
             await scraperService.LoginAsync();
