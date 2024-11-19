@@ -84,7 +84,16 @@ namespace MyFigureCollectionValue.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            await _scraperService.LoginAsync();
+            try
+            {
+                await _scraperService.LoginAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                TempData["ErrorMessage"] = "Service Unavailable (rush hour), please try again later.";
+                return RedirectToAction(nameof(Index));
+            }
 
             List<string> links = new List<string>();
 

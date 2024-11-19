@@ -42,7 +42,7 @@ namespace MyFigureCollectionValue.Services
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "An error occured while executing the UpdateAftermarketPrices background task.");
-                    await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+                    await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
                 }
             }
         }
