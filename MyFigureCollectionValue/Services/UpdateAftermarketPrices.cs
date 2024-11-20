@@ -57,7 +57,7 @@ namespace MyFigureCollectionValue.Services
 
             foreach (var figure in figureUrlAndIds)
             {
-                var newAftermarketPrices = await scraperService.GetAftermarketPriceListAsync(figure.Key, figure.Value);
+                var newAftermarketPrices = await scraperService.GetAftermarketPriceListAsync(figure.Key, figure.Value, true);
 
                 if (newAftermarketPrices != null)
                 {

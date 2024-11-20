@@ -402,7 +402,10 @@ namespace MyFigureCollectionValue.Services
             };
         }
 
-        public async Task<ICollection<AftermarketPrice>> GetAftermarketPriceListAsync(string url, int figureId = 0)
+        public async Task<ICollection<AftermarketPrice>> GetAftermarketPriceListAsync(
+            string url,
+            int figureId = 0,
+            bool calledFromBackgroundService = false)
         {
             var aftermarketPriceList = new List<AftermarketPrice>();
             int initialPageNum = 1;
@@ -416,7 +419,14 @@ namespace MyFigureCollectionValue.Services
             {
                 try
                 {
-                    await Task.Delay(_delayRequest.Next(500, 800));
+                    if (calledFromBackgroundService)
+                    {
+                        await Task.Delay(_delayRequest.Next(2000, 3000));
+                    }
+                    else
+                    {
+                        await Task.Delay(_delayRequest.Next(500, 800));
+                    }
 
                     var document = await GetDocument(_client, url, formData);
 
@@ -567,7 +577,7 @@ namespace MyFigureCollectionValue.Services
         }
 
         public async Task<(
-            ICollection<Figure> Figures, 
+            ICollection<Figure> Figures,
             ICollection<RetailPrice> RetailPrices)> GetFiguresAndRetailPricesAsync(IEnumerable<string> figureUrls)
         {
             var figureList = new List<Figure>();
@@ -586,7 +596,7 @@ namespace MyFigureCollectionValue.Services
                     {
                         try
                         {
-                            await Task.Delay(_delayRequest.Next(500, 800));
+                            await Task.Delay(_delayRequest.Next(2000, 3000));
 
                             var document = await _context.OpenAsync(url);
 

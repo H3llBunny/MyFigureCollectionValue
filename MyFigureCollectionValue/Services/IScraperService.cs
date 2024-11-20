@@ -14,7 +14,7 @@ namespace MyFigureCollectionValue.Services
 
         Task<ICollection<RetailPrice>> GetRetailPriceListAsync(IDocument document, int figureId);
 
-        Task<ICollection<AftermarketPrice>> GetAftermarketPriceListAsync(string url, int figureId);
+        Task<ICollection<AftermarketPrice>> GetAftermarketPriceListAsync(string url, int figureId, bool calledFromBackgroundService);
 
         Task<(ICollection<Figure> Figures, ICollection<RetailPrice> RetailPrices)> GetFiguresAndRetailPricesAsync(IEnumerable<string> figureUrls);
     }
