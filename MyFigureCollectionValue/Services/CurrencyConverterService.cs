@@ -37,7 +37,7 @@ namespace MyFigureCollectionValue.Services
             return retailPrices;
         }
 
-        public async Task<ICollection<AftermarketPrice>> ConvertAftermarketPricesToUSDAsync(ICollection<AftermarketPrice> aftermarketPrices)
+        public async Task<ICollection<CurrentAftermarketPrice>> ConvertAftermarketPricesToUSDAsync(ICollection<CurrentAftermarketPrice> aftermarketPrices)
         {
             var jsonContent = File.ReadAllText(filePath);
             var exchangeRatesUSD = JsonSerializer.Deserialize<ExchangeRate>(jsonContent);

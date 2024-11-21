@@ -134,7 +134,7 @@ namespace MyFigureCollectionValue.Services
             if (figures.Any())
             {
                 var retailPriceTask = _currencyConverter.ConvertRetailPricesToUSDAsync(figures.SelectMany(f => f.RetailPrices).ToList());
-                var aftermarketPriceTask = _currencyConverter.ConvertAftermarketPricesToUSDAsync(figures.SelectMany(f => f.AftermarketPrices).ToList());
+                var aftermarketPriceTask = _currencyConverter.ConvertAftermarketPricesToUSDAsync(figures.SelectMany(f => f.CurrentAftermarketPrices).ToList());
                 await Task.WhenAll(retailPriceTask, aftermarketPriceTask);
             }
 
@@ -209,7 +209,7 @@ namespace MyFigureCollectionValue.Services
             var figures = await _dbContext.UserFigures
                 .Where(uf => uf.UserId == userId)
                 .Include(uf => uf.Figure.RetailPrices)
-                .Include(uf => uf.Figure.AftermarketPrices)
+                .Include(uf => uf.Figure.CurrentAftermarketPrices)
                 .Select(f => f.Figure)
                 .ToListAsync();
 
@@ -218,11 +218,11 @@ namespace MyFigureCollectionValue.Services
                 return 0;
             }
 
-            await _currencyConverter.ConvertAftermarketPricesToUSDAsync(figures.SelectMany(f => f.AftermarketPrices).ToList());
+            await _currencyConverter.ConvertAftermarketPricesToUSDAsync(figures.SelectMany(f => f.CurrentAftermarketPrices).ToList());
 
             return figures.Select((f =>
-                f.AftermarketPrices != null && f.AftermarketPrices.Any()
-                    ? Math.Round(f.AftermarketPrices.Average(af => af.Price), 2)
+                f.CurrentAftermarketPrices != null && f.CurrentAftermarketPrices.Any()
+                    ? Math.Round(f.CurrentAftermarketPrices.Average(af => af.Price), 2)
                     : f.RetailPrices.OrderByDescending(rp => rp.ReleaseDate).FirstOrDefault()?.Price ?? 0)
             ).Sum();
         }

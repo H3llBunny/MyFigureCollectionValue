@@ -6,6 +6,6 @@ namespace MyFigureCollectionValue.Services
     {
         Task<ICollection<RetailPrice>> ConvertRetailPricesToUSDAsync(ICollection<RetailPrice> retailPrices);
 
-        Task<ICollection<AftermarketPrice>> ConvertAftermarketPricesToUSDAsync(ICollection<AftermarketPrice> aftermarketPrices);
+        Task<ICollection<CurrentAftermarketPrice>> ConvertAftermarketPricesToUSDAsync(ICollection<CurrentAftermarketPrice> aftermarketPrices);
     }
 }
