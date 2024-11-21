@@ -17,7 +17,14 @@ namespace MyFigureCollectionValue.Controllers
         [Authorize]
         public async Task<IActionResult> GetFigure(int figureId)
         {
-            return this.View();
+            if (!await _figureService.DoesFigureExistAsync(figureId))
+            {
+                TempData["ErrorMessage"] = "Figure Id does not exist.";
+                return RedirectToAction(nameof(HomeController.Index), "Home");
+            }
+
+            var figure = await _figureService.GetFigureAsync(figureId);
+            return this.View(figure);
         }
     }
 }

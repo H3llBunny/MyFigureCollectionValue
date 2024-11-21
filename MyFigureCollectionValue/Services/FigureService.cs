@@ -301,5 +301,39 @@ namespace MyFigureCollectionValue.Services
                 await _dbContext.SaveChangesAsync();
             }
         }
+
+        public async Task<FigureInListViewModel> GetFigureAsync(int figureId)
+        {
+            var figure = await _dbContext.Figures
+                .Where(f => f.Id == figureId)
+                .Include(f => f.RetailPrices)
+                .Include(f => f.CurrentAftermarketPrices)
+                .Include(f => f.AftermarketPrices)
+                .FirstOrDefaultAsync();
+
+            if (figure != null)
+            {
+                var retailPriceTask = _currencyConverter.ConvertRetailPricesToUSDAsync(figure.RetailPrices);
+                var currentAftermarketPriceTask = _currencyConverter.ConvertAftermarketPricesToUSDAsync(figure.CurrentAftermarketPrices);
+                var aftermarketPriceTask = _currencyConverter.ConvertAftermarketPricesToUSDAsync(figure.AftermarketPrices);
+                await Task.WhenAll(retailPriceTask, aftermarketPriceTask);
+            }
+
+            return new FigureInListViewModel
+            {
+                Id = figure.Id,
+                Name = figure.Name,
+                ImageUrl = figure.Image,
+                RetailPrice = figure.RetailPrices?
+                   .OrderByDescending(rp => rp.ReleaseDate)
+                   .FirstOrDefault()?.Price ?? 0,
+                RetailPriceCurrency = DefaultCurrencySymbol,
+                AvgCurrentAftermarketPrice = figure.CurrentAftermarketPrices != null && figure.CurrentAftermarketPrices.Any()
+                   ? Math.Round(figure.CurrentAftermarketPrices.Average(af => af.Price), 2)
+                   : (figure.RetailPrices.OrderByDescending(rp => rp.ReleaseDate).FirstOrDefault()?.Price ?? 0),
+                AvgAftermarketPriceCurrency = DefaultCurrencySymbol,
+                AftermarketPrices = figure.AftermarketPrices
+            };
+        }
     }
 }

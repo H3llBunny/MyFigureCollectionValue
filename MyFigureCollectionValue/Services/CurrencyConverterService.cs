@@ -37,26 +37,36 @@ namespace MyFigureCollectionValue.Services
             return retailPrices;
         }
 
-        public async Task<ICollection<CurrentAftermarketPrice>> ConvertAftermarketPricesToUSDAsync(ICollection<CurrentAftermarketPrice> aftermarketPrices)
+        public async Task<ICollection<T>> ConvertAftermarketPricesToUSDAsync<T>(ICollection<T> aftermarketPrices) where T : class
         {
             var jsonContent = File.ReadAllText(filePath);
             var exchangeRatesUSD = JsonSerializer.Deserialize<ExchangeRate>(jsonContent);
 
+            var priceProperty = typeof(T).GetProperty("Price");
+            var currencyProperty = typeof(T).GetProperty("Currency");
+
+            if (priceProperty == null || currencyProperty == null)
+            {
+                throw new ArgumentException($"The type {typeof(T).Name} does not have the required properties 'Price' and 'Currency'.");
+            }
+
             foreach (var price in aftermarketPrices)
             {
-                if (price.Currency == "$")
+                var currency = currencyProperty.GetValue(price)?.ToString();
+                if (currency == "$")
                 {
-                    price.Currency = "USD";
+                    currencyProperty.SetValue(price, "USD");
                     continue;
                 }
 
-                string currencyCode = MapSymbolToCode(price.Currency);
+                string currencyCode = MapSymbolToCode(currency);
 
                 if (exchangeRatesUSD.Rates.TryGetValue(currencyCode, out var exchangeRate) &&
                                    decimal.TryParse(exchangeRate, NumberStyles.Any, CultureInfo.InvariantCulture, out var rate))
                 {
-                    price.Price = Math.Round(price.Price / rate, 2);
-                    price.Currency = "USD";
+                    var currentPrice = (decimal)priceProperty.GetValue(price);
+                    priceProperty.SetValue(price, Math.Round(currentPrice / rate, 2));
+                    currencyProperty.SetValue(price, "USD");
                 }
                 else
                 {
