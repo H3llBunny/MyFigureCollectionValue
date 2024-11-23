@@ -1,4 +1,5 @@
 ﻿namespace MyFigureCollectionValue.Models
+
 {
     public class FigureInListViewModel
     {

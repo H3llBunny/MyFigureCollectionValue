@@ -1,4 +1,4 @@
-﻿@model FigureInListViewModel
+﻿@model FigurePageViewModel
 
 @{
     @if (TempData["ErrorMessage"] != null)
@@ -16,16 +16,30 @@
     }
 }
 
-
-<div class="figure-card m-2">
-    <div class="figure-image" style="background-image: url('@Model.ImageUrl');">
-        <div class="figure-overlay">
-            <span class="title">@Model.Name</span>
+<div class="d-flex flex-wrap justify-content-center">
+    <div class="col-md-3 text-center" id="leftSide">
+        <div class="figureImage">
+            <img src="@Model.ImageUrl" />
         </div>
     </div>
-    </a>
-    <ul class="figure-info">
-        <li>Retail Price: <span class="figure-price">@Model.RetailPriceCurrency@Model.RetailPrice</span></li>
-        <li>Avg. Aftermarket Price: <span class="figure-price">@Model.AvgAftermarketPriceCurrency@Model.AvgCurrentAftermarketPrice</span></li>
-    </ul>
+    <div class="col-md-9" id="rightSide">
+        <ul class="figureInfo">
+            <li><h2>@Model.Name</h2></li>
+            <br />
+            <li><strong>Origin: </strong>@Model.Origin</li>
+            <li><strong>Company: </strong>@Model.Company</li>
+            <br />
+            <li class="position-relative">
+                <a class="text-decoration-none" style="color: white;" href="@Model.FigureUrl" target="_blank">
+                    <img class="mfc-logo" src="~/images/mfc-icon.webp" alt="@Model.FigureUrl" title="Open on MFC" />
+                    <span class="mfc-logo-text" title="Open on MFC">
+                        <span>MY<strong>FIGURE</strong>COLLECTION</span>
+                    </span>
+                </a>
+            </li>
+            <br />
+            <li><strong>Retail Price: </strong><span class="figure-price">@Model.RetailPriceCurrency@Model.RetailPrice</span></li>
+            <li><strong>Avg. Aftermarket Price: </strong><span class="figure-price">@Model.AvgAftermarketPriceCurrency@Model.AvgCurrentAftermarketPrice</span></li>
+        </ul>
+    </div>
 </div>

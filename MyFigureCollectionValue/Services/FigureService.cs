@@ -302,7 +302,7 @@ namespace MyFigureCollectionValue.Services
             }
         }
 
-        public async Task<FigureInListViewModel> GetFigureAsync(int figureId)
+        public async Task<FigurePageViewModel> GetFigureAsync(int figureId)
         {
             var figure = await _dbContext.Figures
                 .Where(f => f.Id == figureId)
@@ -319,11 +319,14 @@ namespace MyFigureCollectionValue.Services
                 await Task.WhenAll(retailPriceTask, aftermarketPriceTask);
             }
 
-            return new FigureInListViewModel
+            return new FigurePageViewModel
             {
                 Id = figure.Id,
                 Name = figure.Name,
                 ImageUrl = figure.Image,
+                Origin = figure.Origin,
+                Company = figure.Company,
+                FigureUrl = figure.FigureUrl,
                 RetailPrice = figure.RetailPrices?
                    .OrderByDescending(rp => rp.ReleaseDate)
                    .FirstOrDefault()?.Price ?? 0,
