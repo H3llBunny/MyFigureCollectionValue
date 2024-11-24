@@ -41,5 +41,106 @@
             <li><strong>Retail Price: </strong><span class="figure-price">@Model.RetailPriceCurrency@Model.RetailPrice</span></li>
             <li><strong>Avg. Aftermarket Price: </strong><span class="figure-price">@Model.AvgAftermarketPriceCurrency@Model.AvgCurrentAftermarketPrice</span></li>
         </ul>
+        <div id="figurePriceChart"></div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const aftermarketPrices = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.AftermarketPrices,
+            new Newtonsoft.Json.JsonSerializerSettings { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore }));
+
+        const prices = aftermarketPrices.sort((a, b) => new Date(a.LoggedAt) - new Date(b.LoggedAt));
+
+        Highcharts.setOptions({
+            time: {
+                useUTC: true
+            }
+        });
+
+        const priceData = prices.map(price => {
+            let date = new Date(price.LoggedAt);
+            date.setUTCHours(0, 0, 0, 0);
+            return [date.getTime(), price.Price];
+        });
+
+        Highcharts.chart('figurePriceChart', {
+            chart: {
+                type: 'line',
+                backgroundColor: '#333333',
+                style: {
+                    fontFamily: 'Arial, sans-serif'
+                }
+            },
+            title: {
+                text: 'Aftermarket Price Over Time',
+                style: {
+                    color: '#E0E0E0'
+                }
+            },
+            accessibility: {
+                enabled: false
+            },
+            xAxis: {
+                type: 'datetime',
+                title: {
+                    text: '<span style="font-weight:bold; font-size: 16px">Date</span>',
+                    margin: 10,
+                    style: {
+                        color: '#f48939'
+                    }
+                },
+                labels: {
+                    style: {
+                        color: '#E0E0E0'
+                    },
+                    formatter: function () {
+                        const utcDate = new Date(this.value);
+                        utcDate.setUTCHours(0, 0, 0, 0);
+                        return Highcharts.dateFormat('%e %b %Y', utcDate);
+                    }
+                },
+                lineColor: '#f48939',
+                tickColor: '#f48939'
+            },
+            yAxis: {
+                title: {
+                    text: '<span style="font-weight:bold; font-size: 16px">Price</span>',
+                    style: {
+                        color: '#f48939'
+                    }
+                },
+                labels: {
+                    style: {
+                        color: '#E0E0E0'
+                    },
+                    formatter: function () {
+                        return this.value + ' ' + 'USD';
+                    }
+                },
+                gridLineColor: '#707070'
+            },
+            legend: {
+                itemStyle: {
+                    color: '#E0E0E0'
+                },
+                itemHoverStyle: {
+                    color: '#FFFFFF'
+                }
+            },
+            series: [{
+                name: 'Price',
+                data: priceData,
+                color: '#f48939'
+            }],
+            tooltip: {
+                formatter: function () {
+                    return `<br>${Highcharts.dateFormat('%e %b %Y', this.x)}<br><strong style="color: #bc6c25">Price: </strong>${this.y} ${prices[0].Currency}`;
+                }
+            },
+            credits: {
+                enabled: false
+            }
+        });
+    });
+</script>

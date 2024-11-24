@@ -212,3 +212,9 @@ span.mfc-logo-text {
     font-size: 30px;
     bottom: 0;
 }
+
+div#figurePriceChart {
+    border-radius: 20px;
+    margin-left: 10px;
+    max-width: 1000px;
+}
