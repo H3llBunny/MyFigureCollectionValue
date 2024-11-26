@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using MyFigureCollectionValue.Data;
 using MyFigureCollectionValue.Models;
+using System.Linq;
 
 namespace MyFigureCollectionValue.Services
 {
@@ -118,17 +119,36 @@ namespace MyFigureCollectionValue.Services
             return await _dbContext.UserFigures.Where(u => u.UserId == userId).CountAsync();
         }
 
-        public async Task<IEnumerable<FigureInListViewModel>> GetAllFiguresAsync(string userId, int pageNumber, int figuresPerPage)
+        public async Task<IEnumerable<FigureInListViewModel>> GetAllFiguresAsync(string userId, int pageNumber, int figuresPerPage, string sortOrder)
         {
-            var figures = await _dbContext.UserFigures
+            var query = _dbContext.UserFigures
                 .Where(uf => uf.UserId == userId)
-                .Skip((pageNumber - 1) * figuresPerPage)
-                .Take(figuresPerPage)
                 .Include(uf => uf.Figure.RetailPrices)
                 .Include(uf => uf.Figure.CurrentAftermarketPrices)
                 .Include(uf => uf.Figure.AftermarketPrices)
                 .Select(f => f.Figure)
-                .AsNoTracking()
+                .AsNoTracking();
+
+            query = sortOrder switch
+            {
+                "retail_asc" => query.OrderBy(f => f.RetailPrices.Any() 
+                ? f.RetailPrices.OrderByDescending(rp => rp.ReleaseDate).FirstOrDefault().Price
+                : 0),
+                "retail_desc" => query.OrderByDescending(f => f.RetailPrices.Any()
+                ? f.RetailPrices.OrderByDescending(rp => rp.ReleaseDate).FirstOrDefault().Price
+                : 0),
+                "am_asc" => query.OrderBy(f => f.CurrentAftermarketPrices.Any() 
+                ? f.CurrentAftermarketPrices.Average(cap => cap.Price)
+                : 0),
+                "am_desc" => query.OrderByDescending(f => f.CurrentAftermarketPrices.Any()
+                ? f.CurrentAftermarketPrices.Average(cap => cap.Price)
+                : 0),
+                 _ => query
+            };
+
+            var figures = await query
+                .Skip((pageNumber - 1) * figuresPerPage)
+                .Take(figuresPerPage)
                 .ToListAsync();
 
             if (figures.Any())

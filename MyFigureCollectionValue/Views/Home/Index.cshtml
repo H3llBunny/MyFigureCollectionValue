@@ -53,6 +53,18 @@
                     <span class="total-value">Total Aftermarket Value: <span class="figure-price">$@Model.SumAvgAftermarketPriceCollection</span></span>
                 </div>
             </div>
+            <div class="sort-options">
+                <form id="sortForm" method="get" asp-action="Index">
+                    <input type="hidden" name="pageNumber" value="1" />
+                    <select name="sortOrder" onchange="document.getElementById('sortForm').submit()">
+                        <option value="default" selected="@(Model.SortOrder == "default")">Default</option>
+                        <option value="retail_asc" selected="@(Model.SortOrder == "retail_asc")">Retail: Ascending</option>
+                        <option value="retail_desc" selected="@(Model.SortOrder == "retail_desc")">Retail: Descending</option>
+                        <option value="am_asc" selected="@(Model.SortOrder == "am_asc")">Aftermarket: Ascending</option>
+                        <option value="am_desc" selected="@(Model.SortOrder == "am_desc")">Aftermarket: Descending</option>
+                    </select>
+                </form>
+            </div>
             <div class="figure-container justify-content-center">
                 @foreach (var figure in Model.Figures)
                 {

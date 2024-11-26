@@ -8,6 +8,8 @@
 
         public string FigureCollectionUsername { get; set; }
 
+        public string SortOrder { get; set; }
+
         public decimal SumRetailPriceCollection { get; set; }
 
         public decimal SumAvgAftermarketPriceCollection { get; set; }

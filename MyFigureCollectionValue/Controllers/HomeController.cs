@@ -24,7 +24,7 @@ namespace MyFigureCollectionValue.Controllers
             _currencyConverterService = currencyConverterService;
         }
 
-        public async Task<IActionResult> Index(int pageNumber = 1)
+        public async Task<IActionResult> Index(int pageNumber = 1, string sortOrder = "default")
         {
             if (!User.Identity.IsAuthenticated)
             {
@@ -39,7 +39,7 @@ namespace MyFigureCollectionValue.Controllers
             const int FiguresPerPage = 90;
 
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var figures = await _figureService.GetAllFiguresAsync(userId, pageNumber, FiguresPerPage);
+            var figures = await _figureService.GetAllFiguresAsync(userId, pageNumber, FiguresPerPage, sortOrder);
 
             if (figures.Any())
             {
@@ -50,6 +50,7 @@ namespace MyFigureCollectionValue.Controllers
                 {
                     FiguresPerPage = FiguresPerPage,
                     PageNumber = pageNumber,
+                    SortOrder = sortOrder,
                     UserId = userId,
                     FiguresCount = await _figureService.GetUserFiguresCountAsync(userId),
                     Figures = figures,

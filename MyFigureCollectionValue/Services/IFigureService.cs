@@ -22,7 +22,7 @@ namespace MyFigureCollectionValue.Services
 
         Task<int> GetUserFiguresCountAsync(string userId);
 
-        Task<IEnumerable<FigureInListViewModel>> GetAllFiguresAsync(string userId, int pageNumber, int figuresPerPage);
+        Task<IEnumerable<FigureInListViewModel>> GetAllFiguresAsync(string userId, int pageNumber, int figuresPerPage, string sortOrder);
 
         Task UpdateUserFigureCollectionUrlAsync(string userId, string url);
 
