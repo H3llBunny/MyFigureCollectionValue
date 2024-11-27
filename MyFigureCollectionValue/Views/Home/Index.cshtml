@@ -78,7 +78,11 @@
                         </a>
                         <ul class="figure-info">
                             <li>Retail Price: <span class="figure-price">@figure.RetailPriceCurrency@figure.RetailPrice</span></li>
-                            <li>Avg. Aftermarket Price: <span class="figure-price">@figure.AvgAftermarketPriceCurrency@figure.AvgCurrentAftermarketPrice</span></li>
+                            <li>Avg. Aftermarket Price: <span class="figure-price">
+                                    @(figure.AvgCurrentAftermarketPrice > 0 
+                                        ? figure.AvgAftermarketPriceCurrency + figure.AvgCurrentAftermarketPrice : "N/A")
+                                </span>
+                            </li>
                         </ul>
                     </div>
                 }
