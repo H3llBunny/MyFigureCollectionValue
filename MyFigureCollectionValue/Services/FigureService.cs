@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using MyFigureCollectionValue.Data;
 using MyFigureCollectionValue.Models;
-using System.Linq;
 
 namespace MyFigureCollectionValue.Services
 {
@@ -121,44 +120,46 @@ namespace MyFigureCollectionValue.Services
 
         public async Task<IEnumerable<FigureInListViewModel>> GetAllFiguresAsync(string userId, int pageNumber, int figuresPerPage, string sortOrder)
         {
-            var query = _dbContext.UserFigures
+            var figures = await _dbContext.UserFigures
                 .Where(uf => uf.UserId == userId)
                 .Include(uf => uf.Figure.RetailPrices)
                 .Include(uf => uf.Figure.CurrentAftermarketPrices)
-                .Include(uf => uf.Figure.AftermarketPrices)
                 .Select(f => f.Figure)
-                .AsNoTracking();
-
-            query = sortOrder switch
-            {
-                "retail_asc" => query.OrderBy(f => f.RetailPrices.Any() 
-                ? f.RetailPrices.OrderByDescending(rp => rp.ReleaseDate).FirstOrDefault().Price
-                : 0),
-                "retail_desc" => query.OrderByDescending(f => f.RetailPrices.Any()
-                ? f.RetailPrices.OrderByDescending(rp => rp.ReleaseDate).FirstOrDefault().Price
-                : 0),
-                "am_asc" => query.OrderBy(f => f.CurrentAftermarketPrices.Any() 
-                ? f.CurrentAftermarketPrices.Average(cap => cap.Price)
-                : 0),
-                "am_desc" => query.OrderByDescending(f => f.CurrentAftermarketPrices.Any()
-                ? f.CurrentAftermarketPrices.Average(cap => cap.Price)
-                : 0),
-                 _ => query
-            };
-
-            var figures = await query
-                .Skip((pageNumber - 1) * figuresPerPage)
-                .Take(figuresPerPage)
+                .AsNoTracking()
                 .ToListAsync();
 
-            if (figures.Any())
+
+            if (!figures.Any())
             {
-                var retailPriceTask = _currencyConverter.ConvertRetailPricesToUSDAsync(figures.SelectMany(f => f.RetailPrices).ToList());
-                var aftermarketPriceTask = _currencyConverter.ConvertAftermarketPricesToUSDAsync(figures.SelectMany(f => f.CurrentAftermarketPrices).ToList());
-                await Task.WhenAll(retailPriceTask, aftermarketPriceTask);
+                return Enumerable.Empty<FigureInListViewModel>();
             }
 
-            return figures.Select(f => new FigureInListViewModel
+            await _currencyConverter.ConvertRetailPricesToUSDAsync(figures.SelectMany(f => f.RetailPrices).ToList());
+            await _currencyConverter.ConvertAftermarketPricesToUSDAsync(figures.SelectMany(f => f.CurrentAftermarketPrices).ToList());
+
+            var sortedFigures = sortOrder switch
+            {
+                "retail_asc" => figures.OrderBy(f => f.RetailPrices.Any()
+                    ? f.RetailPrices.OrderByDescending(rp => rp.ReleaseDate).FirstOrDefault()?.Price ?? 0
+                    : 0).ToList(),
+                "retail_desc" => figures.OrderByDescending(f => f.RetailPrices.Any()
+                    ? f.RetailPrices.OrderByDescending(rp => rp.ReleaseDate).FirstOrDefault()?.Price ?? 0
+                    : 0).ToList(),
+                "am_asc" => figures.OrderBy(f => f.CurrentAftermarketPrices.Any()
+                    ? f.CurrentAftermarketPrices.Average(cap => cap.Price)
+                    : 0).ToList(),
+                "am_desc" => figures.OrderByDescending(f => f.CurrentAftermarketPrices.Any()
+                    ? f.CurrentAftermarketPrices.Average(cap => cap.Price)
+                    : 0).ToList(),
+                _ => figures
+            };
+
+            var paginatedFigures = sortedFigures
+                .Skip((pageNumber - 1) * figuresPerPage)
+                .Take(figuresPerPage)
+                .ToList();
+
+            return paginatedFigures.Select(f => new FigureInListViewModel
             {
                 Id = f.Id,
                 Name = f.Name,
@@ -167,11 +168,10 @@ namespace MyFigureCollectionValue.Services
                     .OrderByDescending(rp => rp.ReleaseDate)
                     .FirstOrDefault()?.Price ?? 0,
                 RetailPriceCurrency = DefaultCurrencySymbol,
-                AvgCurrentAftermarketPrice = f.CurrentAftermarketPrices != null && f.CurrentAftermarketPrices.Any()
+                AvgCurrentAftermarketPrice = f.CurrentAftermarketPrices.Any()
                     ? Math.Round(f.CurrentAftermarketPrices.Average(af => af.Price), 2)
-                    : (f.RetailPrices.OrderByDescending(rp => rp.ReleaseDate).FirstOrDefault()?.Price ?? 0),
-                AvgAftermarketPriceCurrency = DefaultCurrencySymbol,
-                AftermarketPrices = f.AftermarketPrices
+                    : 0,
+                AvgAftermarketPriceCurrency = DefaultCurrencySymbol
             });
         }
 
@@ -243,7 +243,7 @@ namespace MyFigureCollectionValue.Services
             return figures.Select((f =>
                 f.CurrentAftermarketPrices != null && f.CurrentAftermarketPrices.Any()
                     ? Math.Round(f.CurrentAftermarketPrices.Average(af => af.Price), 2)
-                    : f.RetailPrices.OrderByDescending(rp => rp.ReleaseDate).FirstOrDefault()?.Price ?? 0)
+                    : 0)
             ).Sum();
         }
 
