@@ -598,6 +598,8 @@ namespace MyFigureCollectionValue.Services
                         {
                             await Task.Delay(_delayRequest.Next(2000, 3000));
 
+                            await SetAuthenticatedCookies(url);
+
                             var document = await _context.OpenAsync(url);
 
                             var newFigure = await ScrapeFigure(document, url, figureId);
