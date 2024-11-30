@@ -351,9 +351,15 @@ namespace MyFigureCollectionValue.Services
                    .OrderByDescending(rp => rp.ReleaseDate)
                    .FirstOrDefault()?.Price ?? 0,
                 RetailPriceCurrency = DefaultCurrencySymbol,
+                LowestAftermarketPeice = figure.AftermarketPrices.Any()
+                    ? figure.AftermarketPrices.MinBy(ap => ap.Price)
+                    : null,
+                HighestAftermarketPrice = figure.AftermarketPrices.Any()
+                    ? figure.AftermarketPrices.MaxBy(ap => ap.Price)
+                    : null,
                 AvgCurrentAftermarketPrice = figure.CurrentAftermarketPrices.Any()
-                   ? Math.Round(figure.CurrentAftermarketPrices.Average(af => af.Price), 2)
-                   : 0,
+                    ? Math.Round(figure.CurrentAftermarketPrices.Average(af => af.Price), 2)
+                    : 0,
                 AvgAftermarketPriceCurrency = DefaultCurrencySymbol,
                 AftermarketPrices = figure.AftermarketPrices
             };

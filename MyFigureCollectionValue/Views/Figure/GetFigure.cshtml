@@ -21,6 +21,22 @@
         <div class="figureImage">
             <img src="@Model.ImageUrl" />
         </div>
+        <div class="lowest-price">
+            <storng>Lowest Aftermarket Price: </storng><span class="figure-price">
+                @(Model.LowestAftermarketPeice != null
+                    ? (Model.LowestAftermarketPeice.Currency == "USD" 
+                    ? "$" : Model.LowestAftermarketPeice.Currency) 
+                    + Model.LowestAftermarketPeice.Price : "N/A")
+            </span>
+        </div>
+        <div class="highest-price">
+            <storng>Highest Aftermarket Price: </storng><span class="figure-price">
+                @(Model.HighestAftermarketPrice != null
+                    ? (Model.HighestAftermarketPrice.Currency == "USD"
+                    ? "$" : Model.HighestAftermarketPrice.Currency)
+                    + Model.HighestAftermarketPrice.Price : "N/A")
+            </span>
+        </div>
     </div>
     <div class="col-md-9" id="rightSide">
         <ul class="figureInfo">
@@ -39,9 +55,12 @@
             </li>
             <br />
             <li><strong>Retail Price: </strong><span class="figure-price">@Model.RetailPriceCurrency@Model.RetailPrice</span></li>
-            <li><strong>Avg. Aftermarket Price: </strong><span class="figure-price">
-                @(Model.AvgCurrentAftermarketPrice > 0 
-                ? Model.AvgAftermarketPriceCurrency + Model.AvgCurrentAftermarketPrice : "N/A")</span></li>
+            <li>
+                <strong>Avg. Aftermarket Price: </strong><span class="figure-price">
+                    @(Model.AvgCurrentAftermarketPrice > 0
+                        ? Model.AvgAftermarketPriceCurrency + Model.AvgCurrentAftermarketPrice : "N/A")
+                </span>
+            </li>
         </ul>
         <div id="figurePriceChart"></div>
     </div>
