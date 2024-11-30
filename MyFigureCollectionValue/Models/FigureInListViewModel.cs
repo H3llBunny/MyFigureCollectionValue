@@ -21,6 +21,8 @@
 
         public string AvgAftermarketPriceCurrency { get; set; }
 
+        public decimal PurchasedPrice { get; set; }
+
         public ICollection<AftermarketPrice> AftermarketPrices { get; set; }
     }
 }

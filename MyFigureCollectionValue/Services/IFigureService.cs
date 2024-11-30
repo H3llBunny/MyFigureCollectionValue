@@ -42,8 +42,10 @@ namespace MyFigureCollectionValue.Services
 
         Task UpdateRetailPricesAsync(ICollection<RetailPrice> retailPrices);
 
-        Task<FigurePageViewModel> GetFigureAsync(int figureId);
+        Task<FigurePageViewModel> GetFigureAsync(int figureId, string userId);
 
         bool IsSameUserFigureCollection(string userId, string profileUrl);
+
+        Task AddPurchasePriceAsync(string userId, int figureId, decimal priceValue);
     }
 }

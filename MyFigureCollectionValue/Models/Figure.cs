@@ -10,6 +10,7 @@ namespace MyFigureCollectionValue.Models
             this.CurrentAftermarketPrices = new HashSet<CurrentAftermarketPrice>();
             this.RetailPrices = new HashSet<RetailPrice>();
             this.UserFigures = new HashSet<UserFigure>();
+            this.UserPurchasePrices = new HashSet<UserPurchasePrices>();
         }
 
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
@@ -36,5 +37,7 @@ namespace MyFigureCollectionValue.Models
         public ICollection<RetailPrice> RetailPrices { get; set; }
 
         public ICollection<UserFigure> UserFigures { get; set; }
+
+        public ICollection<UserPurchasePrices> UserPurchasePrices { get; set; }
     }
 }

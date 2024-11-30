@@ -327,13 +327,14 @@ namespace MyFigureCollectionValue.Services
             }
         }
 
-        public async Task<FigurePageViewModel> GetFigureAsync(int figureId)
+        public async Task<FigurePageViewModel> GetFigureAsync(int figureId, string userId)
         {
             var figure = await _dbContext.Figures
                 .Where(f => f.Id == figureId)
                 .Include(f => f.RetailPrices)
                 .Include(f => f.CurrentAftermarketPrices)
                 .Include(f => f.AftermarketPrices)
+                .Include(f => f.UserPurchasePrices)
                 .FirstOrDefaultAsync();
 
             if (figure != null)
@@ -366,8 +367,34 @@ namespace MyFigureCollectionValue.Services
                     ? Math.Round(figure.CurrentAftermarketPrices.Average(af => af.Price), 2)
                     : 0,
                 AvgAftermarketPriceCurrency = DefaultCurrencySymbol,
-                AftermarketPrices = figure.AftermarketPrices
+                AftermarketPrices = figure.AftermarketPrices,
+                PurchasedPrice = Math.Round(figure.UserPurchasePrices.FirstOrDefault(up => up.UserId == userId)?.Price ?? 0, 2)
             };
+        }
+
+        public async Task AddPurchasePriceAsync(string userId, int figureId, decimal priceValue)
+        {
+            var existingPrice = await _dbContext.UserPurchasePrices
+                .FirstOrDefaultAsync(up => up.UserId == userId && up.FigureId == figureId);
+
+            if (existingPrice != null)
+            {
+                existingPrice.Price = priceValue;
+                _dbContext.UserPurchasePrices.Update(existingPrice);
+            }
+            else
+            {
+
+                var price = new UserPurchasePrices
+                {
+                    UserId = userId,
+                    FigureId = figureId,
+                    Price = priceValue
+                };
+                await _dbContext.UserPurchasePrices.AddAsync(price);
+            }
+
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

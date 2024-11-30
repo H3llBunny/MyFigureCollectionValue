@@ -231,3 +231,25 @@ div.lowMaxPrice {
 div.sort-options {
     padding-top: 10px;
 }
+
+.input-unstyled {
+    border: 1px solid white;
+    background: transparent;
+    outline: none;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+    width: 100px;
+    text-align: center;
+}
+
+    .input-unstyled:focus {
+        border: 1px solid #ced4da;
+        outline: none;
+        box-shadow: none;
+    }
+
+    .input-unstyled::placeholder {
+        color: white;
+        opacity: 1;
+    }

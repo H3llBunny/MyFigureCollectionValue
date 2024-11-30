@@ -3,16 +3,16 @@
 @{
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger d-flex justify-content-center align-items-center">
-            @TempData["ErrorMessage"]
-        </div>
+                    <div class="alert alert-danger d-flex justify-content-center align-items-center">
+                        @TempData["ErrorMessage"]
+                    </div>
     }
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success d-flex justify-content-center align-items-center">
-            @TempData["SuccessMessage"]
-        </div>
+                    <div class="alert alert-success d-flex justify-content-center align-items-center">
+                        @TempData["SuccessMessage"]
+                    </div>
     }
 }
 
@@ -56,6 +56,30 @@
                 </a>
             </li>
             <br />
+            <li>
+                <div class="d-flex align-items-center">
+                    <strong class="me-2">Paid: </strong>
+                    <span class="d-flex align-items-center">
+                        <span id="displayPrice" class="figure-price me-2">
+                            @(Model.PurchasedPrice > 0
+                                ? "$" + Model.PurchasedPrice
+                                : "N/A")
+                        </span>
+                        <form asp-action="AddPurchasePrice" method="post" class="d-flex">
+                            <input type="hidden" name="figureId" value="@Model.Id" />
+                            <input type="text" 
+                                   name="price" 
+                                   placeholder="Purchased for $?" 
+                                   class="form-control form-control-sm input-unstyled" 
+                                   oninput="toggleSubmitButton(this)" />
+                            <button type="submit"
+                                    id="submitPriceButton"
+                                    class="btn btn-primary btn-sm ms-2"
+                                    style="display: none;">Submit</button>
+                        </form>
+                    </span>
+                </div>
+            </li>
             <li><strong>Retail Price: </strong><span class="figure-price">@Model.RetailPriceCurrency@Model.RetailPrice</span></li>
             <li>
                 <strong>Avg. Aftermarket Price: </strong><span class="figure-price">
@@ -69,6 +93,15 @@
 </div>
 
 <script>
+    function toggleSubmitButton(input) {
+        const submitButton = document.getElementById('submitPriceButton');
+        if (input.value.trim() !== "") {
+            submitButton.style.display = 'inline-block';
+        } else {
+            submitButton.style.display = 'none';
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const aftermarketPrices = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.AftermarketPrices,
             new Newtonsoft.Json.JsonSerializerSettings { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore }));

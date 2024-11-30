@@ -23,6 +23,8 @@ namespace MyFigureCollectionValue.Data
 
         public DbSet<UserFigureCollectionUrl> UserFigureCollectionUrls { get; set; }
 
+        public DbSet<UserPurchasePrices> UserPurchasePrices { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -63,6 +65,19 @@ namespace MyFigureCollectionValue.Data
                 .HasOne(u => u.User)
                 .WithOne()
                 .HasForeignKey<UserFigureCollectionUrl>(u => u.UserId);
+
+            builder.Entity<UserPurchasePrices>()
+                .HasKey(up => new { up.UserId, up.FigureId });
+
+            builder.Entity<UserPurchasePrices>()
+                .HasOne(up => up.User)
+                .WithMany()
+                .HasForeignKey(up => up.UserId);
+
+            builder.Entity<UserPurchasePrices>()
+                .HasOne(up => up.Figure)
+                .WithMany(f => f.UserPurchasePrices)
+                .HasForeignKey(up => up.FigureId);
         }
     }
 }
