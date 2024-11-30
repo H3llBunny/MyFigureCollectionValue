@@ -21,21 +21,23 @@
         <div class="figureImage">
             <img src="@Model.ImageUrl" />
         </div>
-        <div class="lowest-price">
-            <storng>Lowest Aftermarket Price: </storng><span class="figure-price">
-                @(Model.LowestAftermarketPeice != null
-                    ? (Model.LowestAftermarketPeice.Currency == "USD" 
-                    ? "$" : Model.LowestAftermarketPeice.Currency) 
-                    + Model.LowestAftermarketPeice.Price : "N/A")
-            </span>
-        </div>
-        <div class="highest-price">
-            <storng>Highest Aftermarket Price: </storng><span class="figure-price">
-                @(Model.HighestAftermarketPrice != null
-                    ? (Model.HighestAftermarketPrice.Currency == "USD"
-                    ? "$" : Model.HighestAftermarketPrice.Currency)
-                    + Model.HighestAftermarketPrice.Price : "N/A")
-            </span>
+        <div class="lowMaxPrice">
+            <div class="lowest-price">
+                <storng>Lowest Aftermarket Price: </storng><span class="figure-price">
+                    @(Model.LowestAftermarketPeice != null
+                        ? (Model.LowestAftermarketPeice.Currency == "USD"
+                        ? "$" : Model.LowestAftermarketPeice.Currency)
+                        + Model.LowestAftermarketPeice.Price : "N/A")
+                </span>
+            </div>
+            <div class="highest-price">
+                <storng>Highest Aftermarket Price: </storng><span class="figure-price">
+                    @(Model.HighestAftermarketPrice != null
+                        ? (Model.HighestAftermarketPrice.Currency == "USD"
+                        ? "$" : Model.HighestAftermarketPrice.Currency)
+                        + Model.HighestAftermarketPrice.Price : "N/A")
+                </span>
+            </div>
         </div>
     </div>
     <div class="col-md-9" id="rightSide">

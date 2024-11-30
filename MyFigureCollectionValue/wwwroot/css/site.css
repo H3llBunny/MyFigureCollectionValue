@@ -222,3 +222,12 @@ div#figurePriceChart {
 .lowest-price, .highest-price {
     font-size: 20px;
 }
+
+div.lowMaxPrice {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+div.sort-options {
+    padding-top: 10px;
+}
