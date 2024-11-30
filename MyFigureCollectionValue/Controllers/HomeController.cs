@@ -95,6 +95,14 @@ namespace MyFigureCollectionValue.Controllers
                 TempData["ErrorMessage"] = "Service Unavailable (rush hour), please try again later.";
                 return RedirectToAction(nameof(Index));
             }
+            
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (_figureService.IsSameUserFigureCollection(userId, profileUrl))
+            {
+                TempData["ErrorMessage"] = "Same user collection, please provide a different url.";
+                return RedirectToAction(nameof(Index));
+            }
 
             List<string> links = new List<string>();
 
@@ -107,8 +115,6 @@ namespace MyFigureCollectionValue.Controllers
                 TempData["ErrorMessage"] = ex.Message;
                 return RedirectToAction(nameof(Index));
             }
-
-            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             await _figureService.RemoveUserFiguresAsync(userId);
 

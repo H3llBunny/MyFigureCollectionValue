@@ -175,6 +175,11 @@ namespace MyFigureCollectionValue.Services
             });
         }
 
+        public bool IsSameUserFigureCollection(string userId, string profileUrl)
+        {
+            return _dbContext.UserFigureCollectionUrls.Any(uf => uf.UserId == userId && uf.FigureCollectionUrl == profileUrl);
+        }
+
         public async Task UpdateUserFigureCollectionUrlAsync(string userId, string url)
         {
             var user = await _dbContext.UserFigureCollectionUrls.FirstOrDefaultAsync(u => u.UserId == userId);
