@@ -14,6 +14,8 @@
 
         public decimal SumAvgAftermarketPriceCollection { get; set; }
 
+        public decimal TotalPaid { get; set; }
+
         public IEnumerable<FigureInListViewModel> Figures { get; set; }
     }
 }

@@ -124,6 +124,7 @@ namespace MyFigureCollectionValue.Services
                 .Where(uf => uf.UserId == userId)
                 .Include(uf => uf.Figure.RetailPrices)
                 .Include(uf => uf.Figure.CurrentAftermarketPrices)
+                .Include(uf => uf.Figure.UserPurchasePrices)
                 .Select(f => f.Figure)
                 .AsNoTracking()
                 .ToListAsync();
@@ -171,7 +172,8 @@ namespace MyFigureCollectionValue.Services
                 AvgCurrentAftermarketPrice = f.CurrentAftermarketPrices.Any()
                     ? Math.Round(f.CurrentAftermarketPrices.Average(af => af.Price), 2)
                     : 0,
-                AvgAftermarketPriceCurrency = DefaultCurrencySymbol
+                AvgAftermarketPriceCurrency = DefaultCurrencySymbol,
+                PurchasedPrice = Math.Round(f.UserPurchasePrices.FirstOrDefault(up => up.UserId == userId)?.Price ?? 0, 2)
             });
         }
 
@@ -227,6 +229,14 @@ namespace MyFigureCollectionValue.Services
                           .OrderByDescending(rp => rp.ReleaseDate)
                           .FirstOrDefault()?.Price ?? 0).Sum();
 
+        }
+
+        public async Task<decimal> SumUserPurchasePriceAsync(string userId)
+        {
+            return Math.Round(await _dbContext.UserPurchasePrices
+                .Where(up => up.UserId == userId)
+                .DefaultIfEmpty()
+                .SumAsync(up => up != null ? up.Price : 0), 2);
         }
 
         public async Task<decimal> SumAvgAftermarketPriceCollectionAsync(string userId)

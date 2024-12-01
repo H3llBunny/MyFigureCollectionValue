@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyFigureCollectionValue.Services;
+using System.Globalization;
 using System.Security.Claims;
 
 namespace MyFigureCollectionValue.Controllers
@@ -39,7 +40,7 @@ namespace MyFigureCollectionValue.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            if (!decimal.TryParse(price, out decimal priceValue))
+            if (!decimal.TryParse(price, CultureInfo.InvariantCulture, out decimal priceValue))
             {
                 TempData["ErrorMessage"] = "Invalid price format. Please enter a valid number.";
                 return RedirectToAction(nameof(GetFigure), new { figureId });

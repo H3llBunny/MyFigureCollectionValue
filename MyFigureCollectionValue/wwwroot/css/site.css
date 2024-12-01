@@ -233,13 +233,13 @@ div.sort-options {
 }
 
 .input-unstyled {
-    border: 1px solid white;
+    border: 1px solid #f48939;
     background: transparent;
     outline: none;
     box-shadow: none;
     padding: 0;
     margin: 0;
-    width: 100px;
+    width: 120px;
     text-align: center;
 }
 
@@ -250,6 +250,10 @@ div.sort-options {
     }
 
     .input-unstyled::placeholder {
-        color: white;
+        color: #f48939;
         opacity: 1;
+    }
+
+    .input-unstyled:focus::placeholder {
+        color: transparent;
     }

@@ -57,7 +57,8 @@ namespace MyFigureCollectionValue.Controllers
                     UserFigureCollectionUrl = userFigureCollectionUrl,
                     FigureCollectionUsername = figureCollectionUsername,
                     SumRetailPriceCollection = await _figureService.SumRetailPriceCollectionAsync(userId),
-                    SumAvgAftermarketPriceCollection = await _figureService.SumAvgAftermarketPriceCollectionAsync(userId)
+                    SumAvgAftermarketPriceCollection = await _figureService.SumAvgAftermarketPriceCollectionAsync(userId),
+                    TotalPaid = await _figureService.SumUserPurchasePriceAsync(userId)
                 };
 
                 return View(figuresViewModel);
