@@ -69,12 +69,18 @@
                             <input type="hidden" name="figureId" value="@Model.Id" />
                             <input type="text" 
                                    name="price" 
-                                   placeholder="Purchased for $ ?" 
+                                   placeholder="Purchased for ?" 
                                    class="form-control form-control-sm input-unstyled" 
                                    oninput="toggleSubmitButton(this)" />
+                            <select name="currency" id="currency-selector" class="form-select form-select-sm">
+                                @foreach(var currency in Model.SupportedCurrencies)
+                                {
+                                    <option value=@currency>@currency</option>
+                                }
+                            </select>
                             <button type="submit"
                                     id="submitPriceButton"
-                                    class="btn btn-primary btn-sm ms-2"
+                                    class="btn btn-primary btn-sm"
                                     style="display: none;">Submit</button>
                         </form>
                     </span>

@@ -7,5 +7,7 @@
         public string Company { get; set; }
 
         public string FigureUrl { get; set; }
+
+        public ICollection<string> SupportedCurrencies { get; set; }
     }
 }

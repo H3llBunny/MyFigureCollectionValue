@@ -10,6 +10,7 @@ namespace MyFigureCollectionValue.Services
         private readonly ApplicationDbContext _dbContext;
         private readonly ICurrencyConverterService _currencyConverter;
         private const string DefaultCurrencySymbol = "$";
+        private ICollection<string> SupportedCurrencies = new List<string> { "$", "€", "A$", "C$", "£", "HK$", "¥" };
 
         public FigureService(ApplicationDbContext dbContext, ICurrencyConverterService currencyConverter)
         {
@@ -378,7 +379,8 @@ namespace MyFigureCollectionValue.Services
                     : 0,
                 AvgAftermarketPriceCurrency = DefaultCurrencySymbol,
                 AftermarketPrices = figure.AftermarketPrices,
-                PurchasedPrice = Math.Round(figure.UserPurchasePrices.FirstOrDefault(up => up.UserId == userId)?.Price ?? 0, 2)
+                PurchasedPrice = Math.Round(figure.UserPurchasePrices.FirstOrDefault(up => up.UserId == userId)?.Price ?? 0, 2),
+                SupportedCurrencies = SupportedCurrencies
             };
         }
 
