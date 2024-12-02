@@ -48,6 +48,8 @@ namespace MyFigureCollectionValue.Services
 
         bool IsSameUserFigureCollection(string userId, string profileUrl);
 
-        Task AddPurchasePriceAsync(string userId, int figureId, decimal priceValue);
+        Task AddPurchasePriceAsync(string userId, int figureId, decimal priceValue, string currency);
+
+        bool IsCurrencySupported(string currency);
     }
 }

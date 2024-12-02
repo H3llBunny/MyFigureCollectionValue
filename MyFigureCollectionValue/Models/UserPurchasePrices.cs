@@ -13,5 +13,7 @@ namespace MyFigureCollectionValue.Models
         public Figure Figure { get; set; }
 
         public decimal Price { get; set; }
+
+        public string Currency { get; set; }
     }
 }

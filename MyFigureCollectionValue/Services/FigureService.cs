@@ -137,7 +137,8 @@ namespace MyFigureCollectionValue.Services
             }
 
             await _currencyConverter.ConvertRetailPricesToUSDAsync(figures.SelectMany(f => f.RetailPrices).ToList());
-            await _currencyConverter.ConvertAftermarketPricesToUSDAsync(figures.SelectMany(f => f.CurrentAftermarketPrices).ToList());
+            _currencyConverter.ConvertAftermarketAndUserPurchasePricesToUSD(figures.SelectMany(f => f.CurrentAftermarketPrices).ToList());
+            _currencyConverter.ConvertAftermarketAndUserPurchasePricesToUSD(figures.SelectMany(f => f.UserPurchasePrices).ToList());
 
             var sortedFigures = sortOrder switch
             {
@@ -234,10 +235,13 @@ namespace MyFigureCollectionValue.Services
 
         public async Task<decimal> SumUserPurchasePriceAsync(string userId)
         {
-            return Math.Round(await _dbContext.UserPurchasePrices
+            var purchasePricesList = await _dbContext.UserPurchasePrices
                 .Where(up => up.UserId == userId)
-                .DefaultIfEmpty()
-                .SumAsync(up => up != null ? up.Price : 0), 2);
+                .ToListAsync();
+
+            var convertedPrices = _currencyConverter.ConvertAftermarketAndUserPurchasePricesToUSD(purchasePricesList);
+
+            return Math.Round(convertedPrices.Sum(p => p.Price), 2);
         }
 
         public async Task<decimal> SumAvgAftermarketPriceCollectionAsync(string userId)
@@ -254,7 +258,7 @@ namespace MyFigureCollectionValue.Services
                 return 0;
             }
 
-            await _currencyConverter.ConvertAftermarketPricesToUSDAsync(figures.SelectMany(f => f.CurrentAftermarketPrices).ToList());
+            _currencyConverter.ConvertAftermarketAndUserPurchasePricesToUSD(figures.SelectMany(f => f.CurrentAftermarketPrices).ToList());
 
             return figures.Select((f =>
                 f.CurrentAftermarketPrices != null && f.CurrentAftermarketPrices.Any()
@@ -348,12 +352,23 @@ namespace MyFigureCollectionValue.Services
                 .Include(f => f.UserPurchasePrices)
                 .FirstOrDefaultAsync();
 
-            if (figure != null)
+            decimal purchasedPrice = 0;
+
+            if (figure == null)
             {
-                var retailPriceTask = _currencyConverter.ConvertRetailPricesToUSDAsync(figure.RetailPrices);
-                var currentAftermarketPriceTask = _currencyConverter.ConvertAftermarketPricesToUSDAsync(figure.CurrentAftermarketPrices);
-                var aftermarketPriceTask = _currencyConverter.ConvertAftermarketPricesToUSDAsync(figure.AftermarketPrices);
-                await Task.WhenAll(retailPriceTask, aftermarketPriceTask);
+                throw new KeyNotFoundException($"Figure with ID {figureId} not found.");
+            }
+
+            var retailPriceTask = await _currencyConverter.ConvertRetailPricesToUSDAsync(figure.RetailPrices);
+            var currentAftermarketPriceTask = _currencyConverter.ConvertAftermarketAndUserPurchasePricesToUSD(figure.CurrentAftermarketPrices);
+            var aftermarketPriceTask = _currencyConverter.ConvertAftermarketAndUserPurchasePricesToUSD(figure.AftermarketPrices);
+
+            var purchasedPriceModel = figure.UserPurchasePrices.FirstOrDefault(up => up.UserId == userId);
+
+            if (purchasedPriceModel != null && purchasedPriceModel.Price > 0)
+            {
+                var convertedPrices = _currencyConverter.ConvertAftermarketAndUserPurchasePricesToUSD(new List<UserPurchasePrices>() { purchasedPriceModel });
+                purchasedPrice = convertedPrices.First().Price;
             }
 
             return new FigurePageViewModel
@@ -379,12 +394,12 @@ namespace MyFigureCollectionValue.Services
                     : 0,
                 AvgAftermarketPriceCurrency = DefaultCurrencySymbol,
                 AftermarketPrices = figure.AftermarketPrices,
-                PurchasedPrice = Math.Round(figure.UserPurchasePrices.FirstOrDefault(up => up.UserId == userId)?.Price ?? 0, 2),
+                PurchasedPrice = Math.Round(purchasedPrice, 2),
                 SupportedCurrencies = SupportedCurrencies
             };
         }
 
-        public async Task AddPurchasePriceAsync(string userId, int figureId, decimal priceValue)
+        public async Task AddPurchasePriceAsync(string userId, int figureId, decimal priceValue, string currency)
         {
             var existingPrice = await _dbContext.UserPurchasePrices
                 .FirstOrDefaultAsync(up => up.UserId == userId && up.FigureId == figureId);
@@ -392,6 +407,7 @@ namespace MyFigureCollectionValue.Services
             if (existingPrice != null)
             {
                 existingPrice.Price = priceValue;
+                existingPrice.Currency = currency;
                 _dbContext.UserPurchasePrices.Update(existingPrice);
             }
             else
@@ -401,12 +417,19 @@ namespace MyFigureCollectionValue.Services
                 {
                     UserId = userId,
                     FigureId = figureId,
-                    Price = priceValue
+                    Price = priceValue,
+                    Currency = currency
                 };
+
                 await _dbContext.UserPurchasePrices.AddAsync(price);
             }
 
             await _dbContext.SaveChangesAsync();
+        }
+
+        public bool IsCurrencySupported(string currency)
+        {
+            return SupportedCurrencies.Contains(currency);
         }
     }
 }

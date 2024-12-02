@@ -32,7 +32,7 @@ namespace MyFigureCollectionValue.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> AddPurchasePrice(int figureId, string price)
+        public async Task<IActionResult> AddPurchasePrice(int figureId, string price, string currency)
         {
             if (!await _figureService.DoesFigureExistAsync(figureId))
             {
@@ -40,22 +40,47 @@ namespace MyFigureCollectionValue.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            if (!decimal.TryParse(price, CultureInfo.InvariantCulture, out decimal priceValue))
+            if (!_figureService.IsCurrencySupported(currency))
+            {
+                TempData["ErrorMessage"] = "Currency not supported.";
+                return RedirectToAction(nameof(GetFigure), new { figureId });
+            }
+
+            price = price.Replace(" ", "");
+
+            if (currency == "$" || currency == "£" || currency == "A$" || currency == "C$" || currency == "HK$")
+            {
+                price = price.Replace(",", ".");
+            }
+
+            CultureInfo cultureInfo = currency switch
+            {
+                "$" => new CultureInfo("en-US"), 
+                "€" => new CultureInfo("fr-FR"), 
+                "A$" => new CultureInfo("en-AU"),
+                "C$" => new CultureInfo("en-CA"),
+                "£" => new CultureInfo("en-GB"), 
+                "HK$" => new CultureInfo("zh-HK"),
+                "¥" => new CultureInfo("ja-JP"), 
+            };
+
+            if (!decimal.TryParse(price, NumberStyles.Any, cultureInfo, out decimal parsedPrice))
             {
                 TempData["ErrorMessage"] = "Invalid price format. Please enter a valid number.";
                 return RedirectToAction(nameof(GetFigure), new { figureId });
             }
 
-            if (priceValue < 0)
+            if (parsedPrice < 0)
             {
                 TempData["ErrorMessage"] = "Price must be a positive number.";
                 return RedirectToAction(nameof(GetFigure), new { figureId });
             }
 
+
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             try
             {
-                await _figureService.AddPurchasePriceAsync(userId, figureId, priceValue);
+                await _figureService.AddPurchasePriceAsync(userId, figureId, parsedPrice, currency);
                 TempData["SuccessMessage"] = "Purchase price added successfully.";
             }
             catch (Exception ex)
