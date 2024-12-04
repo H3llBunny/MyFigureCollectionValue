@@ -48,11 +48,6 @@ namespace MyFigureCollectionValue.Controllers
 
             price = price.Replace(" ", "");
 
-            if (currency == "$" || currency == "£" || currency == "A$" || currency == "C$" || currency == "HK$")
-            {
-                price = price.Replace(",", ".");
-            }
-
             CultureInfo cultureInfo = currency switch
             {
                 "$" => new CultureInfo("en-US"), 

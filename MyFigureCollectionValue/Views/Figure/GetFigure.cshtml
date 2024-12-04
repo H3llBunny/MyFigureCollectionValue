@@ -1,4 +1,5 @@
 ﻿@model FigurePageViewModel
+@using System.Globalization
 
 @{
     @if (TempData["ErrorMessage"] != null)
@@ -27,7 +28,7 @@
                     @(Model.LowestAftermarketPeice != null
                         ? (Model.LowestAftermarketPeice.Currency == "USD"
                         ? "$" : Model.LowestAftermarketPeice.Currency)
-                        + Model.LowestAftermarketPeice.Price : "N/A")
+                        + Model.LowestAftermarketPeice.Price.ToString("N2", new CultureInfo("en-US")) : "N/A")
                 </span>
             </div>
             <div class="highest-price">
@@ -35,7 +36,7 @@
                     @(Model.HighestAftermarketPrice != null
                         ? (Model.HighestAftermarketPrice.Currency == "USD"
                         ? "$" : Model.HighestAftermarketPrice.Currency)
-                        + Model.HighestAftermarketPrice.Price : "N/A")
+                        + Model.HighestAftermarketPrice.Price.ToString("N2", new CultureInfo("en-US")) : "N/A")
                 </span>
             </div>
         </div>
@@ -62,7 +63,7 @@
                     <span class="d-flex align-items-center">
                         <span id="displayPrice" class="figure-price me-2">
                             @(Model.PurchasedPrice > 0
-                                ? "$" + Model.PurchasedPrice
+                                ? "$" + Model.PurchasedPrice.ToString("N2", new CultureInfo("en-US"))
                                 : "N/A")
                         </span>
                         <form asp-action="AddPurchasePrice" method="post" class="d-flex">
@@ -86,13 +87,13 @@
                     </span>
                 </div>
             </li>
-            <li><strong>Retail Price: </strong><span class="figure-price">@(Model.RetailPrice > 0 
-                ? Model.RetailPriceCurrency + Model.RetailPrice 
-                : "N/A")</span></li>
+            <li><strong>Retail Price: </strong><span class="figure-price">@(Model.RetailPrice > 0
+                        ? Model.RetailPriceCurrency + Model.RetailPrice.ToString("N2", new CultureInfo("en-US"))
+                        : "N/A")</span></li>
             <li>
                 <strong>Avg. Aftermarket Price: </strong><span class="figure-price">
                     @(Model.AvgCurrentAftermarketPrice > 0
-                        ? Model.AvgAftermarketPriceCurrency + Model.AvgCurrentAftermarketPrice : "N/A")
+                        ? Model.AvgAftermarketPriceCurrency + Model.AvgCurrentAftermarketPrice.ToString("N2", new CultureInfo("en-US")) : "N/A")
                 </span>
             </li>
         </ul>

@@ -1,4 +1,6 @@
 ﻿@model FiguresListViewModel
+@using System.Globalization;
+
 @{
     @if (TempData["ErrorMessage"] != null)
     {
@@ -49,9 +51,21 @@
         {
             <div class="collection-value d-flex justify-content-center">
                 <div class="value-box">
-                    <span class="total-value">Total Paid: <span class="figure-price">$@Model.TotalPaid</span></span>
-                    <span class="total-value">Total Retail Value: <span class="figure-price">$@Model.SumRetailPriceCollection</span></span>
-                    <span class="total-value">Total Aftermarket Value: <span class="figure-price">$@Model.SumAvgAftermarketPriceCollection</span></span>
+                    <span class="total-value">
+                        Total Paid: <span class="figure-price">
+                            $@Model.TotalPaid.ToString("N2", new CultureInfo("en-US"))
+                        </span>
+                    </span>
+                    <span class="total-value">
+                        Total Retail Value: <span class="figure-price">
+                            $@Model.SumRetailPriceCollection.ToString("N2", new CultureInfo("en-US"))
+                        </span>
+                    </span>
+                    <span class="total-value">
+                        Total Aftermarket Value: <span class="figure-price">
+                            $@Model.SumAvgAftermarketPriceCollection.ToString("N2", new CultureInfo("en-US"))
+                        </span>
+                    </span>
                 </div>
             </div>
             <div class="sort-options">
@@ -78,14 +92,22 @@
                             </div>
                         </a>
                         <ul class="figure-info">
-                            <li>Purchased for: <span class="figure-price">
-                                @(figure.PurchasedPrice > 0 ? "$" + figure.PurchasedPrice : "N/A")</span></li>
-                            <li>Retail Price: <span class="figure-price">@(figure.RetailPrice > 0 
-                                ? figure.RetailPriceCurrency + figure.RetailPrice 
-                                : "N/A")</span></li>
-                            <li>Avg. Aftermarket Price: <span class="figure-price">
-                                    @(figure.AvgCurrentAftermarketPrice > 0 
-                                        ? figure.AvgAftermarketPriceCurrency + figure.AvgCurrentAftermarketPrice : "N/A")
+                            <li>
+                                Purchased for: <span class="figure-price">
+                                    @(figure.PurchasedPrice > 0 ? "$" + figure.PurchasedPrice.ToString("N2", new CultureInfo("en-US")) : "N/A")
+                                </span>
+                            </li>
+                            <li>
+                                Retail Price: <span class="figure-price">
+                                    @(figure.RetailPrice > 0
+                                    ? figure.RetailPriceCurrency + figure.RetailPrice.ToString("N2", new CultureInfo("en-US"))
+                                    : "N/A")
+                                </span>
+                            </li>
+                            <li>
+                                Avg. Aftermarket Price: <span class="figure-price">
+                                    @(figure.AvgCurrentAftermarketPrice > 0
+                                    ? figure.AvgAftermarketPriceCurrency + figure.AvgCurrentAftermarketPrice.ToString("N2", new CultureInfo("en-US")) : "N/A")
                                 </span>
                             </li>
                         </ul>
