@@ -2,6 +2,7 @@ using AngleSharp;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MyFigureCollectionValue.Data;
+using MyFigureCollectionValue.Hubs;
 using MyFigureCollectionValue.Models;
 using MyFigureCollectionValue.Services;
 
@@ -30,6 +31,7 @@ namespace MyFigureCollectionValue
                 return BrowsingContext.New(config);
             });
 
+            builder.Services.AddSignalR();
             builder.Services.Configure<ScraperSettings>(builder.Configuration.GetSection("ScraperSettings"));
             builder.Services.Configure<CurrencyFreaksSettings>(builder.Configuration.GetSection("CurrencyFreaks"));
 
@@ -63,10 +65,13 @@ namespace MyFigureCollectionValue
                 app.UseHsts();
             }
 
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.MapHub<ScraperProgressHub>("/scraperProgressHub");
 
             app.UseAuthorization();
 

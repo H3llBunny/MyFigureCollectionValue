@@ -165,18 +165,26 @@ namespace MyFigureCollectionValue.Services
         public async Task<(
             ICollection<Figure> Figures,
             ICollection<RetailPrice> RetailPrices,
-            ICollection<AftermarketPrice> AftermarketPrices)> CreateFiguresAndPricesAsync(IEnumerable<string> figureUrls, string userId)
+            ICollection<AftermarketPrice> AftermarketPrices)> CreateFiguresAndPricesAsync(IEnumerable<string> figureUrls, string userId,
+                Func<int, int, string, Task> progressCallback = null)
         {
             var newFigureList = new List<Figure>();
             var retailPriceList = new List<RetailPrice>();
             var aftermarketPriceList = new List<AftermarketPrice>();
             const int maxRetries = 5;
 
+            int totalUrls = figureUrls.Count();
+            int processedUrls = 0;
+
+
             try
             {
                 foreach (var url in figureUrls)
                 {
                     int figureId = int.Parse(url.Split("/item/")[1]);
+
+                    processedUrls++;
+                    progressCallback?.Invoke(processedUrls, totalUrls, $"Processing {url}");
 
                     if (await _figureService.DoesFigureExistAsync(figureId))
                     {

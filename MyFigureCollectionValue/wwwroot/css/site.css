@@ -273,3 +273,13 @@ div.sort-options {
         box-shadow: none;
         color: #f48939;
     }
+
+.progress-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.progress-status {
+    color: #666;
+    font-size: 0.9em;
+}

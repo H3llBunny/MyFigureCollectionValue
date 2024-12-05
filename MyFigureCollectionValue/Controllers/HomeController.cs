@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using MyFigureCollectionValue.Hubs;
 using MyFigureCollectionValue.Models;
 using MyFigureCollectionValue.Services;
 using System.Diagnostics;
@@ -12,16 +14,19 @@ namespace MyFigureCollectionValue.Controllers
         private readonly IScraperService _scraperService;
         private readonly IFigureService _figureService;
         private readonly ICurrencyConverterService _currencyConverterService;
+        private readonly IHubContext<ScraperProgressHub> _hubContext;
 
         public HomeController(ILogger<HomeController> logger,
             IScraperService scraperService,
             IFigureService figureService,
-            ICurrencyConverterService currencyConverterService)
+            ICurrencyConverterService currencyConverterService,
+            IHubContext<ScraperProgressHub> hubContext)
         {
             _logger = logger;
             _scraperService = scraperService;
             _figureService = figureService;
             _currencyConverterService = currencyConverterService;
+            _hubContext = hubContext;
         }
 
         public async Task<IActionResult> Index(int pageNumber = 1, string sortOrder = "default")
@@ -105,7 +110,7 @@ namespace MyFigureCollectionValue.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            List<string> links = new List<string>();
+            var links = new List<string>();
 
             try
             {
@@ -121,7 +126,11 @@ namespace MyFigureCollectionValue.Controllers
 
             await _figureService.UpdateUserFigureCollectionUrlAsync(userId, profileUrl);
 
-            var (newFigureList, retailPriceList, aftermarketPriceList) = await _scraperService.CreateFiguresAndPricesAsync(links, userId);
+            var (newFigureList, retailPriceList, aftermarketPriceList) = await _scraperService.CreateFiguresAndPricesAsync(links, userId,
+                async (current, total, status) =>
+                {
+                    await _hubContext.Clients.All.SendAsync("ReceiveProgress", current, total, status);
+                });
 
             if (newFigureList.Any())
             {
@@ -149,7 +158,7 @@ namespace MyFigureCollectionValue.Controllers
                 await _figureService.AddCurrentAftermarketPricesAsync(currentAftermarketPrices);
             }
 
-            return RedirectToAction(nameof(Index));
+            return Json(new { redirectUrl = Url.Action(nameof(Index)) });
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
