@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using MyFigureCollectionValue.Hubs;
@@ -78,17 +79,21 @@ namespace MyFigureCollectionValue.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> AddProfileUrl(string profileUrl)
         {
-            if (!User.Identity.IsAuthenticated)
-            {
-                return View();
-            }
-
             if (string.IsNullOrWhiteSpace(profileUrl))
             {
                 TempData["ErrorMessage"] = "Please ensure the URL is valid and try again";
-                return RedirectToAction(nameof(Index));
+                return Ok();
+            }
+            
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (_figureService.IsSameUserFigureCollection(userId, profileUrl))
+            {
+                TempData["ErrorMessage"] = "Same user collection, please provide a different url.";
+                return Ok();
             }
 
             try
@@ -99,15 +104,7 @@ namespace MyFigureCollectionValue.Controllers
             {
                 Console.WriteLine(ex.Message);
                 TempData["ErrorMessage"] = "Service Unavailable (rush hour), please try again later.";
-                return RedirectToAction(nameof(Index));
-            }
-            
-            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (_figureService.IsSameUserFigureCollection(userId, profileUrl))
-            {
-                TempData["ErrorMessage"] = "Same user collection, please provide a different url.";
-                return RedirectToAction(nameof(Index));
+                return Ok();
             }
 
             var links = new List<string>();
@@ -119,7 +116,7 @@ namespace MyFigureCollectionValue.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
-                return RedirectToAction(nameof(Index));
+                return Ok();
             }
 
             await _figureService.RemoveUserFiguresAsync(userId);
@@ -158,7 +155,7 @@ namespace MyFigureCollectionValue.Controllers
                 await _figureService.AddCurrentAftermarketPricesAsync(currentAftermarketPrices);
             }
 
-            return Json(new { redirectUrl = Url.Action(nameof(Index)) });
+            return Ok();
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

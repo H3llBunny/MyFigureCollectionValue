@@ -18,6 +18,18 @@
 
     if (User?.Identity?.IsAuthenticated ?? false)
     {
+        <div id="progressContainer" class="progress-container" style="display: none;">
+            <div class="progress">
+                <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                     role="progressbar"
+                     aria-valuenow="0"
+                     aria-valuemin="0"
+                     aria-valuemax="100"
+                     style="width: 0%;">
+                </div>
+            </div>
+            <div id="progressStatus" class="progress-status text-center mt-2"></div>
+        </div>
         <div class="d-flex">
             @if (Model != null)
             {
@@ -81,18 +93,6 @@
                         <option value="am_desc" selected="@(Model.SortOrder == "am_desc")">Aftermarket: Descending</option>
                     </select>
                 </form>
-            </div>
-            <div id="progressContainer" class="progress-container" style="display: none;">
-                <div class="progress">
-                    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
-                         role="progressbar"
-                         aria-valuenow="0"
-                         aria-valuemin="0"
-                         aria-valuemax="100"
-                         style="width: 0%;">
-                    </div>
-                </div>
-                <div id="progressStatus" class="progress-status text-center mt-2"></div>
             </div>
             <div class="figure-container justify-content-center">
                 @foreach (var figure in Model.Figures)
@@ -167,7 +167,7 @@
         progressContainer.style.display = "block";
         const progressPercent = Math.round((current / total) * 100);
 
-        progressBar.style.width = `${progressPercent}%`;
+        progressBar.style.width = `${ progressPercent }%`;
         progressBar.setAttribute('aria-valuenow', progressPercent);
         progressStatus.textContent = status;
 
@@ -201,24 +201,15 @@
                 headers: { "Content-Type": "application/x-www-form-urlencoded" }
             });
 
-            if (!response.ok) {
-                const error = await response.text();
-                alert(`Error: ${error}`);
-                progressContainer.style.display = 'none';
+            if (response.ok) {
+                location.reload();
             } else {
-                const result = await response.json();
-
-                if (result.redirectUrl) {
-                    window.location.href = resul.redirectUrl;
-                } else {
-                    alert("Unexpected response. The page will not reload.");
-                    progressContainer.style.display = 'none';
-                }
+                const error = await response.text();
+                alert(`Error: ${ error }`);
+                progressContainer.style.display = 'none';
             }
         } catch (error) {
             console.error("SignalR or submission error:", error);
-            alert("An error occurred while processing your request.");
-            progressContainer.style.display = 'none';
         }
     });
 </script>

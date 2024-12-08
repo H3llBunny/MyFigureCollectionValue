@@ -37,7 +37,11 @@ namespace MyFigureCollectionValue.Services
 
         public async Task AddCurrentAftermarketPricesAsync(IEnumerable<CurrentAftermarketPrice> currentAftermarketPrices)
         {
-            await _dbContext.Database.ExecuteSqlRawAsync("DELETE FROM CurrentAftermarketPrices");
+            var figureIds = currentAftermarketPrices.Select(cap => cap.FigureId).Distinct().ToList();
+
+            var figureIdsString = string.Join(", ", figureIds);
+
+            await _dbContext.Database.ExecuteSqlRawAsync($"DELETE FROM CurrentAftermarketPrices WHERE FigureId IN ({figureIdsString})");
 
             await _dbContext.AddRangeAsync(currentAftermarketPrices);
             await _dbContext.SaveChangesAsync();
