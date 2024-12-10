@@ -28,6 +28,7 @@
                      aria-valuemin="0"
                      aria-valuemax="100"
                      style="width: 0%;">
+                    <span id="progressPercentage" class="progress-percentage">0%</span>
                 </div>
             </div>
             <div id="progressStatus" class="progress-status text-center mt-2"></div>
@@ -174,6 +175,9 @@
 
         progressBar.style.width = `${ progressPercent }%`;
         progressBar.setAttribute('aria-valuenow', progressPercent);
+
+        document.getElementById("progressPercentage").textContent = `${progressPercent}%`;
+
         progressStatus.textContent = status;
 
         if (current === total) {

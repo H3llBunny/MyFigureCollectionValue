@@ -285,11 +285,21 @@ div.sort-options {
     border-radius: 8px;
     width: 100%;
     max-width: 900px;
+    height: 80px;
+}
+
+.progress {
+    height: 60%;
 }
 
 .progress-status {
     color: white;
     font-size: 0.9em;
+}
+
+.progress-bar {
+    background-color: #f48939;
+    font-size: 1.4rem;
 }
 
 .overlay {
