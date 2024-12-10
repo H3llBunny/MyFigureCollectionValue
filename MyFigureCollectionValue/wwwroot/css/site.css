@@ -275,11 +275,30 @@ div.sort-options {
     }
 
 .progress-container {
-    margin-top: 20px;
-    margin-bottom: 20px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1001;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 900px;
 }
 
 .progress-status {
-    color: #666;
+    color: white;
     font-size: 0.9em;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    cursor: not-allowed;
 }

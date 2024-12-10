@@ -18,6 +18,8 @@
 
     if (User?.Identity?.IsAuthenticated ?? false)
     {
+        <div id="overlay" class="overlay" style="display: none;"></div>
+
         <div id="progressContainer" class="progress-container" style="display: none;">
             <div class="progress">
                 <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
@@ -158,6 +160,7 @@
     const progressContainer = document.getElementById("progressContainer");
     const progressBar = document.getElementById("progressBar");
     const progressStatus = document.getElementById("progressStatus");
+    const overlay = document.getElementById("overlay");
 
     const connection = new signalR.HubConnectionBuilder()
         .withUrl("/scraperProgressHub")
@@ -165,6 +168,8 @@
 
     connection.on("ReceiveProgress", (current, total, status) => {
         progressContainer.style.display = "block";
+        overlay.style.display = "block";
+
         const progressPercent = Math.round((current / total) * 100);
 
         progressBar.style.width = `${ progressPercent }%`;
@@ -174,6 +179,7 @@
         if (current === total) {
             setTimeout(() => {
                 progressContainer.style.display = 'none';
+                overlay.style.display = 'none';
             }, 2000);
         }
     });
@@ -207,6 +213,7 @@
                 const error = await response.text();
                 alert(`Error: ${ error }`);
                 progressContainer.style.display = 'none';
+                overlay.style.display = 'none';
             }
         } catch (error) {
             console.error("SignalR or submission error:", error);
