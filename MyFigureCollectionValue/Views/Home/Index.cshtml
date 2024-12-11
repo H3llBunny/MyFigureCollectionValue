@@ -4,145 +4,145 @@
 @{
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger d-flex justify-content-center align-items-center">
-            @TempData["ErrorMessage"]
-        </div>
+            <div class="alert alert-danger d-flex justify-content-center align-items-center">
+                @TempData["ErrorMessage"]
+            </div>
     }
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success d-flex justify-content-center align-items-center">
-            @TempData["SuccessMessage"]
-        </div>
+            <div class="alert alert-success d-flex justify-content-center align-items-center">
+                @TempData["SuccessMessage"]
+            </div>
     }
 
     if (User?.Identity?.IsAuthenticated ?? false)
     {
-        <div id="overlay" class="overlay" style="display: none;"></div>
+            <div id="overlay" class="overlay" style="display: none;"></div>
 
-        <div id="progressContainer" class="progress-container" style="display: none;">
-            <div class="progress">
-                <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
-                     role="progressbar"
-                     aria-valuenow="0"
-                     aria-valuemin="0"
-                     aria-valuemax="100"
-                     style="width: 0%;">
-                    <span id="progressPercentage" class="progress-percentage">0%</span>
+            <div id="progressContainer" class="progress-container" style="display: none;">
+                <div class="progress">
+                    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                         role="progressbar"
+                         aria-valuenow="0"
+                         aria-valuemin="0"
+                         aria-valuemax="100"
+                         style="width: 0%;">
+                        <span id="progressPercentage" class="progress-percentage">0%</span>
+                    </div>
+                </div>
+                <div id="progressStatus" class="progress-status text-center mt-2"></div>
+            </div>
+            <div class="d-flex">
+                @if (Model != null)
+            {
+                    <div class="d-flex flex-column" style="font-size: 20px;">
+                        <div>
+                            Figures count:
+                            <span class="figure-price" style="padding-left: 5px;">@Model.FiguresCount</span>
+                        </div>
+                        <div>
+                            Collection:
+                            <span class="figure-price" style="padding-left: 5px;">
+                                <a href="@Model.UserFigureCollectionUrl" target="_blank" style="color: inherit;">
+                                    @Model.FigureCollectionUsername
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+            }
+                <div id="searchUrlBoxWrapper" class="d-flex justify-content-center align-items-center flex-grow-1">
+                    <div id="searchUrlBox">
+                        <form id="profileForm" asp-action="AddProfileUrl" method="post">
+                            <input id="profileUrlInput" class="form-control" type="text" name="profileUrl"
+                                   placeholder="Please provide a link to your account from myfigurecollection.net"
+                                   oninput="checkInput()" style="text-align: center;" />
+                            <div style="padding-left: 10px;">
+                                <button id="submitButton" class="btn btn-primary" type="submit" disabled>Add</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
-            <div id="progressStatus" class="progress-status text-center mt-2"></div>
-        </div>
-        <div class="d-flex">
-            @if (Model != null)
-            {
-                <div class="d-flex flex-column" style="font-size: 20px;">
-                    <div>
-                        Figures count:
-                        <span class="figure-price" style="padding-left: 5px;">@Model.FiguresCount</span>
-                    </div>
-                    <div>
-                        Collection:
-                        <span class="figure-price" style="padding-left: 5px;">
-                            <a href="@Model.UserFigureCollectionUrl" target="_blank" style="color: inherit;">
-                                @Model.FigureCollectionUsername
-                            </a>
+    @if (Model != null)
+        {
+                <div class="collection-value d-flex justify-content-center">
+                    <div class="value-box">
+                        <span class="total-value">
+                            Total Paid: <span class="figure-price">
+                                $@Model.TotalPaid.ToString("N2", new CultureInfo("en-US"))
+                            </span>
+                        </span>
+                        <span class="total-value">
+                            Total Retail Value: <span class="figure-price">
+                                $@Model.SumRetailPriceCollection.ToString("N2", new CultureInfo("en-US"))
+                            </span>
+                        </span>
+                        <span class="total-value">
+                            Total Aftermarket Value: <span class="figure-price">
+                                $@Model.SumAvgAftermarketPriceCollection.ToString("N2", new CultureInfo("en-US"))
+                            </span>
                         </span>
                     </div>
                 </div>
-            }
-            <div id="searchUrlBoxWrapper" class="d-flex justify-content-center align-items-center flex-grow-1">
-                <div id="searchUrlBox">
-                    <form id="profileForm" asp-action="AddProfileUrl" method="post">
-                        <input id="profileUrlInput" class="form-control" type="text" name="profileUrl"
-                               placeholder="Please provide a link to your account from myfigurecollection.net"
-                               oninput="checkInput()" style="text-align: center;" />
-                        <div style="padding-left: 10px;">
-                            <button id="submitButton" class="btn btn-primary" type="submit" disabled>Add</button>
-                        </div>
+                <div class="sort-options">
+                    <form id="sortForm" method="get" asp-action="Index">
+                        <input type="hidden" name="pageNumber" value="1" />
+                        <select name="sortOrder" onchange="document.getElementById('sortForm').submit()">
+                            <option value="default" selected="@(Model.SortOrder == "default")">Default</option>
+                            <option value="retail_asc" selected="@(Model.SortOrder == "retail_asc")">Retail: Ascending</option>
+                            <option value="retail_desc" selected="@(Model.SortOrder == "retail_desc")">Retail: Descending</option>
+                            <option value="am_asc" selected="@(Model.SortOrder == "am_asc")">Aftermarket: Ascending</option>
+                            <option value="am_desc" selected="@(Model.SortOrder == "am_desc")">Aftermarket: Descending</option>
+                        </select>
                     </form>
                 </div>
-            </div>
-        </div>
-        @if (Model != null)
-        {
-            <div class="collection-value d-flex justify-content-center">
-                <div class="value-box">
-                    <span class="total-value">
-                        Total Paid: <span class="figure-price">
-                            $@Model.TotalPaid.ToString("N2", new CultureInfo("en-US"))
-                        </span>
-                    </span>
-                    <span class="total-value">
-                        Total Retail Value: <span class="figure-price">
-                            $@Model.SumRetailPriceCollection.ToString("N2", new CultureInfo("en-US"))
-                        </span>
-                    </span>
-                    <span class="total-value">
-                        Total Aftermarket Value: <span class="figure-price">
-                            $@Model.SumAvgAftermarketPriceCollection.ToString("N2", new CultureInfo("en-US"))
-                        </span>
-                    </span>
-                </div>
-            </div>
-            <div class="sort-options">
-                <form id="sortForm" method="get" asp-action="Index">
-                    <input type="hidden" name="pageNumber" value="1" />
-                    <select name="sortOrder" onchange="document.getElementById('sortForm').submit()">
-                        <option value="default" selected="@(Model.SortOrder == "default")">Default</option>
-                        <option value="retail_asc" selected="@(Model.SortOrder == "retail_asc")">Retail: Ascending</option>
-                        <option value="retail_desc" selected="@(Model.SortOrder == "retail_desc")">Retail: Descending</option>
-                        <option value="am_asc" selected="@(Model.SortOrder == "am_asc")">Aftermarket: Ascending</option>
-                        <option value="am_desc" selected="@(Model.SortOrder == "am_desc")">Aftermarket: Descending</option>
-                    </select>
-                </form>
-            </div>
-            <div class="figure-container justify-content-center">
-                @foreach (var figure in Model.Figures)
+                <div class="figure-container justify-content-center">
+                    @foreach (var figure in Model.Figures)
                 {
-                    <div class="figure-card m-2">
-                        <a class="no_underline" asp-controller="Figure" asp-action="GetFigure" asp-route-figureId="@figure.Id" style="width: inherit;">
-                            <div class="figure-image" style="background-image: url('@figure.ImageUrl');">
-                                <div class="figure-overlay">
-                                    <span class="title">@figure.Name</span>
+                        <div class="figure-card m-2">
+                            <a class="no_underline" asp-controller="Figure" asp-action="GetFigure" asp-route-figureId="@figure.Id" style="width: inherit;">
+                                <div class="figure-image" style="background-image: url('@figure.ImageUrl');">
+                                    <div class="figure-overlay">
+                                        <span class="title">@figure.Name</span>
+                                    </div>
                                 </div>
-                            </div>
-                        </a>
-                        <ul class="figure-info">
-                            <li>
-                                Purchased for: <span class="figure-price">
-                                    @(figure.PurchasedPrice > 0 ? "$" + figure.PurchasedPrice.ToString("N2", new CultureInfo("en-US")) : "N/A")
-                                </span>
-                            </li>
-                            <li>
-                                Retail Price: <span class="figure-price">
-                                    @(figure.RetailPrice > 0
+                            </a>
+                            <ul class="figure-info">
+                                <li>
+                                    Purchased for: <span class="figure-price">
+                                        @(figure.PurchasedPrice > 0 ? "$" + figure.PurchasedPrice.ToString("N2", new CultureInfo("en-US")) : "N/A")
+                                    </span>
+                                </li>
+                                <li>
+                                    Retail Price: <span class="figure-price">
+                                        @(figure.RetailPrice > 0
                                     ? figure.RetailPriceCurrency + figure.RetailPrice.ToString("N2", new CultureInfo("en-US"))
                                     : "N/A")
-                                </span>
-                            </li>
-                            <li>
-                                Avg. Aftermarket Price: <span class="figure-price">
-                                    @(figure.AvgCurrentAftermarketPrice > 0
+                                    </span>
+                                </li>
+                                <li>
+                                    Avg. Aftermarket Price: <span class="figure-price">
+                                        @(figure.AvgCurrentAftermarketPrice > 0
                                     ? figure.AvgAftermarketPriceCurrency + figure.AvgCurrentAftermarketPrice.ToString("N2", new CultureInfo("en-US")) : "N/A")
-                                </span>
-                            </li>
-                        </ul>
-                    </div>
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
                 }
-            </div>
-            <partial name="_PagingPartial" model="@Model" />
+                </div>
+                <partial name="_PagingPartial" model="@Model" />
         }
     }
     else
     {
-        <div class="text-center">
-            <h2 class="welcome-header">Welcome!</h2>
-            <p></p>
-            <h4>
-                If you want to check the current value of an anime figure collection, please <a href="/Identity/Account/Register">register</a> and provide a link to your <a href="https://myfigurecollection.net/" target="_blank">MyFigureCollection</a> acccount.
-            </h4>
-        </div>
+            <div class="text-center">
+                <h2 class="welcome-header">Welcome!</h2>
+                <p></p>
+                <h4>
+                    If you want to check the current value of an anime figure collection, please <a href="/Identity/Account/Register">register</a> and provide a link to your <a href="https://myfigurecollection.net/" target="_blank">MyFigureCollection</a> acccount.
+                </h4>
+            </div>
     }
 }
 
@@ -203,6 +203,11 @@
                 console.log("SignalR connection established.");
             }).catch(err => {
                 console.error("Error starting SignalR connection:", err);
+                setTimeout(() => connection.start().then(() => {
+                    console.log("SignalR connection established.");
+                }).catch(err => {
+                    console.error("Error starting SignalR connection:", err);
+                }), 5000);
             });
 
             const response = await fetch(form.action, {
