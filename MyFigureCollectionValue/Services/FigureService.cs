@@ -239,8 +239,13 @@ namespace MyFigureCollectionValue.Services
 
         public async Task<decimal> SumUserPurchasePriceAsync(string userId)
         {
+            var figureIds = await _dbContext.UserFigures
+                .Where(uf => uf.UserId == userId)
+                .Select(uf => uf.FigureId)
+                .ToListAsync();
+
             var purchasePricesList = await _dbContext.UserPurchasePrices
-                .Where(up => up.UserId == userId)
+                .Where(up => up.UserId == userId && figureIds.Contains(up.FigureId))
                 .ToListAsync();
 
             var convertedPrices = _currencyConverter.ConvertAftermarketAndUserPurchasePricesToUSD(purchasePricesList);
