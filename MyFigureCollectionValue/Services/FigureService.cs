@@ -278,7 +278,7 @@ namespace MyFigureCollectionValue.Services
 
         public async Task<Dictionary<string, int>> GetFigureUrlsWithOutdatedAftermarketPricesAsync()
         {
-            var thresholdDate = DateTime.UtcNow.AddDays(-1);
+            var thresholdDate = DateTime.UtcNow.AddDays(-2);
 
             return await _dbContext.Figures
                 .Where(f => (f.LastUpdatedAftermarketPrices <= thresholdDate))
