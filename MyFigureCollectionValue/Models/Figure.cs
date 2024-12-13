@@ -28,7 +28,7 @@ namespace MyFigureCollectionValue.Models
 
         public DateTime LastUpdated { get; set; }
 
-        public DateTime LastUpdatedRetailPrices { get; set; }
+        public DateTime LastUpdatedAftermarketPrices { get; set; }
 
         public ICollection<AftermarketPrice> AftermarketPrices { get; set; }
 

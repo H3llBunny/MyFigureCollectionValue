@@ -281,18 +281,18 @@ namespace MyFigureCollectionValue.Services
             var thresholdDate = DateTime.UtcNow.AddDays(-1);
 
             return await _dbContext.Figures
-                .Where(f => (f.LastUpdatedRetailPrices <= thresholdDate))
+                .Where(f => (f.LastUpdatedAftermarketPrices <= thresholdDate))
                 .ToDictionaryAsync(f => f.FigureUrl, f => f.Id);
         }
 
-        public async Task UpdateFiguresLastUpdatedRetailPricesAsync(List<int> figureIds)
+        public async Task UpdateFiguresLastUpdatedAftermarketPricesAsync(List<int> figureIds)
         {
             var parameters = figureIds.Select((figureId, index) => new SqlParameter($"@id{index}", figureId)).ToList();
             var sqlParameterNames = string.Join(", ", parameters.Select(p => p.ParameterName));
 
             await _dbContext.Database.ExecuteSqlRawAsync($@"
                 UPDATE Figures
-                SET LastUpdatedRetailPrices = @currentDate
+                SET LastUpdatedAftermarketPrices = @currentDate
                 WHERE Id IN ({sqlParameterNames});
             ", parameters.Append(new SqlParameter("@currentDate", DateTime.UtcNow)).ToArray());
         }

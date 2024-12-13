@@ -3,6 +3,7 @@ using AngleSharp.Dom;
 using AngleSharp.Io;
 using Microsoft.Extensions.Options;
 using MyFigureCollectionValue.Models;
+using System;
 using System.Data;
 using System.Globalization;
 using System.Net;
@@ -292,7 +293,7 @@ namespace MyFigureCollectionValue.Services
                 Image = updatedUrl,
                 FigureUrl = url,
                 LastUpdated = DateTime.UtcNow,
-                LastUpdatedRetailPrices = DateTime.UtcNow
+                LastUpdatedAftermarketPrices = DateTime.UtcNow
             };
         }
 
@@ -497,7 +498,6 @@ namespace MyFigureCollectionValue.Services
                     if (retries >= maxRetries)
                     {
                         Console.WriteLine("Max retries reached. Stopping execution.");
-                        break;
                     }
                 }
             }
@@ -592,63 +592,51 @@ namespace MyFigureCollectionValue.Services
             var retailPriceList = new List<RetailPrice>();
             const int maxRetries = 5;
 
-            try
+            foreach (var url in figureUrls)
             {
-                foreach (var url in figureUrls)
+                int figureId = int.Parse(url.Split("/item/")[1]);
+                int retries = 0;
+                bool success = false;
+
+                while (!success && retries < maxRetries)
                 {
-                    int figureId = int.Parse(url.Split("/item/")[1]);
-                    int retries = 0;
-                    bool success = false;
-
-                    while (!success && retries < maxRetries)
+                    try
                     {
-                        try
+                        await Task.Delay(_delayRequest.Next(2000, 3000));
+
+                        await SetAuthenticatedCookies(url);
+
+                        var document = await _context.OpenAsync(url);
+
+                        var newFigure = await ScrapeFigure(document, url, figureId);
+
+                        figureList.Add(newFigure);
+
+                        var figureRetailPrice = await GetRetailPriceListAsync(document, figureId);
+
+                        if (figureRetailPrice != null)
                         {
-                            await Task.Delay(_delayRequest.Next(2000, 3000));
-
-                            await SetAuthenticatedCookies(url);
-
-                            var document = await _context.OpenAsync(url);
-
-                            var newFigure = await ScrapeFigure(document, url, figureId);
-
-                            figureList.Add(newFigure);
-
-                            var figureRetailPrice = await GetRetailPriceListAsync(document, figureId);
-
-                            if (figureRetailPrice != null)
-                            {
-                                retailPriceList.AddRange(figureRetailPrice);
-                            }
-
-                            success = true;
+                            retailPriceList.AddRange(figureRetailPrice);
                         }
-                        catch (NullReferenceException ex)
-                        {
-                            retries++;
-                            Console.WriteLine($"Attempt {retries} failed for URL: {url}. Error: {ex.Message}");
 
-                            if (retries >= maxRetries)
-                            {
-                                Console.WriteLine("Max retries reached. Stopping execution.");
-                                break;
-                            }
-                        }
-                        catch (Exception ex)
+                        success = true;
+                    }
+                    catch (NullReferenceException ex)
+                    {
+                        retries++;
+                        Console.WriteLine($"Attempt {retries} failed for URL: {url}. Error: {ex.Message}");
+
+                        if (retries >= maxRetries)
                         {
-                            throw new Exception($"An error occurred: {ex.Message}");
+                            Console.WriteLine($"Max retries reached for URL: {url}. Skipping this URL.");
                         }
                     }
-
-                    if (retries >= maxRetries)
+                    catch (Exception ex)
                     {
+                        Console.WriteLine($"An unexpected error occurred for URL: {url}. Error: {ex.Message}");
                         break;
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
             }
 
             return (figureList, retailPriceList);

@@ -57,7 +57,10 @@ namespace MyFigureCollectionValue.Services
 
             foreach (var figure in figureUrlAndIds)
             {
-                var newAftermarketPrices = await scraperService.GetAftermarketPriceListAsync(figure.Key, figure.Value, true);
+                var url = figure.Key;
+                var figureId = figure.Value;
+
+                var newAftermarketPrices = await scraperService.GetAftermarketPriceListAsync(url, figureId, true);
 
                 if (newAftermarketPrices != null)
                 {
@@ -82,7 +85,7 @@ namespace MyFigureCollectionValue.Services
 
                 var figureIds = figureUrlAndIds.Select(f => f.Value).ToList();
 
-                await figureService.UpdateFiguresLastUpdatedRetailPricesAsync(figureIds);
+                await figureService.UpdateFiguresLastUpdatedAftermarketPricesAsync(figureIds);
             }
         }
     }

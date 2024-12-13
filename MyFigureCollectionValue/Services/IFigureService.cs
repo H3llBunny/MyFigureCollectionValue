@@ -36,7 +36,7 @@ namespace MyFigureCollectionValue.Services
 
         Task<Dictionary<string, int>> GetFigureUrlsWithOutdatedAftermarketPricesAsync();
 
-        Task UpdateFiguresLastUpdatedRetailPricesAsync(List<int> figureIds);
+        Task UpdateFiguresLastUpdatedAftermarketPricesAsync(List<int> figureIds);
 
         Task<ICollection<string>> GetOutdatedFigureUrlsAsync();
 
