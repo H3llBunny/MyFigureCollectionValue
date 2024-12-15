@@ -80,6 +80,11 @@ footer {
     width: 100%;
 }
 
+#searchUrlBoxWrapper{
+    padding-right: 130px;
+    padding-left: 10px;
+}
+
 #searchUrlBox {
     width: 100%;
     max-width: 1000px;
