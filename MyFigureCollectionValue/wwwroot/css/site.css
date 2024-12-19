@@ -290,11 +290,11 @@ div.sort-options {
     border-radius: 8px;
     width: 100%;
     max-width: 900px;
-    height: 80px;
+    height: 100px;
 }
 
 .progress {
-    height: 60%;
+    height: 30%;
 }
 
 .progress-status {
@@ -303,8 +303,17 @@ div.sort-options {
 }
 
 .progress-bar {
+    position: relative;
     background-color: #f48939;
     font-size: 1.4rem;
+}
+
+.progress-percentage {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 5px;
+    color: white;
 }
 
 .overlay {
