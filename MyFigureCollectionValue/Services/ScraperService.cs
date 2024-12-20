@@ -3,7 +3,6 @@ using AngleSharp.Dom;
 using AngleSharp.Io;
 using Microsoft.Extensions.Options;
 using MyFigureCollectionValue.Models;
-using System;
 using System.Data;
 using System.Globalization;
 using System.Net;
@@ -382,6 +381,8 @@ namespace MyFigureCollectionValue.Services
 
             string dataText = dataValue.InnerHtml;
 
+            var smallElements = dataValue.QuerySelectorAll("small");
+
             var priceTextSection = dataText.Split("<br>").Skip(1).FirstOrDefault()?.Trim();
 
             if (priceTextSection == null)
@@ -389,18 +390,34 @@ namespace MyFigureCollectionValue.Services
                 return null;
             }
 
-            var priceText = priceTextSection.Split(" ").FirstOrDefault()?.Trim().Replace(",", "");
+            string currency = smallElements[1].TextContent.Split(" ")[0];
 
-            if (!decimal.TryParse(priceText, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal price))
+            CultureInfo cultureInfo = currency switch
+            {
+                "USD" => new CultureInfo("en-US"),
+                "EUR" => new CultureInfo("fr-DE"),
+                "AUD" => new CultureInfo("en-AU"),
+                "CAD" => new CultureInfo("en-CA"),
+                "GBP" => new CultureInfo("en-GB"),
+                "HKD" => new CultureInfo("zh-HK"),
+                "JPY" => new CultureInfo("ja-JP"),
+                "CNY" => new CultureInfo("zh-CN"),
+                "IDR" => new CultureInfo("id-ID"),
+                "KRW" => new CultureInfo("ko-KR"),
+                "SGD" => new CultureInfo("en-SG"),
+                "TWD" => new CultureInfo("zh-TW"),
+                "AED" => new CultureInfo("ar-AE"),
+                _ => new CultureInfo("en-US")
+            };
+
+            var priceText = priceTextSection.Split(" ").FirstOrDefault()?.Trim();
+
+            if (!decimal.TryParse(priceText, NumberStyles.Any, cultureInfo, out decimal price))
             {
                 Console.WriteLine($"Failed to parse price from '{priceText}', figureId: {figureId}");
 
                 return null;
             }
-
-            var smallElements = dataValue.QuerySelectorAll("small");
-
-            string currency = smallElements[1].TextContent.Split(" ")[0];
 
             return new RetailPrice
             {
@@ -523,7 +540,6 @@ namespace MyFigureCollectionValue.Services
 
         private async Task<AftermarketPrice> ExtractAftermarketPriceAsync(IElement item, int figureId)
         {
-
             string priceText = item.QuerySelector("span.classified-price-value")?.TextContent?.Trim();
 
             if (priceText == null)
@@ -531,14 +547,27 @@ namespace MyFigureCollectionValue.Services
                 return null;
             }
 
-            if (!decimal.TryParse(priceText.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out decimal price))
+            string currency = item.QuerySelector("span.classified-price-currency").TextContent.Trim();
+
+            CultureInfo cultureInfo = currency switch
+            {
+                "€" => new CultureInfo("fr-FR"),
+                "A$" => new CultureInfo("en-AU"),
+                "C$" => new CultureInfo("en-CA"),
+                "£" => new CultureInfo("en-GB"),
+                "HK$" => new CultureInfo("zh-HK"),
+                "¥" => new CultureInfo("ja-JP"),
+                "$" => new CultureInfo("en-US"),
+                _ => new CultureInfo("en-US")
+            };
+
+            if (!decimal.TryParse(priceText, NumberStyles.Any, cultureInfo, out decimal price))
             {
                 Console.WriteLine($"Failed to parse price from '{priceText}', figureId: {figureId}");
 
                 return null;
             }
 
-            string currency = item.QuerySelector("span.classified-price-currency").TextContent.Trim();
             var dateElement = item.QuerySelector("span.meta > span[title]");
             string dateText = dateElement.GetAttribute("title");
 
