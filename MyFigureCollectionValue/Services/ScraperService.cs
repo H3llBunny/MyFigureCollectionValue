@@ -181,10 +181,21 @@ namespace MyFigureCollectionValue.Services
             {
                 foreach (var url in figureUrls)
                 {
-                    int figureId = int.Parse(url.Split("/item/")[1]);
+                    if (!url.Contains("/item/"))
+                    {
+                        Console.WriteLine($"Invalid URL format: {url}");
+                        continue;
+                    }
+
+                    int figureId;
+                    if (!int.TryParse(url.Split("/item/")[1], out figureId))
+                    {
+                        Console.WriteLine($"Failed to parse figure ID from URL: {url}");
+                        continue;
+                    }
 
                     processedUrls++;
-                    progressCallback?.Invoke(processedUrls, totalUrls, $"Processing {url}");
+                    progressCallback?.Invoke(processedUrls, totalUrls, $"Processing: {url}");
 
                     if (await _figureService.DoesFigureExistAsync(figureId))
                     {
@@ -315,10 +326,6 @@ namespace MyFigureCollectionValue.Services
                     {
                         retailPriceList.Add(retialPrice);
                     }
-                    else
-                    {
-                        return null;
-                    }
 
                     var nextSibling = dataField.NextElementSibling;
 
@@ -335,6 +342,8 @@ namespace MyFigureCollectionValue.Services
                                 retailPriceList.Add(nextRetailPrice);
                                 nextSibling = nextSibling.NextElementSibling;
                             }
+
+                            nextSibling = nextSibling.NextElementSibling;
                         }
                         else
                         {
@@ -381,8 +390,6 @@ namespace MyFigureCollectionValue.Services
 
             string dataText = dataValue.InnerHtml;
 
-            var smallElements = dataValue.QuerySelectorAll("small");
-
             var priceTextSection = dataText.Split("<br>").Skip(1).FirstOrDefault()?.Trim();
 
             if (priceTextSection == null)
@@ -390,7 +397,19 @@ namespace MyFigureCollectionValue.Services
                 return null;
             }
 
-            string currency = smallElements[1].TextContent.Split(" ")[0];
+            var smallElements = dataValue.QuerySelectorAll("small");
+
+            string currency = null;
+
+            try
+            {
+                currency = smallElements[1].TextContent.Split(" ")[0];
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"No currency found for figure ID: {figureId}");
+                return null;
+            }
 
             CultureInfo cultureInfo = currency switch
             {
