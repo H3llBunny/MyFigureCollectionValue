@@ -91,7 +91,7 @@
                         ? Model.RetailPriceCurrency + Model.RetailPrice.ToString("N2", new CultureInfo("en-US"))
                         : "N/A")</span></li>
             <li>
-                <strong>Avg. Aftermarket Price: </strong><span class="figure-price">
+                <strong title="This price is based on currently available aftermarket ads.">Avg. Aftermarket Price: </strong><span class="figure-price">
                     @(Model.AvgCurrentAftermarketPrice > 0
                         ? Model.AvgAftermarketPriceCurrency + Model.AvgCurrentAftermarketPrice.ToString("N2", new CultureInfo("en-US")) : "N/A")
                 </span>
