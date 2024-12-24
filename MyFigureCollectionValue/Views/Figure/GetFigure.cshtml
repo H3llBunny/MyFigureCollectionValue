@@ -4,16 +4,16 @@
 @{
     @if (TempData["ErrorMessage"] != null)
     {
-                    <div class="alert alert-danger d-flex justify-content-center align-items-center">
-                        @TempData["ErrorMessage"]
-                    </div>
+        <div class="alert alert-danger d-flex justify-content-center align-items-center">
+            @TempData["ErrorMessage"]
+        </div>
     }
 
     @if (TempData["SuccessMessage"] != null)
     {
-                    <div class="alert alert-success d-flex justify-content-center align-items-center">
-                        @TempData["SuccessMessage"]
-                    </div>
+        <div class="alert alert-success d-flex justify-content-center align-items-center">
+            @TempData["SuccessMessage"]
+        </div>
     }
 }
 
@@ -68,13 +68,13 @@
                         </span>
                         <form asp-action="AddPurchasePrice" method="post" class="d-flex">
                             <input type="hidden" name="figureId" value="@Model.Id" />
-                            <input type="text" 
-                                   name="price" 
-                                   placeholder="Purchased for ?" 
-                                   class="form-control form-control-sm input-unstyled" 
+                            <input type="text"
+                                   name="price"
+                                   placeholder="Purchased for ?"
+                                   class="form-control form-control-sm input-unstyled"
                                    oninput="toggleSubmitButton(this)" />
                             <select name="currency" id="currency-selector" class="form-select form-select-sm">
-                                @foreach(var currency in Model.SupportedCurrencies)
+                                @foreach (var currency in Model.SupportedCurrencies)
                                 {
                                     <option value=@currency>@currency</option>
                                 }
@@ -82,14 +82,20 @@
                             <button type="submit"
                                     id="submitPriceButton"
                                     class="btn btn-primary btn-sm"
-                                    style="display: none;">Submit</button>
+                                    style="display: none;">
+                                Submit
+                            </button>
                         </form>
                     </span>
                 </div>
             </li>
-            <li><strong>Retail Price: </strong><span class="figure-price">@(Model.RetailPrice > 0
+            <li>
+                <strong>Retail Price: </strong><span class="figure-price">
+                    @(Model.RetailPrice > 0
                         ? Model.RetailPriceCurrency + Model.RetailPrice.ToString("N2", new CultureInfo("en-US"))
-                        : "N/A")</span></li>
+                        : "N/A")
+                </span>
+            </li>
             <li>
                 <strong title="This price is based on currently available aftermarket ads.">Avg. Aftermarket Price: </strong><span class="figure-price">
                     @(Model.AvgCurrentAftermarketPrice > 0

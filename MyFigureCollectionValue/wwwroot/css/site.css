@@ -51,6 +51,10 @@ a {
         box-shadow: none;
     }
 
+.btn-danger {
+    border-radius: 15px;
+}
+
 .page-link {
     color: white;
 }
