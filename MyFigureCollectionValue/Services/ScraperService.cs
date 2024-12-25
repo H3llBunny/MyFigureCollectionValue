@@ -162,8 +162,8 @@ namespace MyFigureCollectionValue.Services
             }
         }
 
-        public async Task<(ICollection<Figure> Figures, ICollection<RetailPrice> RetailPrices, 
-            ICollection<AftermarketPrice> AftermarketPrices)> 
+        public async Task<(ICollection<Figure> Figures, ICollection<RetailPrice> RetailPrices,
+            ICollection<AftermarketPrice> AftermarketPrices)>
             CreateFiguresAndPricesAsync(IEnumerable<string> figureUrls, string userId,
                 Func<int, int, string, Task> progressCallback = null)
         {
@@ -174,7 +174,7 @@ namespace MyFigureCollectionValue.Services
 
             int totalUrls = figureUrls.Count();
             int processedUrls = 0;
-
+            bool shouldDelay = true;
 
             try
             {
@@ -209,7 +209,12 @@ namespace MyFigureCollectionValue.Services
                     {
                         try
                         {
-                            await Task.Delay(_delayRequest.Next(500, 800));
+                            if (shouldDelay)
+                            {
+                                await Task.Delay(_delayRequest.Next(500, 800));
+                            }
+
+                            shouldDelay = !shouldDelay;
 
                             var document = await _context.OpenAsync(url);
 
@@ -446,8 +451,7 @@ namespace MyFigureCollectionValue.Services
             };
         }
 
-        public async Task<ICollection<AftermarketPrice>> GetAftermarketPriceListAsync(string url,
-            int figureId = 0,
+        public async Task<ICollection<AftermarketPrice>> GetAftermarketPriceListAsync(string url, int figureId = 0,
             bool calledFromBackgroundService = false)
         {
             var aftermarketPriceList = new List<AftermarketPrice>();
