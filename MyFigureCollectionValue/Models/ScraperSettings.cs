@@ -7,5 +7,7 @@
         public string Password { get; set; }
 
         public string LoginUrl { get; set; }
+
+        public string BaseUrl { get; set; }
     }
 }

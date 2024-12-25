@@ -41,7 +41,7 @@ namespace MyFigureCollectionValue.Services
 
             _client = new HttpClient(handler);
             _client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
-            _client.DefaultRequestHeaders.Add("Referer", "https://myfigurecollection.net/");
+            _client.DefaultRequestHeaders.Add("Referer", _settings.BaseUrl);
         }
 
         public async Task LoginAsync()
@@ -49,7 +49,7 @@ namespace MyFigureCollectionValue.Services
             var loginData = new Dictionary<string, string>
             {
                 { "commit", "signIn" },
-                { "from", "https://myfigurecollection.net/" },
+                { "from", _settings.BaseUrl },
                 { "username", _settings.Username },
                 { "password", _settings.Password },
                 { "remember", "1" },
@@ -162,10 +162,9 @@ namespace MyFigureCollectionValue.Services
             }
         }
 
-        public async Task<(
-            ICollection<Figure> Figures,
-            ICollection<RetailPrice> RetailPrices,
-            ICollection<AftermarketPrice> AftermarketPrices)> CreateFiguresAndPricesAsync(IEnumerable<string> figureUrls, string userId,
+        public async Task<(ICollection<Figure> Figures, ICollection<RetailPrice> RetailPrices, 
+            ICollection<AftermarketPrice> AftermarketPrices)> 
+            CreateFiguresAndPricesAsync(IEnumerable<string> figureUrls, string userId,
                 Func<int, int, string, Task> progressCallback = null)
         {
             var newFigureList = new List<Figure>();
@@ -447,8 +446,7 @@ namespace MyFigureCollectionValue.Services
             };
         }
 
-        public async Task<ICollection<AftermarketPrice>> GetAftermarketPriceListAsync(
-            string url,
+        public async Task<ICollection<AftermarketPrice>> GetAftermarketPriceListAsync(string url,
             int figureId = 0,
             bool calledFromBackgroundService = false)
         {
