@@ -56,16 +56,23 @@ namespace MyFigureCollectionValue.Services
             var figures = new List<Figure>();
             var retailPrices = new List<RetailPrice>();
 
-            var (figureList, retailPriceList) = await scraperService.GetFiguresAndRetailPricesAsync(figureUrls);
+            var batches = figureUrls.Chunk(50);
 
-            if (figureList.Any())
+            foreach (var batch in batches)
             {
-                await figureService.UpdateFiguresAsync(figureList);
-            }
+                var (figureList, retailPriceList) = await scraperService.GetFiguresAndRetailPricesAsync(batch);
 
-            if (retailPriceList.Any())
-            {
-                await figureService.UpdateRetailPricesAsync(retailPriceList);
+                if (figureList.Any())
+                {
+                    await figureService.UpdateFiguresAsync(figureList);
+                }
+
+                if (retailPriceList.Any())
+                {
+                    await figureService.UpdateRetailPricesAsync(retailPriceList);
+                }
+
+                await Task.Delay(TimeSpan.FromMinutes(2));
             }
         }
     }

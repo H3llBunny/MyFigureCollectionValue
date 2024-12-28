@@ -53,39 +53,46 @@ namespace MyFigureCollectionValue.Services
         {
             await scraperService.LoginAsync();
 
-            var aftermarketPrices = new List<AftermarketPrice>();
+            var batches = figureUrlAndIds.Chunk(50);
 
-            foreach (var figure in figureUrlAndIds)
+            foreach (var batch in batches)
             {
-                var url = figure.Key;
-                var figureId = figure.Value;
+                var aftermarketPrices = new List<AftermarketPrice>();
 
-                var newAftermarketPrices = await scraperService.GetAftermarketPriceListAsync(url, figureId, true);
-
-                if (newAftermarketPrices != null)
+                foreach (var figure in batch)
                 {
-                    aftermarketPrices.AddRange(newAftermarketPrices);
+                    var url = figure.Key;
+                    var figureId = figure.Value;
+
+                    var newAftermarketPrices = await scraperService.GetAftermarketPriceListAsync(url, figureId, true);
+
+                    if (newAftermarketPrices != null)
+                    {
+                        aftermarketPrices.AddRange(newAftermarketPrices);
+                    }
                 }
-            }
 
-            if (aftermarketPrices.Any())
-            {
-                await figureService.AddAftermarketPricesAsync(aftermarketPrices);
-
-                var currentAftermarketPrices = aftermarketPrices.Select(ap => new CurrentAftermarketPrice
+                if (aftermarketPrices.Any())
                 {
-                    Id = ap.Id,
-                    Price = ap.Price,
-                    Currency = ap.Currency,
-                    LoggedAt = ap.LoggedAt,
-                    FigureId = ap.FigureId,
-                });
+                    await figureService.AddAftermarketPricesAsync(aftermarketPrices);
 
-                await figureService.AddCurrentAftermarketPricesAsync(currentAftermarketPrices);
+                    var currentAftermarketPrices = aftermarketPrices.Select(ap => new CurrentAftermarketPrice
+                    {
+                        Id = ap.Id,
+                        Price = ap.Price,
+                        Currency = ap.Currency,
+                        LoggedAt = ap.LoggedAt,
+                        FigureId = ap.FigureId,
+                    });
 
-                var figureIds = figureUrlAndIds.Select(f => f.Value).ToList();
+                    await figureService.AddCurrentAftermarketPricesAsync(currentAftermarketPrices);
 
-                await figureService.UpdateFiguresLastUpdatedAftermarketPricesAsync(figureIds);
+                    var figureIds = batch.Select(f => f.Value).ToList();
+
+                    await figureService.UpdateFiguresLastUpdatedAftermarketPricesAsync(figureIds);
+                }
+
+                await Task.Delay(TimeSpan.FromMinutes(2));
             }
         }
     }
