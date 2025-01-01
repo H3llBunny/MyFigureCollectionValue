@@ -50,6 +50,12 @@ namespace MyFigureCollectionValue.Controllers
             if (figures.Any())
             {
                 string userFigureCollectionUrl = await _figureService.GetUserFigureCollectionUrlAsync(userId);
+
+                if (userFigureCollectionUrl == null)
+                {
+                    return View();
+                }
+
                 string figureCollectionUsername = userFigureCollectionUrl.Substring(userFigureCollectionUrl.IndexOf("/profile/") + 9);
 
                 var figuresViewModel = new FiguresListViewModel
