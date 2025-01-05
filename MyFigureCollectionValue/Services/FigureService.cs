@@ -210,6 +210,17 @@ namespace MyFigureCollectionValue.Services
             }
         }
 
+        public async Task DeleteUserFigureCollectionAsync(string usedId, string url)
+        {
+            var collectionUrl = await _dbContext.UserFigureCollectionUrls.FirstOrDefaultAsync(u => u.UserId == usedId && u.FigureCollectionUrl == url);
+
+            if (collectionUrl != null)
+            {
+                _dbContext.UserFigureCollectionUrls.Remove(collectionUrl);
+                await _dbContext.SaveChangesAsync();
+            }
+        }
+
         public async Task<string> GetUserFigureCollectionUrlAsync(string userId)
         {
             var userFigureCollectionUrl = await _dbContext.UserFigureCollectionUrls.FirstOrDefaultAsync(u => u.UserId == userId);
@@ -440,5 +451,5 @@ namespace MyFigureCollectionValue.Services
         {
             return SupportedCurrencies.Contains(currency);
         }
-    }
+    } 
 }

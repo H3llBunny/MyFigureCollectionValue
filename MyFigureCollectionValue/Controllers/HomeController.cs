@@ -164,6 +164,16 @@ namespace MyFigureCollectionValue.Controllers
             return Ok();
         }
 
+        [Authorize]
+        public async Task<IActionResult> RemoveCollection(string collectionUrl)
+        {
+            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await _figureService.RemoveUserFiguresAsync(userId);
+            await _figureService.DeleteUserFigureCollectionAsync(userId, collectionUrl);
+
+            return RedirectToAction(nameof(Index));
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

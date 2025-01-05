@@ -99,7 +99,7 @@
                         </select>
                     </form>
                 </div>
-                <a class="btn btn-secondary delete-button" href="#">Remove Collection</a>
+                <a class="btn btn-secondary delete-button" href="#" data-url="@Model.UserFigureCollectionUrl">Remove Collection</a>
             </div>
             <div class="figure-container justify-content-center">
                 @foreach (var figure in Model.Figures)
@@ -164,108 +164,119 @@
             checkInput();
         });
 
-        const modelData = @Html.Raw(Json.Serialize(Model));
 
-        if (modelData != null) {
-            const form = document.getElementById("profileForm");
-            const progressContainer = document.getElementById("progressContainer");
-            const progressBar = document.getElementById("progressBar");
-            const progressStatus = document.getElementById("progressStatus");
-            const timerDisplay = document.getElementById("timerDisplay");
-            const overlay = document.getElementById("overlay");
+        const form = document.getElementById("profileForm");
+        const progressContainer = document.getElementById("progressContainer");
+        const progressBar = document.getElementById("progressBar");
+        const progressStatus = document.getElementById("progressStatus");
+        const timerDisplay = document.getElementById("timerDisplay");
+        const overlay = document.getElementById("overlay");
 
-            let startTime = null;
-            let timerInterval = null;
+        let startTime = null;
+        let timerInterval = null;
 
-            const connection = new signalR.HubConnectionBuilder()
-                .withUrl("/scraperProgressHub")
-                .build();
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/scraperProgressHub")
+            .build();
 
-            connection.on("ReceiveProgress", (current, total, status) => {
-                progressContainer.style.display = "block";
-                overlay.style.display = "block";
+        connection.on("ReceiveProgress", (current, total, status) => {
+            progressContainer.style.display = "block";
+            overlay.style.display = "block";
 
-                if (startTime === null) {
-                    startTime = new Date();
-                    timerInterval = setInterval(updateTimer, 1000);
-                }
-
-                const progressPercent = Math.round((current / total) * 100);
-
-                progressBar.style.width = `${progressPercent}%`;
-                progressBar.setAttribute('aria-valuenow', progressPercent);
-
-                document.getElementById("progressPercentage").textContent = `${progressPercent}%`;
-
-                progressStatus.textContent = status;
-
-                if (current === total) {
-                    clearInterval(timerInterval);
-                    timerInterval = null;
-                    const endTime = new Date();
-                    const elapsedTime = endTime - startTime;
-                    timerDisplay.textContent = `${formatElapsedTime(elapsedTime)}`;
-
-                    setTimeout(() => {
-                        progressContainer.style.display = 'none';
-                        overlay.style.display = 'none';
-                        startTime = null;
-                        timerDisplay.textContent = '';
-                    }, 2000);
-                }
-            });
-
-            function formatElapsedTime(milliseconds) {
-                const totalSeconds = Math.floor(milliseconds / 1000);
-                const minutes = Math.floor(totalSeconds / 60);
-                const seconds = totalSeconds % 60;
-                return `Time: ${minutes}:${seconds <= 9 ? '0' + seconds : seconds}`
+            if (startTime === null) {
+                startTime = new Date();
+                timerInterval = setInterval(updateTimer, 1000);
             }
 
-            function updateTimer() {
-                const now = new Date();
-                const elapsedTime = now - startTime;
+            const progressPercent = Math.round((current / total) * 100);
+
+            progressBar.style.width = `${progressPercent}%`;
+            progressBar.setAttribute('aria-valuenow', progressPercent);
+
+            document.getElementById("progressPercentage").textContent = `${progressPercent}%`;
+
+            progressStatus.textContent = status;
+
+            if (current === total) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                const endTime = new Date();
+                const elapsedTime = endTime - startTime;
                 timerDisplay.textContent = `${formatElapsedTime(elapsedTime)}`;
+
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    overlay.style.display = 'none';
+                    startTime = null;
+                    timerDisplay.textContent = '';
+                }, 2000);
+            }
+        });
+
+        function formatElapsedTime(milliseconds) {
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `Time: ${minutes}:${seconds <= 9 ? '0' + seconds : seconds}`
+        }
+
+        function updateTimer() {
+            const now = new Date();
+            const elapsedTime = now - startTime;
+            timerDisplay.textContent = `${formatElapsedTime(elapsedTime)}`;
+        }
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const profileUrl = document.getElementById("profileUrlInput").value;
+
+            if (profileUrl.trim() === '') {
+                alert("Please provide a valid URL.");
+                return;
             }
 
-            form.addEventListener("submit", async (event) => {
-                event.preventDefault();
-
-                const profileUrl = document.getElementById("profileUrlInput").value;
-
-                if (profileUrl.trim() === '') {
-                    alert("Please provide a valid URL.");
-                    return;
-                }
-
-                try {
-                    await connection.start().then(() => {
+            try {
+                await connection.start().then(() => {
+                    console.log("SignalR connection established.");
+                }).catch(err => {
+                    console.error("Error starting SignalR connection:", err);
+                    setTimeout(() => connection.start().then(() => {
                         console.log("SignalR connection established.");
                     }).catch(err => {
                         console.error("Error starting SignalR connection:", err);
-                        setTimeout(() => connection.start().then(() => {
-                            console.log("SignalR connection established.");
-                        }).catch(err => {
-                            console.error("Error starting SignalR connection:", err);
-                        }), 5000);
-                    });
+                    }), 5000);
+                });
 
-                    const response = await fetch(form.action, {
-                        method: "POST",
-                        body: new URLSearchParams({ profileUrl }),
-                        headers: { "Content-Type": "application/x-www-form-urlencoded" }
-                    });
+                const response = await fetch(form.action, {
+                    method: "POST",
+                    body: new URLSearchParams({ profileUrl }),
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" }
+                });
 
-                    if (response.ok) {
-                        location.reload();
-                    } else {
-                        const error = await response.text();
-                        alert(`Error: ${error}`);
-                        progressContainer.style.display = 'none';
-                        overlay.style.display = 'none';
-                    }
-                } catch (error) {
-                    console.error("SignalR or submission error:", error);
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    const error = await response.text();
+                    alert(`Error: ${error}`);
+                    progressContainer.style.display = 'none';
+                    overlay.style.display = 'none';
+                }
+            } catch (error) {
+                console.error("SignalR or submission error:", error);
+            }
+        });
+
+        const modelData = @Html.Raw(Json.Serialize(Model));
+
+        if (modelData != null) {
+
+            document.querySelector('.delete-button').addEventListener('click', function (event) {
+                event.preventDefault();
+                const url = this.getAttribute('data-url');
+                const confirmation = confirm('Are you sure you want to remove this collection?');
+                if (confirmation) {
+                    window.location.href = 'Home/RemoveCollection?collectionUrl=' + encodeURIComponent(url);
                 }
             });
         }
