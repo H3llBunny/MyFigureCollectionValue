@@ -237,9 +237,34 @@ div.lowMaxPrice {
     padding-bottom: 20px;
 }
 
+div.sort-options-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+}
+
 div.sort-options {
     padding-top: 10px;
 }
+
+a.delete-button {
+    border-radius: 15px;
+    background-color: #f48939;
+}
+
+    a.delete-button:active {
+        box-shadow: none;
+        background-color: darkred !important;
+    }
+
+    a.delete-button:focus {
+        box-shadow: none;
+    }
+
+    a.delete-button:hover {
+        background-color: red;
+    }
 
 .input-unstyled {
     border: 1px solid #f48939;
