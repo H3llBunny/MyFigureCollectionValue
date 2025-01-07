@@ -16,5 +16,7 @@ namespace MyFigureCollectionValue.Models
         public int FigureId { get; set; }
 
         public Figure Figure { get; set; }
+
+        public string? Url { get; set; }
     }
 }

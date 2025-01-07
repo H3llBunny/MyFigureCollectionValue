@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MyFigureCollectionValue.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitalCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -61,7 +61,7 @@ namespace MyFigureCollectionValue.Migrations
                     Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FigureUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastUpdatedRetailPrices = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    LastUpdatedAftermarketPrices = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -200,7 +200,8 @@ namespace MyFigureCollectionValue.Migrations
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Currency = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LoggedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    FigureId = table.Column<int>(type: "int", nullable: false)
+                    FigureId = table.Column<int>(type: "int", nullable: false),
+                    Url = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -221,7 +222,8 @@ namespace MyFigureCollectionValue.Migrations
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Currency = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LoggedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    FigureId = table.Column<int>(type: "int", nullable: false)
+                    FigureId = table.Column<int>(type: "int", nullable: false),
+                    Url = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -274,6 +276,32 @@ namespace MyFigureCollectionValue.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_UserFigures_Figures_FigureId",
+                        column: x => x.FigureId,
+                        principalTable: "Figures",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserPurchasePrices",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    FigureId = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Currency = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserPurchasePrices", x => new { x.UserId, x.FigureId });
+                    table.ForeignKey(
+                        name: "FK_UserPurchasePrices_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserPurchasePrices_Figures_FigureId",
                         column: x => x.FigureId,
                         principalTable: "Figures",
                         principalColumn: "Id",
@@ -344,6 +372,11 @@ namespace MyFigureCollectionValue.Migrations
                 name: "IX_UserFigures_FigureId",
                 table: "UserFigures",
                 column: "FigureId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserPurchasePrices_FigureId",
+                table: "UserPurchasePrices",
+                column: "FigureId");
         }
 
         /// <inheritdoc />
@@ -378,6 +411,9 @@ namespace MyFigureCollectionValue.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserFigures");
+
+            migrationBuilder.DropTable(
+                name: "UserPurchasePrices");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

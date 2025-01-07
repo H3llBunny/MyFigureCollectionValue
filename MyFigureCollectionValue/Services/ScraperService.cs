@@ -602,6 +602,8 @@ namespace MyFigureCollectionValue.Services
 
             int id = int.Parse(item.QuerySelector("div.dgst-wrapper a").GetAttribute("href").Split("/")[2]);
 
+            string url = new Uri(new Uri(_settings.BaseUrl), item.QuerySelector("div.dgst-wrapper a").GetAttribute("href")).ToString();
+
             return new AftermarketPrice
             {
                 Id = id,
@@ -609,6 +611,7 @@ namespace MyFigureCollectionValue.Services
                 Currency = currency,
                 LoggedAt = loggedAt,
                 FigureId = figureId,
+                Url = url
             };
         }
 

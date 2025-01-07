@@ -12,15 +12,15 @@ using MyFigureCollectionValue.Data;
 namespace MyFigureCollectionValue.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241114173958_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250107181706_InitalCreate")]
+    partial class InitalCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "8.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -245,6 +245,9 @@ namespace MyFigureCollectionValue.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("Url")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("FigureId");
@@ -269,6 +272,9 @@ namespace MyFigureCollectionValue.Migrations
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -297,7 +303,7 @@ namespace MyFigureCollectionValue.Migrations
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("LastUpdatedRetailPrices")
+                    b.Property<DateTime>("LastUpdatedAftermarketPrices")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
@@ -370,6 +376,28 @@ namespace MyFigureCollectionValue.Migrations
                         .IsUnique();
 
                     b.ToTable("UserFigureCollectionUrls");
+                });
+
+            modelBuilder.Entity("MyFigureCollectionValue.Models.UserPurchasePrices", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("FigureId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("UserId", "FigureId");
+
+                    b.HasIndex("FigureId");
+
+                    b.ToTable("UserPurchasePrices");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -486,6 +514,25 @@ namespace MyFigureCollectionValue.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MyFigureCollectionValue.Models.UserPurchasePrices", b =>
+                {
+                    b.HasOne("MyFigureCollectionValue.Models.Figure", "Figure")
+                        .WithMany("UserPurchasePrices")
+                        .HasForeignKey("FigureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Figure");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MyFigureCollectionValue.Models.Figure", b =>
                 {
                     b.Navigation("AftermarketPrices");
@@ -495,6 +542,8 @@ namespace MyFigureCollectionValue.Migrations
                     b.Navigation("RetailPrices");
 
                     b.Navigation("UserFigures");
+
+                    b.Navigation("UserPurchasePrices");
                 });
 #pragma warning restore 612, 618
         }

@@ -157,6 +157,7 @@ namespace MyFigureCollectionValue.Controllers
                     Currency = ap.Currency,
                     LoggedAt = ap.LoggedAt,
                     FigureId = ap.FigureId,
+                    Url = ap.Url
                 });
                 await _figureService.AddCurrentAftermarketPricesAsync(currentAftermarketPrices);
             }
