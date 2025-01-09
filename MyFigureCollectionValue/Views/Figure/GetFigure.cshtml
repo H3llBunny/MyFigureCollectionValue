@@ -41,7 +41,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-9" id="rightSide">
+    <div class="col-md-7" id="rightSide">
         <ul class="figureInfo">
             <li><h2>@Model.Name</h2></li>
             <br />
@@ -105,6 +105,23 @@
         </ul>
         <div id="figurePriceChart"></div>
     </div>
+    @if (Model.CurrentAftermarketPrices != null && Model.CurrentAftermarketPrices.Any())
+    {
+        <div class="col-md-2" id="aftermarketAds">
+            <div class="aftermarket-ads-container">
+                <strong style="text-align: center">Available ads</strong>
+                @foreach (var ad in Model.CurrentAftermarketPrices)
+                {
+                    <div class="aftermarket-ad">
+                        <a href="@ad.Url" target="_blank" class="btn btn-link">
+                            <strong>Date:</strong> @ad.LoggedAt.ToString("yyyy-MM-dd")
+                            <span class="figure-price">$@ad.Price </span>
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    }
 </div>
 
 <script>

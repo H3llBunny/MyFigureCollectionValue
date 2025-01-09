@@ -415,7 +415,8 @@ namespace MyFigureCollectionValue.Services
                 AvgAftermarketPriceCurrency = DefaultCurrencySymbol,
                 AftermarketPrices = figure.AftermarketPrices,
                 PurchasedPrice = Math.Round(purchasedPrice, 2),
-                SupportedCurrencies = SupportedCurrencies
+                SupportedCurrencies = SupportedCurrencies,
+                CurrentAftermarketPrices = figure.CurrentAftermarketPrices
             };
         }
 

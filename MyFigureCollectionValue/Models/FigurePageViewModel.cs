@@ -9,5 +9,7 @@
         public string FigureUrl { get; set; }
 
         public ICollection<string> SupportedCurrencies { get; set; }
+
+        public ICollection<CurrentAftermarketPrice> CurrentAftermarketPrices { get; set; }
     }
 }
