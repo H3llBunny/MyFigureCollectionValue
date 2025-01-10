@@ -197,18 +197,15 @@ div.figureImage {
     }
 
 ul.figureInfo {
+    max-width: 1000px;
+    border: solid 2px #565656;
+    border-radius: 20px;
+    margin-inline: 10px;
+    padding: 10px;
     color: white;
     list-style-type: none;
     text-align: start;
     font-size: 25px
-}
-
-ul.figureInfo {
-    max-width: 1000px;
-    border: solid 2px #565656;
-    border-radius: 20px;
-    margin-left: 10px;
-    padding: 10px;
 }
 
 img.mfc-logo {
@@ -225,7 +222,7 @@ span.mfc-logo-text {
 div#figurePriceChart {
     border-radius: 20px;
     margin-left: 10px;
-    max-width: 1000px;
+    max-width:100%;
     padding-bottom: 10px;
 }
 
@@ -358,7 +355,7 @@ a.delete-button {
 }
 
 #aftermarketAds {
-    max-height: 420px;
+    max-height: 430px;
     max-width: 220px;
     overflow-y: auto;
     border-radius: 20px;
@@ -384,7 +381,7 @@ a.delete-button {
             color: gray !important;
         }
 
-#rightSide {
-    padding-right: 10px;
+div.figure-info-and-ads {
+    display: flex;
+    flex-direction: row;
 }
-

@@ -18,7 +18,7 @@
 }
 
 <div class="d-flex flex-wrap justify-content-center">
-    <div class="col-md-3 text-center" id="leftSide">
+    <div class="text-center" id="leftSide">
         <div class="figureImage">
             <img src="@Model.ImageUrl" />
         </div>
@@ -41,87 +41,89 @@
             </div>
         </div>
     </div>
-    <div class="col-md-7" id="rightSide">
-        <ul class="figureInfo">
-            <li><h2>@Model.Name</h2></li>
-            <br />
-            <li><strong>Origin: </strong>@Model.Origin</li>
-            <li><strong>Company: </strong>@Model.Company</li>
-            <br />
-            <li class="position-relative">
-                <a class="text-decoration-none" style="color: white;" href="@Model.FigureUrl" target="_blank">
-                    <img class="mfc-logo" src="~/images/mfc-icon.webp" alt="@Model.FigureUrl" title="Open on MFC" />
-                    <span class="mfc-logo-text" title="Open on MFC">
-                        <span>MY<strong>FIGURE</strong>COLLECTION</span>
-                    </span>
-                </a>
-            </li>
-            <br />
-            <li>
-                <div class="d-flex align-items-center">
-                    <strong class="me-2">Paid: </strong>
-                    <span class="d-flex align-items-center">
-                        <span id="displayPrice" class="figure-price me-2">
-                            @(Model.PurchasedPrice > 0
-                                ? "$" + Model.PurchasedPrice.ToString("N2", new CultureInfo("en-US"))
-                                : "N/A")
+    <div id="rightSide">
+        <div class="figure-info-and-ads">
+            <ul class="figureInfo">
+                <li><h2>@Model.Name</h2></li>
+                <br />
+                <li><strong>Origin: </strong>@Model.Origin</li>
+                <li><strong>Company: </strong>@Model.Company</li>
+                <br />
+                <li class="position-relative">
+                    <a class="text-decoration-none" style="color: white;" href="@Model.FigureUrl" target="_blank">
+                        <img class="mfc-logo" src="~/images/mfc-icon.webp" alt="@Model.FigureUrl" title="Open on MFC" />
+                        <span class="mfc-logo-text" title="Open on MFC">
+                            <span>MY<strong>FIGURE</strong>COLLECTION</span>
                         </span>
-                        <form asp-action="AddPurchasePrice" method="post" class="d-flex">
-                            <input type="hidden" name="figureId" value="@Model.Id" />
-                            <input type="text"
-                                   name="price"
-                                   placeholder="Purchased for ?"
-                                   class="form-control form-control-sm input-unstyled"
-                                   oninput="toggleSubmitButton(this)" />
-                            <select name="currency" id="currency-selector" class="form-select form-select-sm">
-                                @foreach (var currency in Model.SupportedCurrencies)
-                                {
-                                    <option value=@currency>@currency</option>
-                                }
-                            </select>
-                            <button type="submit"
-                                    id="submitPriceButton"
-                                    class="btn btn-primary btn-sm"
-                                    style="display: none;">
-                                Submit
-                            </button>
-                        </form>
+                    </a>
+                </li>
+                <br />
+                <li>
+                    <div class="d-flex align-items-center">
+                        <strong class="me-2">Paid: </strong>
+                        <span class="d-flex align-items-center">
+                            <span id="displayPrice" class="figure-price me-2">
+                                @(Model.PurchasedPrice > 0
+                                    ? "$" + Model.PurchasedPrice.ToString("N2", new CultureInfo("en-US"))
+                                    : "N/A")
+                            </span>
+                            <form asp-action="AddPurchasePrice" method="post" class="d-flex">
+                                <input type="hidden" name="figureId" value="@Model.Id" />
+                                <input type="text"
+                                       name="price"
+                                       placeholder="Purchased for ?"
+                                       class="form-control form-control-sm input-unstyled"
+                                       oninput="toggleSubmitButton(this)" />
+                                <select name="currency" id="currency-selector" class="form-select form-select-sm">
+                                    @foreach (var currency in Model.SupportedCurrencies)
+                                    {
+                                        <option value=@currency>@currency</option>
+                                    }
+                                </select>
+                                <button type="submit"
+                                        id="submitPriceButton"
+                                        class="btn btn-primary btn-sm"
+                                        style="display: none;">
+                                    Submit
+                                </button>
+                            </form>
+                        </span>
+                    </div>
+                </li>
+                <li>
+                    <strong>Retail Price: </strong><span class="figure-price">
+                        @(Model.RetailPrice > 0
+                            ? Model.RetailPriceCurrency + Model.RetailPrice.ToString("N2", new CultureInfo("en-US"))
+                            : "N/A")
                     </span>
+                </li>
+                <li>
+                    <strong title="This price is based on currently available aftermarket ads.">Avg. Aftermarket Price: </strong><span class="figure-price">
+                        @(Model.AvgCurrentAftermarketPrice > 0
+                            ? Model.AvgAftermarketPriceCurrency + Model.AvgCurrentAftermarketPrice.ToString("N2", new CultureInfo("en-US")) : "N/A")
+                    </span>
+                </li>
+            </ul>
+            @if (Model.CurrentAftermarketPrices != null && Model.CurrentAftermarketPrices.Any())
+            {
+                <div id="aftermarketAds">
+                    <div class="aftermarket-ads-container">
+                        <strong style="text-align: center">Available ads</strong>
+                        @foreach (var ad in Model.CurrentAftermarketPrices)
+                        {
+                            <div class="aftermarket-ad">
+                                <a href="@ad.Url" target="_blank" class="btn btn-link">
+                                    <strong>Date:</strong> @ad.LoggedAt.ToString("yyyy-MM-dd")
+                                    <span class="figure-price">$@ad.Price </span>
+                                </a>
+                            </div>
+                        }
+                    </div>
                 </div>
-            </li>
-            <li>
-                <strong>Retail Price: </strong><span class="figure-price">
-                    @(Model.RetailPrice > 0
-                        ? Model.RetailPriceCurrency + Model.RetailPrice.ToString("N2", new CultureInfo("en-US"))
-                        : "N/A")
-                </span>
-            </li>
-            <li>
-                <strong title="This price is based on currently available aftermarket ads.">Avg. Aftermarket Price: </strong><span class="figure-price">
-                    @(Model.AvgCurrentAftermarketPrice > 0
-                        ? Model.AvgAftermarketPriceCurrency + Model.AvgCurrentAftermarketPrice.ToString("N2", new CultureInfo("en-US")) : "N/A")
-                </span>
-            </li>
-        </ul>
+            }
+        </div>
         <div id="figurePriceChart"></div>
     </div>
-    @if (Model.CurrentAftermarketPrices != null && Model.CurrentAftermarketPrices.Any())
-    {
-        <div class="col-md-2" id="aftermarketAds">
-            <div class="aftermarket-ads-container">
-                <strong style="text-align: center">Available ads</strong>
-                @foreach (var ad in Model.CurrentAftermarketPrices)
-                {
-                    <div class="aftermarket-ad">
-                        <a href="@ad.Url" target="_blank" class="btn btn-link">
-                            <strong>Date:</strong> @ad.LoggedAt.ToString("yyyy-MM-dd")
-                            <span class="figure-price">$@ad.Price </span>
-                        </a>
-                    </div>
-                }
-            </div>
-        </div>
-    }
 </div>
 
 <script>
