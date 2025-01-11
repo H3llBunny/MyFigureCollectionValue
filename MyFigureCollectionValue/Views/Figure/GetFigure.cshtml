@@ -4,16 +4,16 @@
 @{
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger d-flex justify-content-center align-items-center">
-            @TempData["ErrorMessage"]
-        </div>
+            <div class="alert alert-danger d-flex justify-content-center align-items-center">
+                @TempData["ErrorMessage"]
+            </div>
     }
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success d-flex justify-content-center align-items-center">
-            @TempData["SuccessMessage"]
-        </div>
+            <div class="alert alert-success d-flex justify-content-center align-items-center">
+                @TempData["SuccessMessage"]
+            </div>
     }
 }
 
@@ -127,6 +127,20 @@
 </div>
 
 <script>
+
+    function adjustAftermarketAdsHeight() {
+        const figureInfo = document.querySelector(".figureInfo");
+        const aftermarketAds = document.querySelector("#aftermarketAds");
+
+        if (figureInfo && aftermarketAds) {
+            const figureInfoHeight = figureInfo.offsetHeight;
+            aftermarketAds.style.maxHeight = `${figureInfoHeight}px`;
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", adjustAftermarketAdsHeight);
+    window.addEventListener("resize", adjustAftermarketAdsHeight);
+
     function toggleSubmitButton(input) {
         const submitButton = document.getElementById('submitPriceButton');
         if (input.value.trim() !== "") {
