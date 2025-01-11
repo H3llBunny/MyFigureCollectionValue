@@ -416,7 +416,7 @@ namespace MyFigureCollectionValue.Services
                 AftermarketPrices = figure.AftermarketPrices,
                 PurchasedPrice = Math.Round(purchasedPrice, 2),
                 SupportedCurrencies = SupportedCurrencies,
-                CurrentAftermarketPrices = figure.CurrentAftermarketPrices.OrderBy(p => p.Price).ToList()
+                CurrentAftermarketPrices = figure.CurrentAftermarketPrices
             };
         }
 
