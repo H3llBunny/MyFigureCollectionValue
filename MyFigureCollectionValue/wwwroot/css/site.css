@@ -247,9 +247,14 @@ div.sort-options {
     padding-top: 10px;
 }
 
+a.refresh-button {
+    border-color: transparent;
+}
+
 a.delete-button {
     border-radius: 15px;
     background-color: #f48939;
+    border-color: transparent;
 }
 
     a.delete-button:active {

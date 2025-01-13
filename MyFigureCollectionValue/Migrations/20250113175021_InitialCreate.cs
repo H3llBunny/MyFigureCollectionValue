@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MyFigureCollectionValue.Migrations
 {
     /// <inheritdoc />
-    public partial class InitalCreate : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -179,7 +179,8 @@ namespace MyFigureCollectionValue.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FigureCollectionUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    FigureCollectionUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LastRefreshed = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {

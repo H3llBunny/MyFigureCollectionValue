@@ -99,7 +99,24 @@
                         </select>
                     </form>
                 </div>
-                <a class="btn btn-secondary delete-button" href="#" data-url="@Model.UserFigureCollectionUrl">Remove Collection</a>
+                <div>
+                    @{
+                        var now = DateTime.UtcNow;
+                        var nextRefresh = Model.LastRefreshCollection.AddMinutes(15);
+                        var timeLeft = (nextRefresh - now).TotalSeconds;
+                        var canRefresh = timeLeft <= 0;
+                    }
+                    <a class="btn btn-primary refresh-button @((canRefresh ? "" : "disabled"))" asp-action="RefreshCollection"
+                       asp-route-collectionUrl="@Model.UserFigureCollectionUrl"
+                       data-time-left="@((int)timeLeft)">
+                        Refresh Collection
+                        @if (!canRefresh)
+                        {
+                            <span class="refresh-timer" data-time-left="@((int)timeLeft)">(@TimeSpan.FromSeconds((int)timeLeft).ToString("mm\\:ss"))</span>
+                        }
+                    </a>
+                    <a class="btn btn-secondary delete-button" href="#" data-url="@Model.UserFigureCollectionUrl">Remove Collection</a>
+                </div>
             </div>
             <div class="figure-container justify-content-center">
                 @foreach (var figure in Model.Figures)
@@ -277,6 +294,31 @@
                 const confirmation = confirm('Are you sure you want to remove this collection?');
                 if (confirmation) {
                     window.location.href = 'Home/RemoveCollection?collectionUrl=' + encodeURIComponent(url);
+                }
+            });
+
+            document.querySelector('.refresh-button').addEventListener('click', function () {
+                let timeLeft = parseInt(this.getAttribute('data-time-left'));
+                const timerElement = this.querySelector('.refresh-timer');
+
+                if (timeLeft > 0) {
+                    this.classList.add('disabled');
+                    const interval = setInterval(function () {
+                        timeLeft--;
+                        timerElement.textContent = '(' + formatTimeLeft(timeLeft) + ')';
+                        if (timeLeft <= 0) {
+                            clearInterval(interval);
+                            this.classList.remove('disabled');
+                            if (timerElement) {
+                                timerElement.style.display = 'none';
+                            }
+                        }
+                    }, 1000);
+                } else {
+                    this.classList.remove('disabled');
+                    if (timerElement) {
+                        timerElement.style.display = 'none';
+                    }
                 }
             });
         }

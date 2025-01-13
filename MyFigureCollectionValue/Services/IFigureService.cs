@@ -30,6 +30,8 @@ namespace MyFigureCollectionValue.Services
 
         Task<string> GetUserFigureCollectionUrlAsync(string userId);
 
+        Task<DateTime> GetUserFigureCollectionLastRefreshAsync(string userId);
+
         Task<decimal> SumRetailPriceCollectionAsync(string userId);
 
         Task<decimal> SumUserPurchasePriceAsync(string userId);

@@ -50,6 +50,7 @@ namespace MyFigureCollectionValue.Controllers
             if (figures.Any())
             {
                 string userFigureCollectionUrl = await _figureService.GetUserFigureCollectionUrlAsync(userId);
+                var lastRefreshed = await _figureService.GetUserFigureCollectionLastRefreshAsync(userId);
 
                 if (userFigureCollectionUrl == null)
                 {
@@ -70,7 +71,8 @@ namespace MyFigureCollectionValue.Controllers
                     FigureCollectionUsername = figureCollectionUsername,
                     SumRetailPriceCollection = await _figureService.SumRetailPriceCollectionAsync(userId),
                     SumAvgAftermarketPriceCollection = await _figureService.SumAvgAftermarketPriceCollectionAsync(userId),
-                    TotalPaid = await _figureService.SumUserPurchasePriceAsync(userId)
+                    TotalPaid = await _figureService.SumUserPurchasePriceAsync(userId),
+                    LastRefreshCollection = lastRefreshed
                 };
 
                 return View(figuresViewModel);
@@ -172,6 +174,12 @@ namespace MyFigureCollectionValue.Controllers
             await _figureService.RemoveUserFiguresAsync(userId);
             await _figureService.DeleteUserFigureCollectionAsync(userId, collectionUrl);
 
+            return RedirectToAction(nameof(Index));
+        }
+
+        [Authorize]
+        public async Task<IActionResult> RefreshCollection(string collectionUrl)
+        {
             return RedirectToAction(nameof(Index));
         }
 

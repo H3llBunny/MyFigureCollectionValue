@@ -12,8 +12,8 @@ using MyFigureCollectionValue.Data;
 namespace MyFigureCollectionValue.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250107181706_InitalCreate")]
-    partial class InitalCreate
+    [Migration("20250113175021_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -369,6 +369,9 @@ namespace MyFigureCollectionValue.Migrations
                     b.Property<string>("FigureCollectionUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("LastRefreshed")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("UserId");
 

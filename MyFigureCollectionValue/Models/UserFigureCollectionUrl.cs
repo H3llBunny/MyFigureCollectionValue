@@ -11,5 +11,7 @@ namespace MyFigureCollectionValue.Models
         public IdentityUser User { get; set; }
 
         public string FigureCollectionUrl { get; set; }
+
+        public DateTime LastRefreshed { get; set; }
     }
 }

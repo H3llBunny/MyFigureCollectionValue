@@ -202,7 +202,8 @@ namespace MyFigureCollectionValue.Services
                 var userFigureCollectionUrl = new UserFigureCollectionUrl
                 {
                     UserId = userId,
-                    FigureCollectionUrl = url
+                    FigureCollectionUrl = url,
+                    LastRefreshed = DateTime.UtcNow
                 };
 
                 await _dbContext.UserFigureCollectionUrls.AddAsync(userFigureCollectionUrl);
@@ -225,6 +226,12 @@ namespace MyFigureCollectionValue.Services
         {
             var userFigureCollectionUrl = await _dbContext.UserFigureCollectionUrls.FirstOrDefaultAsync(u => u.UserId == userId);
             return userFigureCollectionUrl?.FigureCollectionUrl;
+        }
+
+        public async Task<DateTime> GetUserFigureCollectionLastRefreshAsync(string userId)
+        {
+            var lastRefreshed = await _dbContext.UserFigureCollectionUrls.FirstOrDefaultAsync(u => u.UserId == userId);
+            return lastRefreshed.LastRefreshed;
         }
 
         public async Task<decimal> SumRetailPriceCollectionAsync(string userId)

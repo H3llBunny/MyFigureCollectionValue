@@ -16,6 +16,8 @@
 
         public decimal TotalPaid { get; set; }
 
+        public DateTime LastRefreshCollection { get; set; }
+
         public IEnumerable<FigureInListViewModel> Figures { get; set; }
     }
 }
