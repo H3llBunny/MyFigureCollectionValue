@@ -297,27 +297,47 @@
                 }
             });
 
-            document.querySelector('.refresh-button').addEventListener('click', function () {
-                let timeLeft = parseInt(this.getAttribute('data-time-left'));
-                const timerElement = this.querySelector('.refresh-timer');
+            function formatTimeLeft(totalSeconds) {
+                var minutes = Math.floor(totalSeconds / 60);
+                var seconds = totalSeconds % 60;
+                return String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+            }
 
-                if (timeLeft > 0) {
-                    this.classList.add('disabled');
-                    const interval = setInterval(function () {
-                        timeLeft--;
-                        timerElement.textContent = '(' + formatTimeLeft(timeLeft) + ')';
-                        if (timeLeft <= 0) {
-                            clearInterval(interval);
-                            this.classList.remove('disabled');
+            document.addEventListener("DOMContentLoaded", function () {
+                const refreshButton = document.querySelector('.refresh-button');
+
+                if (refreshButton) {
+                    let timeLeft = parseInt(refreshButton.getAttribute('data-time-left'));
+                    const timerElement = refreshButton.querySelector('.refresh-timer');
+
+                    function formatTimeLeft(totalSeconds) {
+                        const minutes = Math.floor(totalSeconds / 60);
+                        const seconds = totalSeconds % 60;
+                        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                    }
+
+                    if (timeLeft > 0) {
+                        refreshButton.classList.add('disabled');
+                        const interval = setInterval(function () {
+                            timeLeft--;
+
                             if (timerElement) {
-                                timerElement.style.display = 'none';
+                                timerElement.textContent = `(${formatTimeLeft(timeLeft)})`;
                             }
+
+                            if (timeLeft <= 0) {
+                                clearInterval(interval);
+                                refreshButton.classList.remove('disabled');
+                                if (timerElement) {
+                                    timerElement.style.display = 'none';
+                                }
+                            }
+                        }, 1000);
+                    } else {
+                        refreshButton.classList.remove('disabled');
+                        if (timerElement) {
+                            timerElement.style.display = 'none';
                         }
-                    }, 1000);
-                } else {
-                    this.classList.remove('disabled');
-                    if (timerElement) {
-                        timerElement.style.display = 'none';
                     }
                 }
             });

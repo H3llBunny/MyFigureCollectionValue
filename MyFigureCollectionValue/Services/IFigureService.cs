@@ -24,10 +24,6 @@ namespace MyFigureCollectionValue.Services
 
         Task<IEnumerable<FigureInListViewModel>> GetAllFiguresAsync(string userId, int pageNumber, int figuresPerPage, string sortOrder);
 
-        Task UpdateUserFigureCollectionUrlAsync(string userId, string url);
-
-        Task DeleteUserFigureCollectionAsync(string usedId, string url);
-
         Task<string> GetUserFigureCollectionUrlAsync(string userId);
 
         Task<DateTime> GetUserFigureCollectionLastRefreshAsync(string userId);

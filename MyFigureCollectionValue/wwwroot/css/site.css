@@ -84,7 +84,7 @@ footer {
     width: 100%;
 }
 
-#searchUrlBoxWrapper{
+#searchUrlBoxWrapper {
     padding-right: 130px;
     padding-left: 10px;
 }
@@ -224,7 +224,7 @@ span.mfc-logo-text {
 
 div#figurePriceChart {
     border-radius: 20px;
-    max-width:100%;
+    max-width: 100%;
 }
 
 .lowest-price, .highest-price {
@@ -250,6 +250,15 @@ div.sort-options {
 a.refresh-button {
     border-color: transparent;
 }
+
+    a.refresh-button:hover {
+        border-color: transparent;
+    }
+
+    a.refresh-button.disabled {
+        border-color: transparent;
+        background-color: dimgray !important;
+    }
 
 a.delete-button {
     border-radius: 15px;
@@ -380,9 +389,9 @@ a.delete-button {
         color: white;
     }
 
-    .aftermarket-ads-container a:hover {
-        color: gray;
-    }
+        .aftermarket-ads-container a:hover {
+            color: gray;
+        }
 
         .aftermarket-ads-container a:focus {
             color: gray !important;
