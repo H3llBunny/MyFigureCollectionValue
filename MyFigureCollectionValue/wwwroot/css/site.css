@@ -141,6 +141,7 @@ footer {
     width: 230px;
     border-radius: 20px;
     overflow: hidden;
+    border: solid 2px #4a4a4a;
 }
 
 .figure-image {
@@ -172,6 +173,7 @@ footer {
     list-style-type: none;
     padding: 10px;
     text-align: left;
+    margin-bottom: 0px;
 }
 
 span.figure-price {
