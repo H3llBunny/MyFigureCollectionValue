@@ -102,24 +102,41 @@
                         @(Model.AvgCurrentAftermarketPrice > 0
                             ? Model.AvgAftermarketPriceCurrency + Model.AvgCurrentAftermarketPrice.ToString("N2", new CultureInfo("en-US")) : "N/A")
                     </span>
-                    <strong>
-                        @if (Model.AvgCurrentAftermarketPrice > Model.RetailPrice && Model.RetailPrice != 0)
-                        {
-                            <span class="percentage" style="color: limegreen">
-                                +@((((Model.AvgCurrentAftermarketPrice - Model.RetailPrice) / Model.RetailPrice) * 100).ToString("N2"))%
-                            </span>
-                        }
-                        else if (Model.AvgCurrentAftermarketPrice < Model.RetailPrice && Model.AvgCurrentAftermarketPrice != 0)
-                        {
-                            <span class="percentage" style="color: red">
-                                @((((Model.AvgCurrentAftermarketPrice - Model.RetailPrice) / Model.RetailPrice) * 100).ToString("N2"))%
-                            </span>
-                        }
-                        else
-                        {
-                            <span class="percentage" style="color: darkgray">0%</span>
-                        }
-                    </strong>
+                    <div>
+                        <strong>
+                            @if (Model.AvgCurrentAftermarketPrice > Model.RetailPrice && Model.RetailPrice != 0)
+                            {
+                                <span>By Retail Price:</span>
+                                <span class="percentage" style="color: limegreen">
+                                    +@((((Model.AvgCurrentAftermarketPrice - Model.RetailPrice) / Model.RetailPrice) * 100).ToString("N2"))%
+                                </span>
+                            }
+                            else if (Model.AvgCurrentAftermarketPrice < Model.RetailPrice && Model.AvgCurrentAftermarketPrice != 0)
+                            {
+                                <span>By Retail Price:</span>
+                                <span class="percentage" style="color: red">
+                                    @((((Model.AvgCurrentAftermarketPrice - Model.RetailPrice) / Model.RetailPrice) * 100).ToString("N2"))%
+                                </span>
+                            }
+                        </strong>
+                        <strong>
+                            @if (Model.AvgCurrentAftermarketPrice > Model.PurchasedPrice && Model.PurchasedPrice != 0)
+                            {
+                                <span>By Paid Price</span>
+                                <span class="percentage" style="color: limegreen">
+                                    +@((((Model.AvgCurrentAftermarketPrice - Model.PurchasedPrice) / Model.PurchasedPrice) * 100).ToString("N2"))%
+                                </span>
+                            }
+                            else if (Model.AvgCurrentAftermarketPrice < Model.PurchasedPrice && Model.AvgCurrentAftermarketPrice != 0
+                            && Model.PurchasedPrice != 0)
+                            {
+                                <span>By Paid Price</span>
+                                <span class="percentage" style="color: red">
+                                    @((((Model.AvgCurrentAftermarketPrice - Model.PurchasedPrice) / Model.PurchasedPrice) * 100).ToString("N2"))%
+                                </span>
+                            }
+                        </strong>
+                    </div>
                 </li>
             </ul>
             @if (Model.CurrentAftermarketPrices != null && Model.CurrentAftermarketPrices.Any())
