@@ -403,3 +403,7 @@ div.figure-info-and-ads {
     display: flex;
     flex-direction: row;
 }
+
+span.percentage {
+    padding-left: 10px;
+}

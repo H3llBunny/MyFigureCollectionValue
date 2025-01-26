@@ -4,16 +4,16 @@
 @{
     @if (TempData["ErrorMessage"] != null)
     {
-            <div class="alert alert-danger d-flex justify-content-center align-items-center">
-                @TempData["ErrorMessage"]
-            </div>
+        <div class="alert alert-danger d-flex justify-content-center align-items-center">
+            @TempData["ErrorMessage"]
+        </div>
     }
 
     @if (TempData["SuccessMessage"] != null)
     {
-            <div class="alert alert-success d-flex justify-content-center align-items-center">
-                @TempData["SuccessMessage"]
-            </div>
+        <div class="alert alert-success d-flex justify-content-center align-items-center">
+            @TempData["SuccessMessage"]
+        </div>
     }
 }
 
@@ -102,6 +102,24 @@
                         @(Model.AvgCurrentAftermarketPrice > 0
                             ? Model.AvgAftermarketPriceCurrency + Model.AvgCurrentAftermarketPrice.ToString("N2", new CultureInfo("en-US")) : "N/A")
                     </span>
+                    <strong>
+                        @if (Model.AvgCurrentAftermarketPrice > Model.RetailPrice && Model.RetailPrice != 0)
+                        {
+                            <span class="percentage" style="color: limegreen">
+                                +@((((Model.AvgCurrentAftermarketPrice - Model.RetailPrice) / Model.RetailPrice) * 100).ToString("N2"))%
+                            </span>
+                        }
+                        else if (Model.AvgCurrentAftermarketPrice < Model.RetailPrice && Model.AvgCurrentAftermarketPrice != 0)
+                        {
+                            <span class="percentage" style="color: red">
+                                @((((Model.AvgCurrentAftermarketPrice - Model.RetailPrice) / Model.RetailPrice) * 100).ToString("N2"))%
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="percentage" style="color: darkgray">0%</span>
+                        }
+                    </strong>
                 </li>
             </ul>
             @if (Model.CurrentAftermarketPrices != null && Model.CurrentAftermarketPrices.Any())
