@@ -237,6 +237,22 @@ namespace MyFigureCollectionValue.Services
             return Math.Round(convertedPrices.Sum(p => p.Price), 2);
         }
 
+        public async Task<int> GetUserPurchasePriceCountAsync(string userId)
+        {
+            var figureIds = await _dbContext.UserFigures
+                .Where(uf => uf.UserId == userId)
+                .Select(uf => uf.FigureId)
+                .ToListAsync();
+
+            var purchasePricesList = await _dbContext.UserPurchasePrices
+                .Where(up => up.UserId == userId && figureIds.Contains(up.FigureId))
+                .ToListAsync();
+
+            purchasePricesList.RemoveAll(p => p.Price <= 0);
+
+            return purchasePricesList.Count();
+        }
+
         public async Task<decimal> SumAvgAftermarketPriceCollectionAsync(string userId)
         {
             var figures = await _dbContext.UserFigures

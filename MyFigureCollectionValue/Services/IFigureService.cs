@@ -32,6 +32,8 @@ namespace MyFigureCollectionValue.Services
 
         Task<decimal> SumUserPurchasePriceAsync(string userId);
 
+        Task<int> GetUserPurchasePriceCountAsync(string userId);
+
         Task<decimal> SumAvgAftermarketPriceCollectionAsync(string userId);
 
         Task<Dictionary<string, int>> GetFigureUrlsWithOutdatedAftermarketPricesAsync();

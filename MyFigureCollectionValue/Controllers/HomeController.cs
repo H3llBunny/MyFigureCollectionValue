@@ -62,20 +62,27 @@ namespace MyFigureCollectionValue.Controllers
 
                 string figureCollectionUsername = userFigureCollectionUrl.Substring(userFigureCollectionUrl.IndexOf("/profile/") + 9);
 
+                int paidPricesCount = await _figureService.GetUserPurchasePriceCountAsync(userId);
+
+                int figuresCount = await _figureService.GetUserFiguresCountAsync(userId);
+
+                bool shouldCalcPaidPricePercent = paidPricesCount == figuresCount;
+
                 var figuresViewModel = new FiguresListViewModel
                 {
                     FiguresPerPage = FiguresPerPage,
                     PageNumber = pageNumber,
                     SortOrder = sortOrder,
                     UserId = userId,
-                    FiguresCount = await _figureService.GetUserFiguresCountAsync(userId),
+                    FiguresCount = figuresCount,
                     Figures = figures,
                     UserFigureCollectionUrl = userFigureCollectionUrl,
                     FigureCollectionUsername = figureCollectionUsername,
                     SumRetailPriceCollection = await _figureService.SumRetailPriceCollectionAsync(userId),
                     SumAvgAftermarketPriceCollection = await _figureService.SumAvgAftermarketPriceCollectionAsync(userId),
                     TotalPaid = await _figureService.SumUserPurchasePriceAsync(userId),
-                    LastRefreshCollection = lastRefreshed
+                    LastRefreshCollection = lastRefreshed,
+                    ShouldCalcPaidPricePercent = shouldCalcPaidPricePercent
                 };
 
                 return View(figuresViewModel);

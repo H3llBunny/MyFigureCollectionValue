@@ -87,9 +87,32 @@
                 </div>
             </div>
             <div class="percentage d-flex justify-content-center">
+                @if (Model.ShouldCalcPaidPricePercent)
+                {
+                    @if (Model.SumAvgAftermarketPriceCollection > Model.TotalPaid)
+                    {
+                        <span>By Paid Price:</span>
+                        <span class="percentage" style="color: limegreen">
+                            <strong id="percent">
+                                +@((((Model.SumAvgAftermarketPriceCollection - Model.TotalPaid)
+                               / Model.TotalPaid) * 100).ToString("N2"))%
+                            </strong>
+                        </span>
+                    }
+                    else if (Model.SumAvgAftermarketPriceCollection < Model.TotalPaid && Model.SumAvgAftermarketPriceCollection != 0)
+                    {
+                        <span>By Paid Price:</span>
+                        <span class="percentage" style="color: red">
+                            <strong id="percent">
+                                @((((Model.SumAvgAftermarketPriceCollection - Model.TotalPaid)
+                                / Model.TotalPaid) * 100).ToString("N2"))%
+                            </strong>
+                        </span>
+                    }
+                }
                 @if (Model.SumAvgAftermarketPriceCollection > Model.SumRetailPriceCollection && Model.SumRetailPriceCollection != 0)
                 {
-                    <span>By Retail Price:</span>
+                    <span style="padding-left:20px;">By Retail Price:</span>
                     <span class="percentage" style="color: limegreen">
                         <strong id="percent">
                             +@((((Model.SumAvgAftermarketPriceCollection - Model.SumRetailPriceCollection)
