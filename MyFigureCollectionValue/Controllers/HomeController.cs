@@ -225,7 +225,7 @@ namespace MyFigureCollectionValue.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
-                return Ok();
+                return RedirectToAction(nameof(RemoveCollection), new { collectionUrl });
             }
 
             await _figureService.RemoveUserFiguresAsync(userId);

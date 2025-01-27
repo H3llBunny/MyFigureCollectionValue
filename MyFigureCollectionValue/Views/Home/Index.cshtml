@@ -86,6 +86,25 @@
                     </span>
                 </div>
             </div>
+            <div class="percentage d-flex justify-content-center">
+                @if (Model.SumAvgAftermarketPriceCollection > Model.SumRetailPriceCollection && Model.SumRetailPriceCollection != 0)
+                {
+                    <span>By Retail Price:</span>
+                    <span class="percentage" style="color: limegreen">
+                        <strong id="percent">
+                            +@((((Model.SumAvgAftermarketPriceCollection - Model.SumRetailPriceCollection)
+                           / Model.SumRetailPriceCollection) * 100).ToString("N2"))%
+                        </strong>
+                    </span>
+                }
+                else if (Model.SumAvgAftermarketPriceCollection < Model.SumRetailPriceCollection && Model.SumAvgAftermarketPriceCollection != 0)
+                {
+                    <span>By Retail Price:</span>
+                    <span class="percentage" style="color: red">
+                        @((((Model.SumAvgAftermarketPriceCollection - Model.SumRetailPriceCollection) / Model.SumRetailPriceCollection) * 100).ToString("N2"))%
+                    </span>
+                }
+            </div>
             <div class="sort-options-container">
                 <div class="sort-options">
                     <form id="sortForm" method="get" asp-action="Index">

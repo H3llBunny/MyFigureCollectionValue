@@ -122,7 +122,7 @@
                         <strong>
                             @if (Model.AvgCurrentAftermarketPrice > Model.PurchasedPrice && Model.PurchasedPrice != 0)
                             {
-                                <span>By Paid Price</span>
+                                <span>By Paid Price:</span>
                                 <span class="percentage" style="color: limegreen">
                                     +@((((Model.AvgCurrentAftermarketPrice - Model.PurchasedPrice) / Model.PurchasedPrice) * 100).ToString("N2"))%
                                 </span>
@@ -130,7 +130,7 @@
                             else if (Model.AvgCurrentAftermarketPrice < Model.PurchasedPrice && Model.AvgCurrentAftermarketPrice != 0
                             && Model.PurchasedPrice != 0)
                             {
-                                <span>By Paid Price</span>
+                                <span>By Paid Price:</span>
                                 <span class="percentage" style="color: red">
                                     @((((Model.AvgCurrentAftermarketPrice - Model.PurchasedPrice) / Model.PurchasedPrice) * 100).ToString("N2"))%
                                 </span>
