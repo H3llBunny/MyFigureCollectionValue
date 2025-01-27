@@ -101,7 +101,9 @@
                 {
                     <span>By Retail Price:</span>
                     <span class="percentage" style="color: red">
-                        @((((Model.SumAvgAftermarketPriceCollection - Model.SumRetailPriceCollection) / Model.SumRetailPriceCollection) * 100).ToString("N2"))%
+                        <strong id="percent">
+                            @((((Model.SumAvgAftermarketPriceCollection - Model.SumRetailPriceCollection) / Model.SumRetailPriceCollection) * 100).ToString("N2"))%
+                        </strong>
                     </span>
                 }
             </div>
