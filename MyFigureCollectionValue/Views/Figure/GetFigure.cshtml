@@ -4,16 +4,16 @@
 @{
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger d-flex justify-content-center align-items-center">
+                <div class="alert alert-danger d-flex justify-content-center align-items-center">
             @TempData["ErrorMessage"]
-        </div>
+                </div>
     }
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success d-flex justify-content-center align-items-center">
+                <div class="alert alert-success d-flex justify-content-center align-items-center">
             @TempData["SuccessMessage"]
-        </div>
+                </div>
     }
 }
 
@@ -26,17 +26,17 @@
             <div class="lowest-price">
                 <storng>Lowest Aftermarket Price: </storng><span class="figure-price">
                     @(Model.LowestAftermarketPeice != null
-                        ? (Model.LowestAftermarketPeice.Currency == "USD"
-                        ? "$" : Model.LowestAftermarketPeice.Currency)
-                        + Model.LowestAftermarketPeice.Price.ToString("N2", new CultureInfo("en-US")) : "N/A")
+                            ? (Model.LowestAftermarketPeice.Currency == "USD"
+                            ? "$" : Model.LowestAftermarketPeice.Currency)
+                            + Model.LowestAftermarketPeice.Price.ToString("N2", new CultureInfo("en-US")) : "N/A")
                 </span>
             </div>
             <div class="highest-price">
                 <storng>Highest Aftermarket Price: </storng><span class="figure-price">
                     @(Model.HighestAftermarketPrice != null
-                        ? (Model.HighestAftermarketPrice.Currency == "USD"
-                        ? "$" : Model.HighestAftermarketPrice.Currency)
-                        + Model.HighestAftermarketPrice.Price.ToString("N2", new CultureInfo("en-US")) : "N/A")
+                            ? (Model.HighestAftermarketPrice.Currency == "USD"
+                            ? "$" : Model.HighestAftermarketPrice.Currency)
+                            + Model.HighestAftermarketPrice.Price.ToString("N2", new CultureInfo("en-US")) : "N/A")
                 </span>
             </div>
         </div>
@@ -64,8 +64,8 @@
                         <span class="d-flex align-items-center">
                             <span id="displayPrice" class="figure-price me-2">
                                 @(Model.PurchasedPrice > 0
-                                    ? "$" + Model.PurchasedPrice.ToString("N2", new CultureInfo("en-US"))
-                                    : "N/A")
+                                        ? "$" + Model.PurchasedPrice.ToString("N2", new CultureInfo("en-US"))
+                                        : "N/A")
                             </span>
                             <form asp-action="AddPurchasePrice" method="post" class="d-flex">
                                 <input type="hidden" name="figureId" value="@Model.Id" />
@@ -77,7 +77,7 @@
                                 <select name="currency" id="currency-selector" class="form-select form-select-sm">
                                     @foreach (var currency in Model.SupportedCurrencies)
                                     {
-                                        <option value=@currency>@currency</option>
+                                            <option value=@currency>@currency</option>
                                     }
                                 </select>
                                 <button type="submit"
@@ -93,47 +93,47 @@
                 <li>
                     <strong>Retail Price: </strong><span class="figure-price">
                         @(Model.RetailPrice > 0
-                            ? Model.RetailPriceCurrency + Model.RetailPrice.ToString("N2", new CultureInfo("en-US"))
-                            : "N/A")
+                                ? Model.RetailPriceCurrency + Model.RetailPrice.ToString("N2", new CultureInfo("en-US"))
+                                : "N/A")
                     </span>
                 </li>
                 <li>
                     <strong title="This price is based on currently available aftermarket ads.">Avg. Aftermarket Price: </strong><span class="figure-price">
                         @(Model.AvgCurrentAftermarketPrice > 0
-                            ? Model.AvgAftermarketPriceCurrency + Model.AvgCurrentAftermarketPrice.ToString("N2", new CultureInfo("en-US")) : "N/A")
+                                ? Model.AvgAftermarketPriceCurrency + Model.AvgCurrentAftermarketPrice.ToString("N2", new CultureInfo("en-US")) : "N/A")
                     </span>
                     <div>
                         <strong>
-                            @if (Model.AvgCurrentAftermarketPrice > Model.RetailPrice && Model.RetailPrice != 0)
-                            {
-                                <span>By Retail Price:</span>
-                                <span class="percentage" style="color: limegreen">
-                                    +@((((Model.AvgCurrentAftermarketPrice - Model.RetailPrice) / Model.RetailPrice) * 100).ToString("N2"))%
-                                </span>
-                            }
-                            else if (Model.AvgCurrentAftermarketPrice < Model.RetailPrice && Model.AvgCurrentAftermarketPrice != 0)
-                            {
-                                <span>By Retail Price:</span>
-                                <span class="percentage" style="color: red">
-                                    @((((Model.AvgCurrentAftermarketPrice - Model.RetailPrice) / Model.RetailPrice) * 100).ToString("N2"))%
-                                </span>
-                            }
-                        </strong>
-                        <strong>
                             @if (Model.AvgCurrentAftermarketPrice > Model.PurchasedPrice && Model.PurchasedPrice != 0)
                             {
-                                <span>By Paid Price:</span>
-                                <span class="percentage" style="color: limegreen">
-                                    +@((((Model.AvgCurrentAftermarketPrice - Model.PurchasedPrice) / Model.PurchasedPrice) * 100).ToString("N2"))%
-                                </span>
+                                    <span>By Paid Price:</span>
+                                    <span class="percentage" style="color: limegreen">
+                                        +@((((Model.AvgCurrentAftermarketPrice - Model.PurchasedPrice) / Model.PurchasedPrice) * 100).ToString("N2"))%
+                                    </span>
                             }
                             else if (Model.AvgCurrentAftermarketPrice < Model.PurchasedPrice && Model.AvgCurrentAftermarketPrice != 0
                             && Model.PurchasedPrice != 0)
                             {
-                                <span>By Paid Price:</span>
-                                <span class="percentage" style="color: red">
+                                    <span>By Paid Price:</span>
+                                    <span class="percentage" style="color: red">
                                     @((((Model.AvgCurrentAftermarketPrice - Model.PurchasedPrice) / Model.PurchasedPrice) * 100).ToString("N2"))%
-                                </span>
+                                    </span>
+                            }
+                        </strong>
+                        <strong>
+                            @if (Model.AvgCurrentAftermarketPrice > Model.RetailPrice && Model.RetailPrice != 0)
+                            {
+                                    <span>By Retail Price:</span>
+                                    <span class="percentage" style="color: limegreen">
+                                        +@((((Model.AvgCurrentAftermarketPrice - Model.RetailPrice) / Model.RetailPrice) * 100).ToString("N2"))%
+                                    </span>
+                            }
+                            else if (Model.AvgCurrentAftermarketPrice < Model.RetailPrice && Model.AvgCurrentAftermarketPrice != 0)
+                            {
+                                    <span>By Retail Price:</span>
+                                    <span class="percentage" style="color: red">
+                                    @((((Model.AvgCurrentAftermarketPrice - Model.RetailPrice) / Model.RetailPrice) * 100).ToString("N2"))%
+                                    </span>
                             }
                         </strong>
                     </div>
@@ -141,20 +141,20 @@
             </ul>
             @if (Model.CurrentAftermarketPrices != null && Model.CurrentAftermarketPrices.Any())
             {
-                <div id="aftermarketAds">
-                    <div class="aftermarket-ads-container">
-                        <strong style="text-align: center">Available ads</strong>
+                    <div id="aftermarketAds">
+                        <div class="aftermarket-ads-container">
+                            <strong style="text-align: center">Available ads</strong>
                         @foreach (var ad in Model.CurrentAftermarketPrices)
                         {
-                            <div class="aftermarket-ad">
-                                <a href="@ad.Url" target="_blank" class="btn btn-link">
-                                    <strong>Date:</strong> @ad.LoggedAt.ToString("yyyy-MM-dd")
-                                    <span class="figure-price">$@ad.Price </span>
-                                </a>
-                            </div>
+                                    <div class="aftermarket-ad">
+                                        <a href="@ad.Url" target="_blank" class="btn btn-link">
+                                            <strong>Date:</strong> @ad.LoggedAt.ToString("yyyy-MM-dd")
+                                            <span class="figure-price">$@ad.Price </span>
+                                        </a>
+                                    </div>
                         }
+                        </div>
                     </div>
-                </div>
             }
         </div>
         <div id="figurePriceChart"></div>
