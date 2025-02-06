@@ -66,7 +66,7 @@ namespace MyFigureCollectionValue.Services
             string baseUrl = _fixerSettings.BaseUrl;
             string apiKey = _fixerSettings.ApiKey;
 
-            string url = $"{baseUrl}?apikey={apiKey}&symbols={this.currencies}";
+            string url = $"{baseUrl}?base=usd&symbols={this.currencies}&apikey={apiKey}";
 
             HttpResponseMessage response = await _httpClient.GetAsync(url);
 
