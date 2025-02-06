@@ -36,7 +36,7 @@ namespace MyFigureCollectionValue.Services
 
                         DateTime.TryParse(existingDate.Date, out DateTime lastUdated);
 
-                        if ((DateTime.UtcNow - lastUdated).TotalDays >= 1)
+                        if ((DateTime.UtcNow - lastUdated).TotalHours >= 3)
                         {
                             await DoWorkAsync();
                             await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
